@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, Search, Sun, Moon, User, LogOut, Settings } from "lucide-react";
+import { Menu, X, Search, Sun, Moon, User, LogOut, Settings, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -145,10 +145,16 @@ export function Header() {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
+              <DropdownMenuItem asChild>
                   <Link to="/dashboard" className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
                     Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/library" className="cursor-pointer">
+                    <Bookmark className="mr-2 h-4 w-4" />
+                    My Library
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

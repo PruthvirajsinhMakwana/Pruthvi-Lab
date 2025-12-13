@@ -10,6 +10,9 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
+import Library from "./pages/Library";
+import PublicProfile from "./pages/PublicProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +44,23 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/library"
+                element={
+                  <ProtectedRoute>
+                    <Library />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/user/:userId" element={<PublicProfile />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
