@@ -25,6 +25,9 @@ import AdminBlogs from "./pages/admin/AdminBlogs";
 import AdminTutorials from "./pages/admin/AdminTutorials";
 import AdminSnippets from "./pages/admin/AdminSnippets";
 import AdminMaterials from "./pages/admin/AdminMaterials";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminCommunity from "./pages/admin/AdminCommunity";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -120,6 +123,30 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <AdminMaterials />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <ProtectedRoute>
+                    <AdminUsers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/analytics"
+                element={
+                  <ProtectedRoute>
+                    <AdminAnalytics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/community"
+                element={
+                  <ProtectedRoute>
+                    <AdminCommunity />
                   </ProtectedRoute>
                 }
               />
