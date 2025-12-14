@@ -110,6 +110,19 @@ CREATE TABLE public.blog_posts (
 
 
 --
+-- Name: chat_blocked_users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.chat_blocked_users (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    blocked_by uuid NOT NULL,
+    reason text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
 -- Name: code_snippets; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -141,6 +154,19 @@ CREATE TABLE public.comments (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT comments_content_type_check CHECK ((content_type = ANY (ARRAY['blog'::text, 'tutorial'::text])))
+);
+
+
+--
+-- Name: community_messages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.community_messages (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    message text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -182,6 +208,19 @@ CREATE TABLE public.materials (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT materials_category_check CHECK ((category = ANY (ARRAY['editing'::text, 'video'::text, 'graphics'::text, 'apps'::text, 'other'::text])))
+);
+
+
+--
+-- Name: message_reactions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.message_reactions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    message_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    emoji text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -288,6 +327,22 @@ ALTER TABLE ONLY public.blog_posts
 
 
 --
+-- Name: chat_blocked_users chat_blocked_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chat_blocked_users
+    ADD CONSTRAINT chat_blocked_users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: chat_blocked_users chat_blocked_users_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chat_blocked_users
+    ADD CONSTRAINT chat_blocked_users_user_id_key UNIQUE (user_id);
+
+
+--
 -- Name: code_snippets code_snippets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -304,6 +359,14 @@ ALTER TABLE ONLY public.comments
 
 
 --
+-- Name: community_messages community_messages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.community_messages
+    ADD CONSTRAINT community_messages_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: material_purchases material_purchases_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -317,6 +380,22 @@ ALTER TABLE ONLY public.material_purchases
 
 ALTER TABLE ONLY public.materials
     ADD CONSTRAINT materials_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: message_reactions message_reactions_message_id_user_id_emoji_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_reactions
+    ADD CONSTRAINT message_reactions_message_id_user_id_emoji_key UNIQUE (message_id, user_id, emoji);
+
+
+--
+-- Name: message_reactions message_reactions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_reactions
+    ADD CONSTRAINT message_reactions_pkey PRIMARY KEY (id);
 
 
 --
@@ -441,6 +520,13 @@ CREATE TRIGGER update_comments_updated_at BEFORE UPDATE ON public.comments FOR E
 
 
 --
+-- Name: community_messages update_community_messages_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER update_community_messages_updated_at BEFORE UPDATE ON public.community_messages FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+
+--
 -- Name: materials update_materials_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -517,6 +603,14 @@ ALTER TABLE ONLY public.material_purchases
 
 
 --
+-- Name: message_reactions message_reactions_message_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_reactions
+    ADD CONSTRAINT message_reactions_message_id_fkey FOREIGN KEY (message_id) REFERENCES public.community_messages(id) ON DELETE CASCADE;
+
+
+--
 -- Name: profiles profiles_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -578,6 +672,13 @@ CREATE POLICY "Admins can manage all materials" ON public.materials USING ((publ
 
 
 --
+-- Name: community_messages Admins can manage all messages; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Admins can manage all messages" ON public.community_messages USING ((public.has_role(auth.uid(), 'admin'::text) OR public.has_role(auth.uid(), 'super_admin'::text)));
+
+
+--
 -- Name: code_snippets Admins can manage all snippets; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -596,6 +697,13 @@ CREATE POLICY "Admins can manage all tutorial steps" ON public.tutorial_steps US
 --
 
 CREATE POLICY "Admins can manage all tutorials" ON public.tutorials USING ((public.has_role(auth.uid(), 'admin'::text) OR public.has_role(auth.uid(), 'super_admin'::text)));
+
+
+--
+-- Name: chat_blocked_users Admins can manage blocked users; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Admins can manage blocked users" ON public.chat_blocked_users USING ((public.has_role(auth.uid(), 'admin'::text) OR public.has_role(auth.uid(), 'super_admin'::text)));
 
 
 --
@@ -622,6 +730,13 @@ CREATE POLICY "Admins can view all roles" ON public.user_roles FOR SELECT USING 
 
 
 --
+-- Name: chat_blocked_users Anyone can view blocked users; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Anyone can view blocked users" ON public.chat_blocked_users FOR SELECT USING (true);
+
+
+--
 -- Name: comments Anyone can view comments; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -629,10 +744,38 @@ CREATE POLICY "Anyone can view comments" ON public.comments FOR SELECT USING (tr
 
 
 --
+-- Name: community_messages Anyone can view messages; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Anyone can view messages" ON public.community_messages FOR SELECT USING (true);
+
+
+--
+-- Name: message_reactions Anyone can view reactions; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Anyone can view reactions" ON public.message_reactions FOR SELECT USING (true);
+
+
+--
+-- Name: message_reactions Authenticated users can add reactions; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Authenticated users can add reactions" ON public.message_reactions FOR INSERT WITH CHECK ((auth.uid() = user_id));
+
+
+--
 -- Name: comments Authenticated users can create comments; Type: POLICY; Schema: public; Owner: -
 --
 
 CREATE POLICY "Authenticated users can create comments" ON public.comments FOR INSERT WITH CHECK ((auth.uid() = user_id));
+
+
+--
+-- Name: community_messages Authenticated users can create messages; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Authenticated users can create messages" ON public.community_messages FOR INSERT WITH CHECK ((auth.uid() = user_id));
 
 
 --
@@ -812,6 +955,13 @@ CREATE POLICY "Users can delete their own comments" ON public.comments FOR DELET
 
 
 --
+-- Name: community_messages Users can delete their own messages; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can delete their own messages" ON public.community_messages FOR DELETE USING ((auth.uid() = user_id));
+
+
+--
 -- Name: saved_items Users can delete their own saved items; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -826,6 +976,13 @@ CREATE POLICY "Users can insert their own profile" ON public.profiles FOR INSERT
 
 
 --
+-- Name: message_reactions Users can remove their own reactions; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can remove their own reactions" ON public.message_reactions FOR DELETE USING ((auth.uid() = user_id));
+
+
+--
 -- Name: saved_items Users can save items; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -837,6 +994,13 @@ CREATE POLICY "Users can save items" ON public.saved_items FOR INSERT WITH CHECK
 --
 
 CREATE POLICY "Users can update their own comments" ON public.comments FOR UPDATE USING ((auth.uid() = user_id));
+
+
+--
+-- Name: community_messages Users can update their own messages; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can update their own messages" ON public.community_messages FOR UPDATE USING ((auth.uid() = user_id));
 
 
 --
@@ -881,6 +1045,12 @@ CREATE POLICY "Users can view their own saved items" ON public.saved_items FOR S
 ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: chat_blocked_users; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.chat_blocked_users ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: code_snippets; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -893,6 +1063,12 @@ ALTER TABLE public.code_snippets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: community_messages; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.community_messages ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: material_purchases; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -903,6 +1079,12 @@ ALTER TABLE public.material_purchases ENABLE ROW LEVEL SECURITY;
 --
 
 ALTER TABLE public.materials ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: message_reactions; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.message_reactions ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: profiles; Type: ROW SECURITY; Schema: public; Owner: -
