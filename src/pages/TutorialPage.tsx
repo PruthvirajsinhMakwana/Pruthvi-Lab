@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CommentSection } from "@/components/comments/CommentSection";
 import { cn } from "@/lib/utils";
 import { useTutorial } from "@/hooks/useTutorials";
 import { useSavedItems } from "@/hooks/useSavedItems";
@@ -222,6 +223,9 @@ export default function TutorialPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Comments Section */}
+        <CommentSection contentType="tutorial" contentId={tutorial.id} />
       </div>
     </Layout>
   );

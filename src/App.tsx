@@ -18,10 +18,12 @@ import BlogPost from "./pages/BlogPost";
 import Tutorials from "./pages/Tutorials";
 import TutorialPage from "./pages/TutorialPage";
 import CodeLibrary from "./pages/CodeLibrary";
+import Materials from "./pages/Materials";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminBlogs from "./pages/admin/AdminBlogs";
 import AdminTutorials from "./pages/admin/AdminTutorials";
 import AdminSnippets from "./pages/admin/AdminSnippets";
+import AdminMaterials from "./pages/admin/AdminMaterials";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -77,6 +79,7 @@ const App = () => (
               <Route path="/tutorials" element={<Tutorials />} />
               <Route path="/tutorials/:slug" element={<TutorialPage />} />
               <Route path="/code-library" element={<CodeLibrary />} />
+              <Route path="/materials" element={<Materials />} />
               
               {/* Admin Routes */}
               <Route
@@ -108,6 +111,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <AdminSnippets />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/materials"
+                element={
+                  <ProtectedRoute>
+                    <AdminMaterials />
                   </ProtectedRoute>
                 }
               />

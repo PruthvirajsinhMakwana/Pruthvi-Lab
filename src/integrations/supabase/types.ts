@@ -114,6 +114,142 @@ export type Database = {
           },
         ]
       }
+      comments: {
+        Row: {
+          comment_text: string
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          parent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment_text: string
+          content_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment_text?: string
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_purchases: {
+        Row: {
+          admin_notes: string | null
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          material_id: string
+          status: string
+          transaction_id: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          material_id: string
+          status?: string
+          transaction_id: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          material_id?: string
+          status?: string
+          transaction_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_purchases_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      materials: {
+        Row: {
+          author_id: string
+          category: string
+          created_at: string
+          description: string | null
+          external_link: string
+          id: string
+          is_paid: boolean
+          price: number | null
+          published: boolean
+          qr_code_url: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          upi_id: string | null
+        }
+        Insert: {
+          author_id: string
+          category: string
+          created_at?: string
+          description?: string | null
+          external_link: string
+          id?: string
+          is_paid?: boolean
+          price?: number | null
+          published?: boolean
+          qr_code_url?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          upi_id?: string | null
+        }
+        Update: {
+          author_id?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          external_link?: string
+          id?: string
+          is_paid?: boolean
+          price?: number | null
+          published?: boolean
+          qr_code_url?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          upi_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

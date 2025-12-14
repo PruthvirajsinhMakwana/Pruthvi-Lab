@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CommentSection } from "@/components/comments/CommentSection";
 import { useBlogPost } from "@/hooks/useBlogPosts";
 import { useSavedItems } from "@/hooks/useSavedItems";
 import { useAuth } from "@/contexts/AuthContext";
@@ -159,6 +160,9 @@ export default function BlogPost() {
             <p key={index}>{paragraph}</p>
           ))}
         </div>
+
+        {/* Comments Section */}
+        <CommentSection contentType="blog" contentId={blog.id} />
       </article>
     </Layout>
   );
