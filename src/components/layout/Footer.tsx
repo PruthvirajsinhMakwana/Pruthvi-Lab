@@ -150,7 +150,7 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()}{" "}
             <Link 
-              to="/admin" 
+              to="/admin-login" 
               className="hover:text-foreground transition-colors cursor-default"
               title=""
             >
