@@ -8,15 +8,20 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Eye, EyeOff, Loader2 } from "lucide-react";
 
+// Set this to false to hide signup option
+const ALLOW_ADMIN_SIGNUP = true;
+
 export default function AdminLogin() {
-  const { user, loading: authLoading, signIn } = useAuth();
+  const { user, loading: authLoading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checkingRole, setCheckingRole] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   // Check if already logged in and has admin role
   useEffect(() => {
@@ -31,20 +36,13 @@ export default function AdminLogin() {
 
         if (!error && data && (data.role === "admin" || data.role === "super_admin")) {
           navigate("/admin");
-        } else {
-          // User is logged in but not admin
-          toast({
-            title: "Access Denied",
-            description: "You don't have admin privileges.",
-            variant: "destructive",
-          });
         }
         setCheckingRole(false);
       }
     };
 
     checkAdminAccess();
-  }, [user, authLoading, navigate, toast]);
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,9 +56,42 @@ export default function AdminLogin() {
       return;
     }
 
+    if (isSignUp && !fullName) {
+      toast({
+        title: "Error",
+        description: "Please enter your full name",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
+      if (isSignUp) {
+        // Handle signup
+        const { error } = await signUp(email, password, fullName);
+
+        if (error) {
+          toast({
+            title: "Signup Failed",
+            description: error.message,
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
+        toast({
+          title: "Account Created",
+          description: "Please contact the administrator to get admin access.",
+        });
+        setIsSignUp(false);
+        setLoading(false);
+        return;
+      }
+
+      // Handle login
       const { error } = await signIn(email, password);
 
       if (error) {
@@ -130,15 +161,30 @@ export default function AdminLogin() {
               <Shield className="h-8 w-8 text-primary" />
             </div>
             <h1 className="font-heading text-2xl font-bold text-foreground">
-              Admin Access
+              {isSignUp ? "Admin Registration" : "Admin Access"}
             </h1>
             <p className="text-muted-foreground mt-2 text-sm">
-              Authorized personnel only
+              {isSignUp ? "Create an admin account" : "Authorized personnel only"}
             </p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
+            {isSignUp && (
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="John Doe"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="h-11"
+                  disabled={loading}
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -186,16 +232,33 @@ export default function AdminLogin() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Authenticating...
+                  {isSignUp ? "Creating Account..." : "Authenticating..."}
                 </>
               ) : (
                 <>
                   <Shield className="mr-2 h-4 w-4" />
-                  Sign In as Admin
+                  {isSignUp ? "Create Admin Account" : "Sign In as Admin"}
                 </>
               )}
             </Button>
           </form>
+
+          {/* Toggle Sign Up / Sign In */}
+          {ALLOW_ADMIN_SIGNUP && (
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {isSignUp ? (
+                  <>Already have an account? <span className="text-primary font-medium">Sign In</span></>
+                ) : (
+                  <>Need an account? <span className="text-primary font-medium">Sign Up</span></>
+                )}
+              </button>
+            </div>
+          )}
 
           {/* Footer */}
           <p className="text-center text-xs text-muted-foreground mt-6">
