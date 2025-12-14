@@ -25,7 +25,7 @@ import { SearchButton } from "@/components/search/SearchDialog";
 import { cn } from "@/lib/utils";
 
 const mainNavigation = [
-  { name: "Home", href: "/" },
+  { name: "Home", href: "/", icon: null },
   { name: "Community", href: "/community", icon: Users },
 ];
 
@@ -34,6 +34,12 @@ const resourcesNavigation = [
   { name: "Tutorials", href: "/tutorials", icon: BookOpen, description: "Step-by-step guides" },
   { name: "Code Library", href: "/code-library", icon: Code, description: "Reusable code snippets" },
   { name: "Materials", href: "/materials", icon: Package, description: "Learning resources" },
+];
+
+const mobileUserNavigation = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "My Library", href: "/library", icon: Bookmark },
+  { name: "Profile", href: "/profile", icon: User },
 ];
 
 export function Header() {
@@ -306,6 +312,58 @@ export function Header() {
                 ))}
               </div>
             </div>
+
+            {/* Mobile User Links */}
+            {user && (
+              <div className="border-t border-border pt-4">
+                <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  Account
+                </p>
+                <div className="space-y-1">
+                  {mobileUserNavigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
+                        isActive(item.href)
+                          ? "text-foreground bg-muted"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      )}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {item.name}
+                    </Link>
+                  ))}
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
+                        isActive("/admin")
+                          ? "text-foreground bg-muted"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      )}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Settings className="h-4 w-4" />
+                      Admin Panel
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      handleSignOut();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors text-destructive hover:bg-destructive/10 w-full"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign out
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Mobile Auth Buttons */}
             {!user && (
