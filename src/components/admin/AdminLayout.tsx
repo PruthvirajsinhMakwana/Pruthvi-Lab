@@ -19,8 +19,8 @@ const navigation = [
   { name: "Blog Posts", href: "/admin/blogs", icon: FileText },
   { name: "Tutorials", href: "/admin/tutorials", icon: BookOpen },
   { name: "Code Snippets", href: "/admin/snippets", icon: Code2 },
+  { name: "Materials", href: "/admin/materials", icon: Settings },
   { name: "Users", href: "/admin/users", icon: Users },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 interface AdminLayoutProps {
