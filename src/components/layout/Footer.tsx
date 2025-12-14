@@ -148,7 +148,15 @@ export function Footer() {
         {/* Bottom Section */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} DevLearn. All rights reserved.
+            © {new Date().getFullYear()}{" "}
+            <Link 
+              to="/admin" 
+              className="hover:text-foreground transition-colors cursor-default"
+              title=""
+            >
+              DevLearn
+            </Link>
+            . All rights reserved.
           </p>
           <div className="flex gap-4 lg:hidden">
             {footerLinks.legal.map((link) => (
