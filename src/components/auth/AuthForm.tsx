@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -112,6 +113,19 @@ export function AuthForm() {
         variant: "destructive",
       });
     } else {
+      // Send welcome email
+      try {
+        await supabase.functions.invoke("send-welcome-email", {
+          body: { 
+            email: data.email, 
+            name: data.fullName,
+            type: "signup" 
+          },
+        });
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+      }
+
       toast({
         title: "Account created!",
         description: "Welcome to Pruthvi's Lab. Let's set up your profile.",
