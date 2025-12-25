@@ -1,1 +1,13 @@
 project_id = "zaeurkbtdypdjykfxmlz"
+
+[functions.notify-telegram-purchase]
+verify_jwt = false
+
+[functions.send-approval-email]
+verify_jwt = false
+
+[functions.send-tutorial-approval-email]
+verify_jwt = false
+
+[functions.ai-chat]
+verify_jwt = false

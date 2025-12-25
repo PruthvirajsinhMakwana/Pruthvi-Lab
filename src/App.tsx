@@ -22,6 +22,7 @@ import TutorialPage from "./pages/TutorialPage";
 import CodeLibrary from "./pages/CodeLibrary";
 import Materials from "./pages/Materials";
 import Community from "./pages/Community";
+import AIAssistant from "./pages/AIAssistant";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminBlogs from "./pages/admin/AdminBlogs";
 import AdminTutorials from "./pages/admin/AdminTutorials";
@@ -99,6 +100,7 @@ const App = () => (
               <Route path="/code-library" element={<CodeLibrary />} />
               <Route path="/materials" element={<Materials />} />
               <Route path="/community" element={<Community />} />
+              <Route path="/ai-assistant" element={<AIAssistant />} />
               {/* Admin Routes */}
               <Route
                 path="/admin"

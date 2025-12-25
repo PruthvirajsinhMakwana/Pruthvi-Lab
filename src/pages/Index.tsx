@@ -9,7 +9,9 @@ import {
   Sparkles,
   Zap,
   Users,
-  Star
+  Star,
+  Bot,
+  MessageCircle
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -370,6 +372,149 @@ const Index = () => {
             </CardContent>
           </Card>
         )}
+      </section>
+
+      {/* AI Assistant Section */}
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-subtle" />
+        <div className="container relative mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="animate-fade-in-up">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+                <Sparkles className="h-3.5 w-3.5" />
+                New Feature
+              </div>
+              <h2 className="text-4xl font-heading font-bold text-foreground mb-4">
+                Meet Your AI{" "}
+                <span className="text-gradient">Coding Assistant</span>
+              </h2>
+              <p className="text-lg text-muted-foreground mb-6">
+                Get instant help with coding questions, debugging, and learning new concepts. 
+                Our AI assistant is available 24/7 to accelerate your learning.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  "Explain complex concepts in simple terms",
+                  "Debug your code with AI-powered suggestions",
+                  "Learn best practices and patterns",
+                  "Get code examples instantly"
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-muted-foreground">
+                    <div className="h-5 w-5 rounded-full bg-success/10 flex items-center justify-center">
+                      <div className="h-2 w-2 rounded-full bg-success" />
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Button size="lg" className="bg-gradient-primary hover:opacity-90 group" asChild>
+                <Link to="/ai-assistant">
+                  <Bot className="mr-2 h-5 w-5" />
+                  Try AI Assistant
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </Button>
+            </div>
+            <div className="relative animate-fade-in-up stagger-2">
+              <div className="absolute inset-0 bg-gradient-primary rounded-2xl blur-3xl opacity-20" />
+              <Card className="relative border-border/50 bg-card/80 backdrop-blur">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Bot className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">DevLearn AI</h3>
+                      <p className="text-xs text-muted-foreground">Online • Ready to help</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex justify-end">
+                      <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2 max-w-[80%]">
+                        <p className="text-sm">How do I center a div with CSS?</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-start">
+                      <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-2 max-w-[80%]">
+                        <p className="text-sm">There are several ways! The modern approach is using Flexbox:</p>
+                        <pre className="mt-2 p-2 bg-background/50 rounded text-xs font-mono">
+{`.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}`}
+                        </pre>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Community Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-12 animate-fade-in-up">
+          <h2 className="text-3xl font-heading font-bold text-foreground flex items-center justify-center gap-3">
+            <div className="p-2 rounded-lg bg-warning/10">
+              <MessageCircle className="h-6 w-6 text-warning" />
+            </div>
+            Join the Community
+          </h2>
+          <p className="text-muted-foreground mt-2 max-w-xl mx-auto">
+            Connect with fellow developers, share knowledge, and grow together
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 animate-fade-in-up stagger-2">
+          <Card className="card-hover border-border/50 hover:border-warning/50 text-center p-8">
+            <CardContent className="p-0">
+              <div className="p-4 rounded-full bg-warning/10 w-fit mx-auto mb-4">
+                <Users className="h-8 w-8 text-warning" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">5K+ Developers</h3>
+              <p className="text-muted-foreground text-sm">
+                Join a growing community of passionate developers
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="card-hover border-border/50 hover:border-primary/50 text-center p-8">
+            <CardContent className="p-0">
+              <div className="p-4 rounded-full bg-primary/10 w-fit mx-auto mb-4">
+                <MessageCircle className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">Live Chat</h3>
+              <p className="text-muted-foreground text-sm">
+                Real-time discussions and instant help from peers
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="card-hover border-border/50 hover:border-success/50 text-center p-8">
+            <CardContent className="p-0">
+              <div className="p-4 rounded-full bg-success/10 w-fit mx-auto mb-4">
+                <Zap className="h-8 w-8 text-success" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">Share & Learn</h3>
+              <p className="text-muted-foreground text-sm">
+                Share your projects and learn from others
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="text-center mt-10 animate-fade-in-up stagger-3">
+          <Button size="lg" variant="outline" className="group" asChild>
+            <Link to="/community">
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Join Community Chat
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </Button>
+        </div>
       </section>
 
       {/* CTA Section */}
