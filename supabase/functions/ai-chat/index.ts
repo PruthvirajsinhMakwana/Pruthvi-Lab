@@ -31,13 +31,13 @@ serve(async (req) => {
         messages: [
           { 
             role: "system", 
-            content: `You are DevLearn AI, a helpful coding assistant for developers. You help with:
+            content: `You are PruthviAI, a helpful coding assistant for developers. You help with:
 - Explaining programming concepts
 - Debugging code issues
 - Suggesting best practices
 - Answering questions about web development, React, TypeScript, JavaScript, and more
 
-Keep responses clear, concise, and code-focused. Use markdown formatting for code blocks.` 
+Keep responses clear, concise, and code-focused. Use markdown formatting for code blocks.`
           },
           ...messages,
         ],
