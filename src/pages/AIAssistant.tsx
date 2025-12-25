@@ -192,7 +192,7 @@ const AIAssistant = () => {
             AI-Powered Assistant
           </div>
           <h1 className="text-4xl font-heading font-bold text-foreground mb-4">
-            DevLearn AI Assistant
+            PruthviAI Assistant
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
             Get instant help with coding questions, debugging, and learning new concepts.
@@ -320,7 +320,7 @@ const AIAssistant = () => {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-2 text-center">
-                DevLearn AI can make mistakes. Verify important information.
+                PruthviAI can make mistakes. Verify important information.
               </p>
             </div>
           </CardContent>
