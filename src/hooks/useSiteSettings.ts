@@ -10,6 +10,12 @@ export interface SEOSettings {
   twitter_handle: string;
   google_analytics_id: string;
   robots_txt: string;
+  favicon_url: string;
+  pwa_name: string;
+  pwa_short_name: string;
+  pwa_description: string;
+  pwa_theme_color: string;
+  pwa_background_color: string;
 }
 
 const defaultSEOSettings: SEOSettings = {
@@ -20,6 +26,12 @@ const defaultSEOSettings: SEOSettings = {
   twitter_handle: "",
   google_analytics_id: "",
   robots_txt: "User-agent: *\nAllow: /",
+  favicon_url: "/favicon.ico",
+  pwa_name: "Pruthvi's Lab",
+  pwa_short_name: "Pruthvi's Lab",
+  pwa_description: "Learn coding, explore tutorials, and discover resources",
+  pwa_theme_color: "#8B5CF6",
+  pwa_background_color: "#0F0A1F",
 };
 
 export function useSiteSettings() {
