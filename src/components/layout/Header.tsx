@@ -149,23 +149,8 @@ export function Header() {
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-2">
-          {/* Mobile Menu Button - First for proper touch target */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden relative z-10"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </Button>
-
-          {/* Search */}
+        <div className="flex items-center gap-1 sm:gap-2">
+          {/* Search - Hidden on mobile */}
           <div className="hidden md:block">
             <SearchButton />
           </div>
@@ -175,7 +160,7 @@ export function Header() {
             variant="ghost"
             size="icon"
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-            className="text-muted-foreground hover:text-foreground hover:bg-muted"
+            className="text-muted-foreground hover:text-foreground hover:bg-muted h-9 w-9"
           >
             {resolvedTheme === "dark" ? (
               <Sun className="h-5 w-5" />
@@ -235,7 +220,7 @@ export function Header() {
                 <DropdownMenuItem asChild>
                   <Link to="/profile" className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
-                    Profile Settings
+                    Settings
                   </Link>
                 </DropdownMenuItem>
                 {isAdmin && (
@@ -250,7 +235,10 @@ export function Header() {
                   </>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
+                <DropdownMenuItem
+                  className="cursor-pointer text-destructive focus:text-destructive"
+                  onClick={handleSignOut}
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out
                 </DropdownMenuItem>
@@ -266,6 +254,22 @@ export function Header() {
               </Button>
             </div>
           )}
+
+          {/* Mobile Menu Button - Always last for far-right position */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden h-9 w-9 ml-1"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            type="button"
+          >
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </Button>
         </div>
       </nav>
 
