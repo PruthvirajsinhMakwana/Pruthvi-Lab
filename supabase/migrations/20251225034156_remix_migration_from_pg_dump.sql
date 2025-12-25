@@ -4,6 +4,8 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
 CREATE EXTENSION IF NOT EXISTS "plpgsql" WITH SCHEMA "pg_catalog";
 CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
+BEGIN;
+
 --
 -- PostgreSQL database dump
 --
@@ -136,7 +138,9 @@ CREATE TABLE public.code_snippets (
     tags text[] DEFAULT '{}'::text[],
     published boolean DEFAULT false,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    preview_image text,
+    custom_link text
 );
 
 
@@ -246,6 +250,25 @@ CREATE TABLE public.profiles (
 
 
 --
+-- Name: public_profiles; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.public_profiles WITH (security_invoker='true') AS
+ SELECT id,
+    full_name,
+    avatar_url,
+    bio,
+    skills,
+    interests,
+    skill_level,
+    learning_goals,
+    onboarding_completed,
+    created_at,
+    updated_at
+   FROM public.profiles;
+
+
+--
 -- Name: saved_items; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -256,6 +279,23 @@ CREATE TABLE public.saved_items (
     item_id uuid NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT saved_items_item_type_check CHECK ((item_type = ANY (ARRAY['blog'::text, 'tutorial'::text, 'code_snippet'::text, 'api'::text])))
+);
+
+
+--
+-- Name: tutorial_purchases; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.tutorial_purchases (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    tutorial_id uuid NOT NULL,
+    transaction_id text NOT NULL,
+    status text DEFAULT 'pending'::text NOT NULL,
+    admin_notes text,
+    approved_at timestamp with time zone,
+    approved_by uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -293,6 +333,11 @@ CREATE TABLE public.tutorials (
     published_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    external_link text,
+    is_paid boolean DEFAULT false,
+    price numeric,
+    upi_id text,
+    qr_code_url text,
     CONSTRAINT tutorials_difficulty_check CHECK ((difficulty = ANY (ARRAY['beginner'::text, 'intermediate'::text, 'advanced'::text])))
 );
 
@@ -420,6 +465,14 @@ ALTER TABLE ONLY public.saved_items
 
 ALTER TABLE ONLY public.saved_items
     ADD CONSTRAINT saved_items_user_id_item_type_item_id_key UNIQUE (user_id, item_type, item_id);
+
+
+--
+-- Name: tutorial_purchases tutorial_purchases_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tutorial_purchases
+    ADD CONSTRAINT tutorial_purchases_pkey PRIMARY KEY (id);
 
 
 --
@@ -627,6 +680,14 @@ ALTER TABLE ONLY public.saved_items
 
 
 --
+-- Name: tutorial_purchases tutorial_purchases_tutorial_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tutorial_purchases
+    ADD CONSTRAINT tutorial_purchases_tutorial_id_fkey FOREIGN KEY (tutorial_id) REFERENCES public.tutorials(id) ON DELETE CASCADE;
+
+
+--
 -- Name: tutorial_steps tutorial_steps_tutorial_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -714,6 +775,20 @@ CREATE POLICY "Admins can update purchases" ON public.material_purchases FOR UPD
 
 
 --
+-- Name: tutorial_purchases Admins can update tutorial purchases; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Admins can update tutorial purchases" ON public.tutorial_purchases FOR UPDATE USING ((public.has_role(auth.uid(), 'admin'::text) OR public.has_role(auth.uid(), 'super_admin'::text)));
+
+
+--
+-- Name: profiles Admins can view all profiles; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING ((public.has_role(auth.uid(), 'admin'::text) OR public.has_role(auth.uid(), 'super_admin'::text)));
+
+
+--
 -- Name: material_purchases Admins can view all purchases; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -724,9 +799,14 @@ CREATE POLICY "Admins can view all purchases" ON public.material_purchases FOR S
 -- Name: user_roles Admins can view all roles; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY "Admins can view all roles" ON public.user_roles FOR SELECT USING ((EXISTS ( SELECT 1
-   FROM public.user_roles user_roles_1
-  WHERE ((user_roles_1.user_id = auth.uid()) AND (user_roles_1.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))));
+CREATE POLICY "Admins can view all roles" ON public.user_roles FOR SELECT TO authenticated USING ((public.has_role(auth.uid(), 'admin'::text) OR public.has_role(auth.uid(), 'super_admin'::text)));
+
+
+--
+-- Name: tutorial_purchases Admins can view all tutorial purchases; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Admins can view all tutorial purchases" ON public.tutorial_purchases FOR SELECT USING ((public.has_role(auth.uid(), 'admin'::text) OR public.has_role(auth.uid(), 'super_admin'::text)));
 
 
 --
@@ -888,13 +968,6 @@ CREATE POLICY "Authors can view their tutorial steps" ON public.tutorial_steps F
 
 
 --
--- Name: profiles Public profiles are viewable by everyone; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles FOR SELECT USING (true);
-
-
---
 -- Name: blog_posts Published blogs are viewable by everyone; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -935,9 +1008,7 @@ CREATE POLICY "Steps of published tutorials are viewable" ON public.tutorial_ste
 -- Name: user_roles Super admins can manage roles; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY "Super admins can manage roles" ON public.user_roles USING ((EXISTS ( SELECT 1
-   FROM public.user_roles user_roles_1
-  WHERE ((user_roles_1.user_id = auth.uid()) AND (user_roles_1.role = 'super_admin'::text)))));
+CREATE POLICY "Super admins can manage roles" ON public.user_roles TO authenticated USING (public.has_role(auth.uid(), 'super_admin'::text)) WITH CHECK (public.has_role(auth.uid(), 'super_admin'::text));
 
 
 --
@@ -945,6 +1016,13 @@ CREATE POLICY "Super admins can manage roles" ON public.user_roles USING ((EXIST
 --
 
 CREATE POLICY "Users can create purchases" ON public.material_purchases FOR INSERT WITH CHECK ((auth.uid() = user_id));
+
+
+--
+-- Name: tutorial_purchases Users can create tutorial purchases; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can create tutorial purchases" ON public.tutorial_purchases FOR INSERT WITH CHECK ((auth.uid() = user_id));
 
 
 --
@@ -1011,6 +1089,13 @@ CREATE POLICY "Users can update their own profile" ON public.profiles FOR UPDATE
 
 
 --
+-- Name: profiles Users can view their own full profile; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can view their own full profile" ON public.profiles FOR SELECT USING ((auth.uid() = id));
+
+
+--
 -- Name: profiles Users can view their own profile; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -1036,6 +1121,13 @@ CREATE POLICY "Users can view their own role" ON public.user_roles FOR SELECT US
 --
 
 CREATE POLICY "Users can view their own saved items" ON public.saved_items FOR SELECT USING ((auth.uid() = user_id));
+
+
+--
+-- Name: tutorial_purchases Users can view their own tutorial purchases; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can view their own tutorial purchases" ON public.tutorial_purchases FOR SELECT USING ((auth.uid() = user_id));
 
 
 --
@@ -1099,6 +1191,12 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.saved_items ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: tutorial_purchases; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.tutorial_purchases ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: tutorial_steps; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -1121,3 +1219,6 @@ ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
 --
 
 
+
+
+COMMIT;
