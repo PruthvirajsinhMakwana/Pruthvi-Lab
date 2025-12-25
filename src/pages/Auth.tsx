@@ -21,10 +21,10 @@ export default function Auth() {
         <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
           <div className="flex items-center gap-3 mb-8">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-foreground/20 text-primary-foreground font-heading font-bold text-xl">
-              DL
+              PL
             </div>
             <span className="font-heading font-bold text-2xl text-primary-foreground">
-              DevLearn
+              Pruthvi's Lab
             </span>
           </div>
           <h1 className="font-heading text-4xl xl:text-5xl font-bold text-primary-foreground mb-6 leading-tight">
@@ -61,10 +61,10 @@ export default function Auth() {
         <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-heading font-bold">
-              DL
+              PL
             </div>
             <span className="font-heading font-semibold text-xl text-foreground">
-              DevLearn
+              Pruthvi's Lab
             </span>
           </div>
           <div className="text-center mb-8">

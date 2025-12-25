@@ -68,8 +68,8 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         sender: {
-          name: "Dev Arena",
-          email: "noreply@devarena.in",
+          name: "Pruthvi's Lab",
+          email: "noreply@pruthvislab.com",
         },
         to: [{ email, name: userName }],
         subject: `✅ Your Purchase for "${tutorialTitle}" is Approved!`,
@@ -101,10 +101,10 @@ const handler = async (req: Request): Promise<Response> => {
                 <p>If the button doesn't work, copy and paste this link in your browser:</p>
                 <p style="word-break: break-all; font-size: 14px; color: #666;">${externalLink}</p>
                 <p>Thank you for your purchase!</p>
-                <p>Best regards,<br>The Dev Arena Team</p>
+                <p>Best regards,<br>The Pruthvi's Lab Team</p>
               </div>
               <div class="footer">
-                <p>© 2024 Dev Arena. All rights reserved.</p>
+                <p>© 2024 Pruthvi's Lab. All rights reserved.</p>
               </div>
             </div>
           </body>

@@ -83,10 +83,10 @@ export function Header() {
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground font-heading font-bold text-sm shadow-glow group-hover:scale-105 transition-transform">
-              DL
+              PL
             </div>
             <span className="font-heading font-bold text-xl text-foreground hidden sm:block">
-              DevLearn
+              Pruthvi's Lab
             </span>
           </Link>
 

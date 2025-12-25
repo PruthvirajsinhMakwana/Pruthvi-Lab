@@ -114,7 +114,7 @@ export function AuthForm() {
     } else {
       toast({
         title: "Account created!",
-        description: "Welcome to DevLearn. Let's set up your profile.",
+        description: "Welcome to Pruthvi's Lab. Let's set up your profile.",
       });
       navigate("/onboarding");
     }
