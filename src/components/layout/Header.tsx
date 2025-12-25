@@ -270,71 +270,46 @@ export function Header() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-border/50 bg-background animate-slide-down">
-          <div className="container mx-auto px-4 py-4 space-y-4">
-            {/* Mobile Search */}
-            <div className="md:hidden">
-              <SearchButton className="w-full" />
-            </div>
+        <div className="lg:hidden border-t border-border/50 bg-background fixed inset-x-0 top-16 bottom-0 z-50 overflow-hidden">
+          <div className="h-full overflow-y-auto overscroll-contain">
+            <div className="container mx-auto px-4 py-4 space-y-4 pb-20">
+              {/* Mobile Search */}
+              <div className="md:hidden">
+                <SearchButton className="w-full" />
+              </div>
 
-            {/* Mobile Navigation */}
-            <div className="space-y-1">
-              {mainNavigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 text-base font-medium rounded-lg transition-colors",
-                    isActive(item.href)
-                      ? "text-foreground bg-muted"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.icon && <item.icon className="h-5 w-5" />}
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-
-            {/* Resources Section */}
-            <div className="border-t border-border pt-4">
-              <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Resources
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                {resourcesNavigation.map((item) => (
+              {/* Mobile Navigation */}
+              <div className="space-y-1">
+                {mainNavigation.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
                     className={cn(
-                      "flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
+                      "flex items-center gap-3 px-3 py-2.5 text-base font-medium rounded-lg transition-colors",
                       isActive(item.href)
                         ? "text-foreground bg-muted"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     )}
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    <item.icon className="h-4 w-4" />
+                    {item.icon && <item.icon className="h-5 w-5" />}
                     {item.name}
                   </Link>
                 ))}
               </div>
-            </div>
 
-            {/* Mobile User Links */}
-            {user && (
+              {/* Resources Section */}
               <div className="border-t border-border pt-4">
                 <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  Account
+                  Resources
                 </p>
-                <div className="space-y-1">
-                  {mobileUserNavigation.map((item) => (
+                <div className="grid grid-cols-2 gap-2">
+                  {resourcesNavigation.map((item) => (
                     <Link
                       key={item.name}
                       to={item.href}
                       className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
+                        "flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
                         isActive(item.href)
                           ? "text-foreground bg-muted"
                           : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -345,50 +320,77 @@ export function Header() {
                       {item.name}
                     </Link>
                   ))}
-                  {isAdmin && (
-                    <Link
-                      to="/admin"
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
-                        isActive("/admin")
-                          ? "text-foreground bg-muted"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                      )}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Settings className="h-4 w-4" />
-                      Admin Panel
-                    </Link>
-                  )}
-                  <button
-                    onClick={() => {
-                      handleSignOut();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors text-destructive hover:bg-destructive/10 w-full"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Sign out
-                  </button>
                 </div>
               </div>
-            )}
 
-            {/* Mobile Auth Buttons */}
-            {!user && (
-              <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                <Button variant="outline" asChild className="w-full">
-                  <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                    Sign in
-                  </Link>
-                </Button>
-                <Button className="w-full bg-gradient-primary" asChild>
-                  <Link to="/auth?mode=signup" onClick={() => setMobileMenuOpen(false)}>
-                    Get Started
-                  </Link>
-                </Button>
-              </div>
-            )}
+              {/* Mobile User Links */}
+              {user && (
+                <div className="border-t border-border pt-4">
+                  <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    Account
+                  </p>
+                  <div className="space-y-1">
+                    {mobileUserNavigation.map((item) => (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
+                          isActive(item.href)
+                            ? "text-foreground bg-muted"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        )}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {item.name}
+                      </Link>
+                    ))}
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
+                          isActive("/admin")
+                            ? "text-foreground bg-muted"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        )}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Settings className="h-4 w-4" />
+                        Admin Panel
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => {
+                        handleSignOut();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors text-destructive hover:bg-destructive/10 w-full"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign out
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Mobile Auth Buttons */}
+              {!user && (
+                <div className="flex flex-col gap-2 pt-4 border-t border-border">
+                  <Button variant="outline" asChild className="w-full">
+                    <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                      Sign in
+                    </Link>
+                  </Button>
+                  <Button className="w-full bg-gradient-primary" asChild>
+                    <Link to="/auth?mode=signup" onClick={() => setMobileMenuOpen(false)}>
+                      Get Started
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
