@@ -271,7 +271,7 @@ export function Header() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-border/50 bg-background fixed inset-x-0 top-16 bottom-0 z-[90] overflow-hidden animate-in slide-in-from-top-2 duration-200">
-          <div className="h-full overflow-y-auto overscroll-contain -webkit-overflow-scrolling-touch">
+          <div className="h-full overflow-y-auto overscroll-contain touch-pan-y">
             <div className="container mx-auto px-4 py-4 space-y-4 pb-24">
               {/* Mobile Search */}
               <div className="md:hidden">
