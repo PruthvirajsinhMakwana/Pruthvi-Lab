@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Search, 
   Image, 
@@ -447,7 +446,7 @@ const AITools = () => {
         </div>
 
         {/* Search & Filters Bar */}
-        <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b pb-4 mb-4 -mx-4 px-4">
+        <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm border-b pb-4 mb-4 -mx-4 px-4">
           <div className="flex flex-col gap-3">
             {/* Search Input */}
             <div className="relative">
