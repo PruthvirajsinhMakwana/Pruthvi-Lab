@@ -117,10 +117,10 @@ export default function Onboarding() {
       <div className="border-b border-border py-4 px-6">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-heading font-bold text-sm">
-            DL
+            PL
           </div>
           <span className="font-heading font-semibold text-lg text-foreground">
-            DevLearn
+            Pruthvi's Lab
           </span>
         </div>
       </div>

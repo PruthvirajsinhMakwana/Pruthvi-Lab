@@ -116,8 +116,8 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         sender: {
-          name: "DevLearn",
-          email: "noreply@devlearn.com",
+          name: "Pruthvi's Lab",
+          email: "noreply@pruthvislab.com",
         },
         to: [{ email }],
         subject: `Access Granted: ${sanitizedTitle}`,
@@ -142,11 +142,11 @@ const handler = async (req: Request): Promise<Response> => {
               <div class="content">
                 <p>Great news! Your payment for <strong>${sanitizedTitle}</strong> has been verified and approved.</p>
                 <p>You now have full access to this resource.</p>
-                ${externalLink ? `<a href="${externalLink}" class="button">Access Your Resource</a>` : '<a href="https://devlearn.app/my-purchases" class="button">View My Purchases</a>'}
+                ${externalLink ? `<a href="${externalLink}" class="button">Access Your Resource</a>` : '<a href="https://pruthvislab.com/my-purchases" class="button">View My Purchases</a>'}
                 <p style="margin-top: 30px;">Thank you for your purchase!</p>
               </div>
               <div class="footer">
-                <p>DevLearn - Learn, Build, Grow</p>
+                <p>Pruthvi's Lab - Learn, Build, Grow</p>
               </div>
             </div>
           </body>

@@ -29,7 +29,7 @@ const socialLinks = [
   { name: "GitHub", icon: Github, href: "#" },
   { name: "Twitter", icon: Twitter, href: "#" },
   { name: "LinkedIn", icon: Linkedin, href: "#" },
-  { name: "Email", icon: Mail, href: "mailto:hello@devlearn.com" },
+  { name: "Email", icon: Mail, href: "mailto:hello@pruthvislab.com" },
 ];
 
 export function Footer() {
@@ -41,10 +41,10 @@ export function Footer() {
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
             <Link to="/" className="flex items-center gap-2.5 group">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground font-heading font-bold text-sm shadow-glow group-hover:scale-105 transition-transform">
-                DL
+                PL
               </div>
               <span className="font-heading font-bold text-xl text-foreground">
-                DevLearn
+                Pruthvi's Lab
               </span>
             </Link>
             <p className="mt-4 text-sm text-muted-foreground max-w-xs">
@@ -154,7 +154,7 @@ export function Footer() {
               className="hover:text-foreground transition-colors cursor-default"
               title=""
             >
-              DevLearn
+              Pruthvi's Lab
             </Link>
             . All rights reserved.
           </p>
