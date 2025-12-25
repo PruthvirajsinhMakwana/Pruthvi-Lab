@@ -272,6 +272,105 @@ const aiTools: AITool[] = [
   { name: "Spline AI", description: "AI 3D design tool", category: "avatar", pricing: "freemium", trialCredits: "Free tier", url: "https://spline.design", features: ["3D design", "AI generation", "Web export"], rating: 4.4 },
   { name: "CSM.ai", description: "AI 3D world and asset generation", category: "avatar", pricing: "freemium", trialCredits: "Free tier", url: "https://csm.ai", features: ["3D worlds", "Game assets", "AI generation"], rating: 4.3 },
   { name: "Masterpiece Studio", description: "AI 3D creation in VR", category: "avatar", pricing: "freemium", trialCredits: "Free tier", url: "https://masterpiecestudio.com", features: ["VR creation", "AI assist", "Animation"], rating: 4.2 },
+
+  // NEW - More Image Tools
+  { name: "Flux AI", description: "State-of-the-art open source image generation model", category: "image", pricing: "freemium", trialCredits: "Free tier available", url: "https://blackforestlabs.ai", features: ["High quality", "Open source", "Fast generation"], rating: 4.8 },
+  { name: "Recraft AI", description: "AI design tool for professional vector graphics", category: "image", pricing: "freemium", trialCredits: "Free tier", url: "https://recraft.ai", features: ["Vector graphics", "Illustrations", "Icons"], rating: 4.5 },
+  { name: "Krea AI", description: "Real-time AI image generation and enhancement", category: "image", pricing: "freemium", trialCredits: "Free tier", url: "https://krea.ai", features: ["Real-time", "Upscaling", "Enhancement"], rating: 4.6 },
+  { name: "Magnific AI", description: "AI image upscaler with incredible detail", category: "image", pricing: "paid", url: "https://magnific.ai", features: ["Upscaling", "Detail enhancement", "Reimagine"], rating: 4.7 },
+  { name: "Topaz Labs", description: "AI-powered photo and video enhancement suite", category: "image", pricing: "paid", url: "https://topazlabs.com", features: ["Photo AI", "Video AI", "Gigapixel"], rating: 4.6 },
+  { name: "Facet AI", description: "AI-powered photo editing for professionals", category: "image", pricing: "freemium", trialCredits: "Free tier", url: "https://facet.ai", features: ["Auto masking", "Batch editing", "Professional"], rating: 4.4 },
+  { name: "Runway Inpainting", description: "AI-powered image inpainting and editing", category: "image", pricing: "freemium", trialCredits: "125 credits free", url: "https://runway.ml", features: ["Inpainting", "Object removal", "Generative fill"], rating: 4.6 },
+
+  // NEW - More Video Tools
+  { name: "Kling AI", description: "High-quality AI video generation from China", category: "video", pricing: "freemium", trialCredits: "66 credits/day free", url: "https://klingai.com", features: ["High quality", "Motion control", "Long videos"], rating: 4.7 },
+  { name: "Minimax Hailuo", description: "AI video generation with realistic motion", category: "video", pricing: "freemium", trialCredits: "Free tier", url: "https://hailuoai.com", features: ["Realistic motion", "Fast", "High quality"], rating: 4.6 },
+  { name: "Sora OpenAI", description: "OpenAI's text-to-video generation model", category: "video", pricing: "paid", url: "https://openai.com/sora", features: ["Realistic", "Long form", "Physics accurate"], rating: 4.9 },
+  { name: "Haiper AI", description: "Fast AI video generation with consistent characters", category: "video", pricing: "freemium", trialCredits: "Free tier", url: "https://haiper.ai", features: ["Character consistency", "Fast", "Quality"], rating: 4.4 },
+  { name: "Captions AI", description: "AI video editing with auto-captions and effects", category: "video", pricing: "freemium", trialCredits: "Free tier", url: "https://captions.ai", features: ["Auto captions", "Eye contact fix", "Translation"], rating: 4.5 },
+  { name: "CapCut AI", description: "AI-powered video editing with smart features", category: "video", pricing: "freemium", trialCredits: "Free tier", url: "https://capcut.com", features: ["Smart editing", "Effects", "Templates"], rating: 4.5 },
+  { name: "Wisecut", description: "AI video editor that removes silences automatically", category: "video", pricing: "freemium", trialCredits: "30 min/month free", url: "https://wisecut.video", features: ["Auto cut silences", "Subtitles", "Music"], rating: 4.3 },
+
+  // NEW - More Chat & LLM Tools
+  { name: "Grok", description: "xAI's witty AI assistant with real-time X integration", category: "chat", pricing: "paid", url: "https://grok.x.ai", features: ["Real-time X", "Witty", "Uncensored"], rating: 4.5 },
+  { name: "DeepSeek", description: "Powerful open-source AI models from China", category: "chat", pricing: "freemium", trialCredits: "Free tier", url: "https://deepseek.com", features: ["Coding", "Reasoning", "Open weights"], rating: 4.6 },
+  { name: "Meta AI", description: "Meta's AI assistant powered by Llama", category: "chat", pricing: "free", url: "https://meta.ai", features: ["Free unlimited", "Image gen", "Meta apps"], rating: 4.4 },
+  { name: "Le Chat Mistral", description: "Mistral's conversational AI assistant", category: "chat", pricing: "freemium", trialCredits: "Free tier", url: "https://chat.mistral.ai", features: ["Fast", "Multilingual", "Canvas"], rating: 4.5 },
+  { name: "Groq", description: "Lightning-fast AI inference platform", category: "chat", pricing: "freemium", trialCredits: "Free tier", url: "https://groq.com", features: ["Ultra fast", "Multiple models", "API"], rating: 4.6 },
+  { name: "Together AI", description: "Platform for running open-source AI models", category: "chat", pricing: "freemium", trialCredits: "Free credits", url: "https://together.ai", features: ["Open source models", "Fine-tuning", "API"], rating: 4.4 },
+  { name: "Replika", description: "AI companion for emotional support", category: "chat", pricing: "freemium", trialCredits: "Free tier", url: "https://replika.ai", features: ["Companion AI", "Memory", "Voice calls"], rating: 4.3 },
+
+  // NEW - More Code Tools
+  { name: "Bolt.new", description: "AI full-stack web development in browser", category: "code", pricing: "freemium", trialCredits: "Free tier", url: "https://bolt.new", features: ["Full-stack", "Browser IDE", "Deploy"], rating: 4.7 },
+  { name: "v0 by Vercel", description: "AI UI component generation with React", category: "code", pricing: "freemium", trialCredits: "200 credits/month free", url: "https://v0.dev", features: ["React/Next.js", "Shadcn UI", "Copy paste"], rating: 4.6 },
+  { name: "Claude Artifacts", description: "Create interactive apps within Claude", category: "code", pricing: "freemium", trialCredits: "Free tier", url: "https://claude.ai", features: ["Interactive", "React apps", "Visualizations"], rating: 4.7 },
+  { name: "Windsurf", description: "AI-powered IDE by Codeium", category: "code", pricing: "freemium", trialCredits: "Free tier", url: "https://codeium.com/windsurf", features: ["AI flows", "Context aware", "Full IDE"], rating: 4.5 },
+  { name: "Devin", description: "First AI software engineer by Cognition", category: "code", pricing: "paid", url: "https://cognition.ai", features: ["Autonomous coding", "Full projects", "Git integration"], rating: 4.4 },
+  { name: "Supermaven", description: "Ultra-fast AI code completion", category: "code", pricing: "freemium", trialCredits: "Free tier", url: "https://supermaven.com", features: ["300k context", "Ultra fast", "VSCode"], rating: 4.5 },
+  { name: "Sweep AI", description: "AI that turns issues into pull requests", category: "code", pricing: "freemium", trialCredits: "Free for open source", url: "https://sweep.dev", features: ["GitHub integration", "Bug fixes", "Features"], rating: 4.3 },
+
+  // NEW - More Audio Tools
+  { name: "NotebookLM", description: "Google's AI research assistant with podcast generation", category: "audio", pricing: "free", url: "https://notebooklm.google.com", features: ["Audio overview", "Research", "Citations"], rating: 4.7 },
+  { name: "Podcastle", description: "AI podcast creation and editing platform", category: "audio", pricing: "freemium", trialCredits: "3 hours/month free", url: "https://podcastle.ai", features: ["Podcast editing", "Voice cloning", "Transcription"], rating: 4.4 },
+  { name: "Adobe Podcast", description: "AI audio enhancement by Adobe", category: "audio", pricing: "free", url: "https://podcast.adobe.com", features: ["Noise removal", "Speech enhancement", "Free"], rating: 4.5 },
+  { name: "Riverside", description: "AI-powered podcast recording platform", category: "audio", pricing: "freemium", trialCredits: "2 hours/month free", url: "https://riverside.fm", features: ["High quality", "Transcription", "Editing"], rating: 4.5 },
+  { name: "Cleanvoice", description: "AI that removes filler words from audio", category: "audio", pricing: "freemium", trialCredits: "30 min free", url: "https://cleanvoice.ai", features: ["Remove fillers", "Remove silence", "Multi-language"], rating: 4.3 },
+  { name: "Voice.ai", description: "Real-time AI voice changer", category: "audio", pricing: "freemium", trialCredits: "Free tier", url: "https://voice.ai", features: ["Real-time", "Voice effects", "Streaming"], rating: 4.2 },
+  { name: "Stability Audio", description: "AI music and sound effects generation", category: "audio", pricing: "freemium", trialCredits: "20 tracks/month free", url: "https://stableaudio.com", features: ["Music gen", "Sound effects", "High quality"], rating: 4.4 },
+
+  // NEW - More Writing Tools
+  { name: "Lex", description: "AI writing tool with a focus on longform content", category: "writing", pricing: "freemium", trialCredits: "Free tier", url: "https://lex.page", features: ["Longform", "AI suggestions", "Minimal"], rating: 4.4 },
+  { name: "Moonbeam", description: "AI writing assistant for long-form content", category: "writing", pricing: "freemium", trialCredits: "Free tier", url: "https://gomoonbeam.com", features: ["Blog posts", "Essays", "AI outline"], rating: 4.3 },
+  { name: "Hemingway Editor", description: "AI writing tool for clear and bold writing", category: "writing", pricing: "freemium", trialCredits: "Free online", url: "https://hemingwayapp.com", features: ["Readability", "Clarity", "Simple"], rating: 4.4 },
+  { name: "Writer", description: "Enterprise AI writing platform", category: "writing", pricing: "paid", url: "https://writer.com", features: ["Enterprise", "Brand voice", "Compliance"], rating: 4.5 },
+  { name: "Jenni AI", description: "AI writing assistant for academic papers", category: "writing", pricing: "freemium", trialCredits: "200 words/day free", url: "https://jenni.ai", features: ["Academic", "Citations", "Plagiarism check"], rating: 4.3 },
+  { name: "Typeset.io", description: "AI research and writing platform", category: "writing", pricing: "freemium", trialCredits: "Free tier", url: "https://typeset.io", features: ["Research papers", "Citations", "Literature review"], rating: 4.4 },
+
+  // NEW - More Design Tools
+  { name: "Visily", description: "AI-powered wireframe and UI design tool", category: "design", pricing: "freemium", trialCredits: "Free tier", url: "https://visily.ai", features: ["Screenshot to design", "Wireframes", "Templates"], rating: 4.4 },
+  { name: "Designs.ai", description: "AI design suite for logos, videos, and more", category: "design", pricing: "freemium", trialCredits: "Free tier", url: "https://designs.ai", features: ["Logo maker", "Video maker", "All-in-one"], rating: 4.2 },
+  { name: "Hotpot.ai", description: "AI design tools for graphics and images", category: "design", pricing: "freemium", trialCredits: "Free tier", url: "https://hotpot.ai", features: ["Background removal", "Art maker", "Mockups"], rating: 4.2 },
+  { name: "Booth.ai", description: "AI product photography generator", category: "design", pricing: "freemium", trialCredits: "Free tier", url: "https://booth.ai", features: ["Product photos", "Lifestyle shots", "Quick"], rating: 4.3 },
+  { name: "Pebblely", description: "AI product photo background generator", category: "design", pricing: "freemium", trialCredits: "40 images free", url: "https://pebblely.com", features: ["Product photos", "Backgrounds", "Templates"], rating: 4.4 },
+  { name: "Brandbird", description: "AI-powered screenshot beautifier", category: "design", pricing: "freemium", trialCredits: "Free tier", url: "https://brandbird.app", features: ["Screenshots", "Mockups", "Social media"], rating: 4.3 },
+
+  // NEW - More Productivity Tools
+  { name: "Granola", description: "AI meeting notes that enhance your notes", category: "productivity", pricing: "freemium", trialCredits: "25 meetings free", url: "https://granola.so", features: ["Meeting notes", "AI enhancement", "Mac app"], rating: 4.5 },
+  { name: "Reflect", description: "AI note-taking with networked thoughts", category: "productivity", pricing: "paid", url: "https://reflect.app", features: ["Backlinks", "AI assistant", "End-to-end encrypted"], rating: 4.4 },
+  { name: "Tana", description: "AI-powered knowledge management", category: "productivity", pricing: "freemium", trialCredits: "Free tier", url: "https://tana.inc", features: ["Supertags", "AI commands", "Outliner"], rating: 4.4 },
+  { name: "Superhuman", description: "AI-powered email client", category: "productivity", pricing: "paid", url: "https://superhuman.com", features: ["AI writing", "Instant reply", "Snippets"], rating: 4.6 },
+  { name: "Raycast AI", description: "AI commands in your launcher", category: "productivity", pricing: "freemium", trialCredits: "Free tier", url: "https://raycast.com", features: ["Quick AI", "Commands", "Extensions"], rating: 4.6 },
+  { name: "Arc Max", description: "AI features in the Arc browser", category: "productivity", pricing: "free", url: "https://arc.net", features: ["5 second previews", "Tidy tabs", "Ask on page"], rating: 4.4 },
+  { name: "Monica AI", description: "AI assistant browser extension", category: "productivity", pricing: "freemium", trialCredits: "Free tier", url: "https://monica.im", features: ["Browser extension", "Chat anywhere", "Write assist"], rating: 4.3 },
+
+  // NEW - More Education Tools
+  { name: "Perplexity Pages", description: "AI-generated research articles", category: "education", pricing: "freemium", trialCredits: "Free tier", url: "https://perplexity.ai/pages", features: ["Research articles", "Citations", "Shareable"], rating: 4.5 },
+  { name: "Gamma Docs", description: "AI document and webpage creator", category: "education", pricing: "freemium", trialCredits: "400 credits free", url: "https://gamma.app", features: ["Documents", "Websites", "AI generation"], rating: 4.6 },
+  { name: "Scholarcy", description: "AI article summarizer for researchers", category: "education", pricing: "freemium", trialCredits: "Free tier", url: "https://scholarcy.com", features: ["Paper summaries", "Key findings", "Flashcards"], rating: 4.3 },
+  { name: "Humata", description: "AI that answers questions about documents", category: "education", pricing: "freemium", trialCredits: "60 pages free", url: "https://humata.ai", features: ["Document Q&A", "Summaries", "Citations"], rating: 4.3 },
+  { name: "Mindgrasp", description: "AI learning assistant for any content", category: "education", pricing: "freemium", trialCredits: "Free tier", url: "https://mindgrasp.ai", features: ["Notes from video", "Flashcards", "Q&A"], rating: 4.2 },
+  { name: "Shiken", description: "AI-powered quiz and flashcard generator", category: "education", pricing: "freemium", trialCredits: "Free tier", url: "https://shiken.ai", features: ["Quiz generation", "Flashcards", "AI tutor"], rating: 4.2 },
+
+  // NEW - More Presentation Tools
+  { name: "Canva Docs", description: "AI-powered visual documents", category: "presentation", pricing: "freemium", trialCredits: "Free tier", url: "https://canva.com/docs", features: ["Visual docs", "AI writing", "Templates"], rating: 4.5 },
+  { name: "Storydoc", description: "AI interactive presentation builder", category: "presentation", pricing: "freemium", trialCredits: "14-day trial", url: "https://storydoc.com", features: ["Interactive", "Analytics", "Templates"], rating: 4.3 },
+  { name: "Visme", description: "AI visual content creation platform", category: "presentation", pricing: "freemium", trialCredits: "Free tier", url: "https://visme.co", features: ["Infographics", "Presentations", "AI designer"], rating: 4.4 },
+  { name: "Simplified", description: "AI design and content creation platform", category: "presentation", pricing: "freemium", trialCredits: "Free tier", url: "https://simplified.com", features: ["AI writer", "Designer", "Video"], rating: 4.3 },
+
+  // NEW - More Research & Data Tools
+  { name: "Perplexity Labs", description: "Experimental AI search features", category: "data", pricing: "freemium", trialCredits: "Free tier", url: "https://labs.perplexity.ai", features: ["Experimental", "New models", "Research"], rating: 4.5 },
+  { name: "Tavily", description: "AI search API for research agents", category: "data", pricing: "freemium", trialCredits: "1000 searches/month free", url: "https://tavily.com", features: ["Search API", "Real-time", "Agents"], rating: 4.4 },
+  { name: "Metaphor", description: "AI-powered semantic search engine", category: "data", pricing: "freemium", trialCredits: "Free tier", url: "https://metaphor.systems", features: ["Semantic search", "API", "Neural search"], rating: 4.4 },
+  { name: "Paperpal", description: "AI writing assistant for academic papers", category: "data", pricing: "freemium", trialCredits: "Free tier", url: "https://paperpal.com", features: ["Academic writing", "Language check", "Journal suggestions"], rating: 4.3 },
+  { name: "Scispace", description: "AI research assistant for papers", category: "data", pricing: "freemium", trialCredits: "Free tier", url: "https://typeset.io", features: ["Paper chat", "Literature review", "Citations"], rating: 4.4 },
+
+  // NEW - More 3D & Avatar Tools
+  { name: "Tripo AI", description: "AI 3D model generation from text and images", category: "avatar", pricing: "freemium", trialCredits: "Free tier", url: "https://tripo3d.ai", features: ["Text to 3D", "Image to 3D", "Animation"], rating: 4.4 },
+  { name: "Rodin AI", description: "Professional AI 3D generation", category: "avatar", pricing: "freemium", trialCredits: "Free tier", url: "https://hyperhuman.top", features: ["High quality 3D", "Rigging", "Export"], rating: 4.3 },
+  { name: "Luma Genie", description: "AI 3D model generation", category: "avatar", pricing: "freemium", trialCredits: "Free tier", url: "https://lumalabs.ai/genie", features: ["Text to 3D", "Fast", "Interactive"], rating: 4.4 },
+  { name: "Scenario", description: "AI game asset generation", category: "avatar", pricing: "freemium", trialCredits: "Free tier", url: "https://scenario.com", features: ["Game assets", "Style training", "Consistency"], rating: 4.4 },
+  { name: "Point-E", description: "OpenAI's 3D point cloud generator", category: "avatar", pricing: "free", url: "https://github.com/openai/point-e", features: ["Open source", "Point clouds", "Text to 3D"], rating: 4.1 },
+  { name: "3DFY AI", description: "AI-powered 3D model generation", category: "avatar", pricing: "paid", url: "https://3dfy.ai", features: ["High quality", "Enterprise", "API"], rating: 4.3 },
 ];
 
 const AITools = () => {
