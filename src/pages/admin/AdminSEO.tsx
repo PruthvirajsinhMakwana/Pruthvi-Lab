@@ -19,7 +19,9 @@ import {
   X, 
   Plus,
   Twitter,
-  Image
+  Image,
+  Palette,
+  Smartphone
 } from "lucide-react";
 
 export default function AdminSEO() {
@@ -89,7 +91,7 @@ export default function AdminSEO() {
 
         {/* Tabs */}
         <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
             <TabsTrigger value="general" className="flex items-center gap-2">
               <Search className="h-4 w-4" />
               <span className="hidden sm:inline">General</span>
@@ -97,6 +99,14 @@ export default function AdminSEO() {
             <TabsTrigger value="social" className="flex items-center gap-2">
               <Share2 className="h-4 w-4" />
               <span className="hidden sm:inline">Social</span>
+            </TabsTrigger>
+            <TabsTrigger value="favicon" className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              <span className="hidden sm:inline">Favicon</span>
+            </TabsTrigger>
+            <TabsTrigger value="pwa" className="flex items-center gap-2">
+              <Smartphone className="h-4 w-4" />
+              <span className="hidden sm:inline">PWA</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
@@ -297,6 +307,202 @@ export default function AdminSEO() {
                       {formData.site_description || "Your site description..."}
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Favicon Tab */}
+          <TabsContent value="favicon" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-primary" />
+                  Favicon Settings
+                </CardTitle>
+                <CardDescription>
+                  Configure your site's favicon that appears in browser tabs
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="favicon_url">Favicon URL</Label>
+                  <Input
+                    id="favicon_url"
+                    value={formData.favicon_url}
+                    onChange={(e) => handleInputChange("favicon_url", e.target.value)}
+                    placeholder="/favicon.ico or https://example.com/favicon.png"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Recommended: 32x32 or 180x180 pixels for best compatibility
+                  </p>
+                </div>
+
+                {/* Favicon Preview */}
+                {formData.favicon_url && (
+                  <div className="space-y-2">
+                    <Label>Preview</Label>
+                    <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border">
+                      <div className="flex items-center gap-2 px-3 py-2 bg-background rounded border">
+                        <img 
+                          src={formData.favicon_url} 
+                          alt="Favicon preview" 
+                          className="w-4 h-4 object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none";
+                          }}
+                        />
+                        <span className="text-sm">{formData.site_title}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">Browser tab preview</span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* PWA Tab */}
+          <TabsContent value="pwa" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Smartphone className="h-5 w-5 text-primary" />
+                  PWA Manifest Settings
+                </CardTitle>
+                <CardDescription>
+                  Configure how your site appears when installed as a Progressive Web App
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="pwa_name">App Name</Label>
+                  <Input
+                    id="pwa_name"
+                    value={formData.pwa_name}
+                    onChange={(e) => handleInputChange("pwa_name", e.target.value)}
+                    placeholder="My Awesome App"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Full name shown when installing the app
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pwa_short_name">Short Name</Label>
+                  <Input
+                    id="pwa_short_name"
+                    value={formData.pwa_short_name}
+                    onChange={(e) => handleInputChange("pwa_short_name", e.target.value)}
+                    placeholder="MyApp"
+                    maxLength={12}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {formData.pwa_short_name.length}/12 characters - shown on home screen
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pwa_description">App Description</Label>
+                  <Textarea
+                    id="pwa_description"
+                    value={formData.pwa_description}
+                    onChange={(e) => handleInputChange("pwa_description", e.target.value)}
+                    placeholder="A brief description of your app"
+                    rows={2}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="pwa_theme_color" className="flex items-center gap-2">
+                      <Palette className="h-4 w-4" />
+                      Theme Color
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="pwa_theme_color"
+                        value={formData.pwa_theme_color}
+                        onChange={(e) => handleInputChange("pwa_theme_color", e.target.value)}
+                        placeholder="#8B5CF6"
+                        className="flex-1"
+                      />
+                      <input
+                        type="color"
+                        value={formData.pwa_theme_color}
+                        onChange={(e) => handleInputChange("pwa_theme_color", e.target.value)}
+                        className="w-10 h-10 rounded border cursor-pointer"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Browser toolbar color on mobile
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="pwa_background_color" className="flex items-center gap-2">
+                      <Palette className="h-4 w-4" />
+                      Background Color
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="pwa_background_color"
+                        value={formData.pwa_background_color}
+                        onChange={(e) => handleInputChange("pwa_background_color", e.target.value)}
+                        placeholder="#0F0A1F"
+                        className="flex-1"
+                      />
+                      <input
+                        type="color"
+                        value={formData.pwa_background_color}
+                        onChange={(e) => handleInputChange("pwa_background_color", e.target.value)}
+                        className="w-10 h-10 rounded border cursor-pointer"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Splash screen background color
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* PWA Preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Install Preview</CardTitle>
+                <CardDescription>
+                  How your app might appear when installed on a device
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div 
+                  className="w-48 mx-auto p-6 rounded-2xl border-2 flex flex-col items-center gap-3"
+                  style={{ backgroundColor: formData.pwa_background_color }}
+                >
+                  {formData.favicon_url ? (
+                    <img 
+                      src={formData.favicon_url} 
+                      alt="App icon" 
+                      className="w-16 h-16 rounded-2xl object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div 
+                      className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                      style={{ backgroundColor: formData.pwa_theme_color }}
+                    >
+                      <Smartphone className="h-8 w-8 text-white" />
+                    </div>
+                  )}
+                  <span 
+                    className="text-sm font-medium text-center"
+                    style={{ color: formData.pwa_theme_color }}
+                  >
+                    {formData.pwa_short_name || formData.pwa_name || "App Name"}
+                  </span>
                 </div>
               </CardContent>
             </Card>
