@@ -76,7 +76,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 glass">
+    <header className="sticky top-0 z-[100] w-full border-b border-border/50 glass">
       <nav className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
         {/* Logo */}
         <div className="flex items-center gap-6">
@@ -270,7 +270,7 @@ export function Header() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-border/50 bg-background fixed inset-x-0 top-16 bottom-0 z-[90] overflow-hidden animate-in slide-in-from-top-2 duration-200">
+        <div className="lg:hidden border-t border-border/50 bg-background fixed inset-x-0 top-16 bottom-0 z-[99] overflow-hidden animate-in slide-in-from-top-2 duration-200">
           <div className="h-full overflow-y-auto overscroll-contain touch-pan-y">
             <div className="container mx-auto px-4 py-4 space-y-4 pb-24">
               {/* Mobile Search */}
