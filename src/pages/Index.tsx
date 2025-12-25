@@ -424,7 +424,7 @@ const Index = () => {
                       <Bot className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">DevLearn AI</h3>
+                      <h3 className="font-semibold text-foreground">PruthviAI</h3>
                       <p className="text-xs text-muted-foreground">Online • Ready to help</p>
                     </div>
                   </div>
@@ -451,6 +451,56 @@ const Index = () => {
               </Card>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* AI Tools Directory Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-12 animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium mb-4">
+            <Sparkles className="h-3.5 w-3.5" />
+            AI Directory
+          </div>
+          <h2 className="text-3xl font-heading font-bold text-foreground mb-4">
+            Discover the Best <span className="text-gradient">AI Tools</span>
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Explore 70+ AI tools for image generation, video creation, coding, writing, and more. 
+            Find free, freemium, and paid options with our comprehensive directory.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-10 animate-fade-in-up stagger-2">
+          {[
+            { name: "Image AI", icon: "🎨", count: "12+" },
+            { name: "Video AI", icon: "🎬", count: "10+" },
+            { name: "Chat AI", icon: "💬", count: "10+" },
+            { name: "Code AI", icon: "💻", count: "10+" },
+            { name: "Audio AI", icon: "🎵", count: "10+" },
+            { name: "Writing AI", icon: "✍️", count: "10+" },
+          ].map((category, index) => (
+            <Card 
+              key={category.name}
+              className="card-hover border-border/50 hover:border-accent/50 text-center p-4"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <CardContent className="p-0">
+                <div className="text-3xl mb-2">{category.icon}</div>
+                <h3 className="font-medium text-foreground text-sm">{category.name}</h3>
+                <p className="text-xs text-muted-foreground">{category.count} tools</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="text-center animate-fade-in-up stagger-3">
+          <Button size="lg" className="bg-gradient-primary hover:opacity-90 group" asChild>
+            <Link to="/ai-tools">
+              <Sparkles className="mr-2 h-4 w-4" />
+              Browse All AI Tools
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </Button>
         </div>
       </section>
 
