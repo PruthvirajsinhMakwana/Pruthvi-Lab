@@ -150,6 +150,21 @@ export function Header() {
 
         {/* Right Section */}
         <div className="flex items-center gap-2">
+          {/* Mobile Menu Button - First for proper touch target */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden relative z-10"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </Button>
+
           {/* Search */}
           <div className="hidden md:block">
             <SearchButton />
@@ -251,20 +266,6 @@ export function Header() {
               </Button>
             </div>
           )}
-
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </Button>
         </div>
       </nav>
 
