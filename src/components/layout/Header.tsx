@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Sun, Moon, User, LogOut, Settings, Bookmark, LayoutDashboard, ChevronDown, BookOpen, Code, FileText, Package, Users, ShoppingBag } from "lucide-react";
+import { Menu, X, Sun, Moon, User, LogOut, Settings, Bookmark, LayoutDashboard, ChevronDown, BookOpen, Code, FileText, Package, Users, ShoppingBag, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 
 const mainNavigation = [
   { name: "Home", href: "/", icon: null },
+  { name: "AI Assistant", href: "/ai-assistant", icon: Bot },
   { name: "Community", href: "/community", icon: Users },
 ];
 
