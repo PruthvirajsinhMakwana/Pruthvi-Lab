@@ -562,12 +562,12 @@ const AITools = () => {
                     )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="bottom" className="h-[80vh]">
-                  <SheetHeader>
+                <SheetContent side="bottom" className="h-[80vh] flex flex-col">
+                  <SheetHeader className="shrink-0">
                     <SheetTitle>Filters</SheetTitle>
                     <SheetDescription>Filter AI tools by category and pricing</SheetDescription>
                   </SheetHeader>
-                  <ScrollArea className="h-[calc(100%-100px)] mt-4">
+                  <div className="flex-1 overflow-y-auto mt-4 -mx-6 px-6">
                     <div className="space-y-6 pb-4">
                       {/* Category Filter */}
                       <div>
@@ -640,8 +640,8 @@ const AITools = () => {
                         </div>
                       </div>
                     </div>
-                  </ScrollArea>
-                  <div className="flex gap-2 pt-4 border-t">
+                  </div>
+                  <div className="flex gap-2 pt-4 border-t shrink-0">
                     <Button variant="outline" className="flex-1" onClick={clearFilters}>
                       Clear All
                     </Button>
