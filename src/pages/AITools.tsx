@@ -1,9 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Search, 
   Image, 
@@ -27,7 +29,11 @@ import {
   X,
   SlidersHorizontal,
   Grid3X3,
-  List
+  List,
+  Heart,
+  GitCompare,
+  Check,
+  ChevronDown
 } from "lucide-react";
 import {
   Select,
@@ -36,7 +42,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 
 type AITool = {
   name: string;
@@ -259,6 +281,46 @@ const AITools = () => {
   const [selectedPricing, setSelectedPricing] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState<"rating" | "name" | "pricing">("rating");
+  const [bookmarks, setBookmarks] = useState<string[]>([]);
+  const [compareList, setCompareList] = useState<string[]>([]);
+  const [showCompareDialog, setShowCompareDialog] = useState(false);
+  const [showBookmarks, setShowBookmarks] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Load bookmarks from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("ai-tools-bookmarks");
+    if (saved) setBookmarks(JSON.parse(saved));
+  }, []);
+
+  // Save bookmarks to localStorage
+  useEffect(() => {
+    localStorage.setItem("ai-tools-bookmarks", JSON.stringify(bookmarks));
+  }, [bookmarks]);
+
+  const toggleBookmark = (toolName: string) => {
+    setBookmarks(prev => {
+      if (prev.includes(toolName)) {
+        toast.success("Removed from favorites");
+        return prev.filter(n => n !== toolName);
+      }
+      toast.success("Added to favorites!");
+      return [...prev, toolName];
+    });
+  };
+
+  const toggleCompare = (toolName: string) => {
+    setCompareList(prev => {
+      if (prev.includes(toolName)) {
+        return prev.filter(n => n !== toolName);
+      }
+      if (prev.length >= 4) {
+        toast.error("You can compare up to 4 tools");
+        return prev;
+      }
+      return [...prev, toolName];
+    });
+  };
 
   const filteredTools = useMemo(() => {
     let tools = aiTools.filter((tool) => {
@@ -268,10 +330,10 @@ const AITools = () => {
         tool.features.some(f => f.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesCategory = selectedCategory === "all" || tool.category === selectedCategory;
       const matchesPricing = selectedPricing === "all" || tool.pricing === selectedPricing;
-      return matchesSearch && matchesCategory && matchesPricing;
+      const matchesBookmarks = !showBookmarks || bookmarks.includes(tool.name);
+      return matchesSearch && matchesCategory && matchesPricing && matchesBookmarks;
     });
 
-    // Sort tools
     tools.sort((a, b) => {
       if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
       if (sortBy === "name") return a.name.localeCompare(b.name);
@@ -283,7 +345,11 @@ const AITools = () => {
     });
 
     return tools;
-  }, [searchQuery, selectedCategory, selectedPricing, sortBy]);
+  }, [searchQuery, selectedCategory, selectedPricing, sortBy, showBookmarks, bookmarks]);
+
+  const compareTools = useMemo(() => 
+    aiTools.filter(t => compareList.includes(t.name)),
+  [compareList]);
 
   const getPricingBadge = (pricing: string, trialCredits?: string) => {
     const configs: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; icon: any; label: string; className: string }> = {
@@ -321,38 +387,76 @@ const AITools = () => {
     setSearchQuery("");
     setSelectedCategory("all");
     setSelectedPricing("all");
+    setShowBookmarks(false);
   };
 
-  const hasActiveFilters = searchQuery || selectedCategory !== "all" || selectedPricing !== "all";
+  const hasActiveFilters = searchQuery || selectedCategory !== "all" || selectedPricing !== "all" || showBookmarks;
+
+  const getCategoryName = (categoryId: string) => {
+    return categories.find(c => c.id === categoryId)?.name || categoryId;
+  };
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <Badge variant="secondary" className="mb-4">
+        <div className="text-center mb-6">
+          <Badge variant="secondary" className="mb-3">
             <Sparkles className="h-3 w-3 mr-1" />
             {aiTools.length}+ AI Tools Directory
           </Badge>
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">
+          <h1 className="text-2xl md:text-4xl font-bold mb-2">
             Find the Perfect <span className="text-gradient">AI Tool</span>
           </h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Discover AI tools for image generation, video creation, coding, writing, and more.
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto">
+            Discover AI tools for image, video, coding, writing, and more.
           </p>
         </div>
 
-        {/* Search & Filters Bar - Sticky */}
-        <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b pb-4 mb-6 -mx-4 px-4">
-          <div className="flex flex-col gap-4">
+        {/* Action Buttons - Bookmarks & Compare */}
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <Button
+            variant={showBookmarks ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowBookmarks(!showBookmarks)}
+            className="gap-1.5"
+          >
+            <Heart className={`h-4 w-4 ${showBookmarks ? "fill-current" : ""}`} />
+            <span className="hidden sm:inline">Favorites</span>
+            {bookmarks.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                {bookmarks.length}
+              </Badge>
+            )}
+          </Button>
+          
+          {compareList.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowCompareDialog(true)}
+              className="gap-1.5"
+            >
+              <GitCompare className="h-4 w-4" />
+              <span className="hidden sm:inline">Compare</span>
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                {compareList.length}
+              </Badge>
+            </Button>
+          )}
+        </div>
+
+        {/* Search & Filters Bar */}
+        <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b pb-4 mb-4 -mx-4 px-4">
+          <div className="flex flex-col gap-3">
             {/* Search Input */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search AI tools by name, feature, or description..."
+                placeholder="Search AI tools..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-10 h-12 text-base"
+                className="pl-10 pr-10 h-11"
               />
               {searchQuery && (
                 <Button
@@ -366,35 +470,35 @@ const AITools = () => {
               )}
             </div>
 
-            {/* Filter Controls */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Category Select */}
+            {/* Desktop Filter Controls */}
+            <div className="hidden md:flex flex-wrap items-center gap-2">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-[160px]">
+                <SelectTrigger className="w-[150px] h-9">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => {
-                    const Icon = cat.icon;
-                    const count = cat.id === "all" 
-                      ? aiTools.length 
-                      : aiTools.filter(t => t.category === cat.id).length;
-                    return (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        <div className="flex items-center gap-2">
-                          <Icon className="h-4 w-4" />
-                          <span>{cat.name}</span>
-                          <span className="text-xs text-muted-foreground">({count})</span>
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
+                <SelectContent className="max-h-[300px]">
+                  <ScrollArea className="h-full">
+                    {categories.map((cat) => {
+                      const Icon = cat.icon;
+                      const count = cat.id === "all" 
+                        ? aiTools.length 
+                        : aiTools.filter(t => t.category === cat.id).length;
+                      return (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          <div className="flex items-center gap-2">
+                            <Icon className="h-4 w-4 shrink-0" />
+                            <span>{cat.name}</span>
+                            <span className="text-xs text-muted-foreground">({count})</span>
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </ScrollArea>
                 </SelectContent>
               </Select>
 
-              {/* Pricing Select */}
               <Select value={selectedPricing} onValueChange={setSelectedPricing}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-[140px] h-9">
                   <SelectValue placeholder="Pricing" />
                 </SelectTrigger>
                 <SelectContent>
@@ -412,44 +516,159 @@ const AITools = () => {
                 </SelectContent>
               </Select>
 
-              {/* Sort Select */}
               <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-                <SelectTrigger className="w-[130px]">
+                <SelectTrigger className="w-[130px] h-9">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="rating">Top Rated</SelectItem>
                   <SelectItem value="name">Name A-Z</SelectItem>
-                  <SelectItem value="pricing">Price: Free First</SelectItem>
+                  <SelectItem value="pricing">Free First</SelectItem>
                 </SelectContent>
               </Select>
 
-              {/* View Mode Toggle */}
-              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "grid" | "list")} className="ml-auto">
+              <div className="flex-1" />
+
+              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "grid" | "list")}>
                 <TabsList className="h-9">
-                  <TabsTrigger value="grid" className="px-3">
+                  <TabsTrigger value="grid" className="px-2.5">
                     <Grid3X3 className="h-4 w-4" />
                   </TabsTrigger>
-                  <TabsTrigger value="list" className="px-3">
+                  <TabsTrigger value="list" className="px-2.5">
                     <List className="h-4 w-4" />
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
 
-              {/* Clear Filters */}
               {hasActiveFilters && (
-                <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
+                <Button variant="ghost" size="sm" onClick={clearFilters}>
                   <X className="h-4 w-4 mr-1" />
                   Clear
                 </Button>
               )}
             </div>
+
+            {/* Mobile Filter Controls */}
+            <div className="flex md:hidden items-center gap-2">
+              <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <SlidersHorizontal className="h-4 w-4 mr-2" />
+                    Filters
+                    {hasActiveFilters && (
+                      <Badge variant="secondary" className="ml-2 h-5 px-1.5">
+                        {[selectedCategory !== "all", selectedPricing !== "all", showBookmarks].filter(Boolean).length}
+                      </Badge>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="h-[80vh]">
+                  <SheetHeader>
+                    <SheetTitle>Filters</SheetTitle>
+                    <SheetDescription>Filter AI tools by category and pricing</SheetDescription>
+                  </SheetHeader>
+                  <ScrollArea className="h-[calc(100%-100px)] mt-4">
+                    <div className="space-y-6 pb-4">
+                      {/* Category Filter */}
+                      <div>
+                        <h4 className="font-medium mb-3">Category</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          {categories.map((cat) => {
+                            const Icon = cat.icon;
+                            const isActive = selectedCategory === cat.id;
+                            const count = cat.id === "all" 
+                              ? aiTools.length 
+                              : aiTools.filter(t => t.category === cat.id).length;
+                            return (
+                              <Button
+                                key={cat.id}
+                                variant={isActive ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setSelectedCategory(cat.id)}
+                                className="justify-start h-auto py-2"
+                              >
+                                <Icon className="h-4 w-4 mr-2 shrink-0" />
+                                <span className="truncate">{cat.name}</span>
+                                <span className="ml-auto text-xs opacity-70">({count})</span>
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Pricing Filter */}
+                      <div>
+                        <h4 className="font-medium mb-3">Pricing</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          {pricingFilters.map((filter) => {
+                            const Icon = filter.icon;
+                            const isActive = selectedPricing === filter.id;
+                            return (
+                              <Button
+                                key={filter.id}
+                                variant={isActive ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setSelectedPricing(filter.id)}
+                                className="justify-start"
+                              >
+                                <Icon className="h-4 w-4 mr-2" />
+                                {filter.name}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Sort */}
+                      <div>
+                        <h4 className="font-medium mb-3">Sort By</h4>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            { id: "rating", name: "Top Rated" },
+                            { id: "name", name: "Name A-Z" },
+                            { id: "pricing", name: "Free First" },
+                          ].map((sort) => (
+                            <Button
+                              key={sort.id}
+                              variant={sortBy === sort.id ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSortBy(sort.id as typeof sortBy)}
+                            >
+                              {sort.name}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                  <div className="flex gap-2 pt-4 border-t">
+                    <Button variant="outline" className="flex-1" onClick={clearFilters}>
+                      Clear All
+                    </Button>
+                    <Button className="flex-1" onClick={() => setMobileFiltersOpen(false)}>
+                      Show {filteredTools.length} Results
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+
+              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "grid" | "list")}>
+                <TabsList className="h-9">
+                  <TabsTrigger value="grid" className="px-2.5">
+                    <Grid3X3 className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="list" className="px-2.5">
+                    <List className="h-4 w-4" />
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
         </div>
 
-        {/* Quick Category Pills */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {categories.slice(1, 8).map((cat) => {
+        {/* Quick Category Pills - Desktop */}
+        <div className="hidden md:flex flex-wrap gap-2 mb-4">
+          {categories.slice(1).map((cat) => {
             const Icon = cat.icon;
             const isActive = selectedCategory === cat.id;
             return (
@@ -458,7 +677,6 @@ const AITools = () => {
                 variant={isActive ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(isActive ? "all" : cat.id)}
-                className={isActive ? "" : "hover:bg-secondary"}
               >
                 <Icon className="h-3.5 w-3.5 mr-1.5" />
                 {cat.name}
@@ -470,28 +688,31 @@ const AITools = () => {
         {/* Results Count */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-muted-foreground">
-            Showing <span className="font-semibold text-foreground">{filteredTools.length}</span> of {aiTools.length} tools
+            {showBookmarks && <span className="text-primary font-medium">Favorites: </span>}
+            <span className="font-semibold text-foreground">{filteredTools.length}</span> tools
           </p>
         </div>
 
         {/* Tools Grid/List */}
         {viewMode === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {filteredTools.map((tool, index) => {
               const CategoryIcon = getCategoryIcon(tool.category);
               const categoryColor = getCategoryColor(tool.category);
+              const isBookmarked = bookmarks.includes(tool.name);
+              const isComparing = compareList.includes(tool.name);
               return (
                 <Card 
                   key={index} 
-                  className="group hover:border-primary/50 transition-all duration-300 hover:shadow-lg flex flex-col"
+                  className={`group hover:border-primary/50 transition-all duration-300 hover:shadow-lg flex flex-col ${isComparing ? "ring-2 ring-primary" : ""}`}
                 >
                   <CardHeader className="pb-2">
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-lg ${categoryColor}`}>
-                        <CategoryIcon className="h-5 w-5" />
+                    <div className="flex items-start gap-2">
+                      <div className={`p-2 rounded-lg ${categoryColor} shrink-0`}>
+                        <CategoryIcon className="h-4 w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-base truncate">{tool.name}</CardTitle>
+                        <CardTitle className="text-sm truncate">{tool.name}</CardTitle>
                         {tool.rating && (
                           <div className="flex items-center gap-1 mt-0.5">
                             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -499,18 +720,40 @@ const AITools = () => {
                           </div>
                         )}
                       </div>
+                      <div className="flex gap-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => toggleBookmark(tool.name)}
+                        >
+                          <Heart className={`h-4 w-4 ${isBookmarked ? "fill-red-500 text-red-500" : ""}`} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => toggleCompare(tool.name)}
+                        >
+                          {isComparing ? (
+                            <Check className="h-4 w-4 text-primary" />
+                          ) : (
+                            <GitCompare className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="flex-1 flex flex-col">
+                  <CardContent className="flex-1 flex flex-col pt-0">
                     <div className="mb-2">
                       {getPricingBadge(tool.pricing, tool.trialCredits)}
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2 flex-1">
+                    <p className="text-xs text-muted-foreground mb-2 line-clamp-2 flex-1">
                       {tool.description}
                     </p>
-                    <div className="flex flex-wrap gap-1 mb-3">
+                    <div className="flex flex-wrap gap-1 mb-2">
                       {tool.features.slice(0, 2).map((feature, i) => (
-                        <Badge key={i} variant="outline" className="text-xs">
+                        <Badge key={i} variant="outline" className="text-[10px] px-1.5 py-0">
                           {feature}
                         </Badge>
                       ))}
@@ -518,11 +761,11 @@ const AITools = () => {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                      className="w-full h-8 text-xs group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
                       onClick={() => window.open(tool.url, "_blank")}
                     >
                       Visit
-                      <ExternalLink className="h-3 w-3 ml-1.5" />
+                      <ExternalLink className="h-3 w-3 ml-1" />
                     </Button>
                   </CardContent>
                 </Card>
@@ -534,36 +777,60 @@ const AITools = () => {
             {filteredTools.map((tool, index) => {
               const CategoryIcon = getCategoryIcon(tool.category);
               const categoryColor = getCategoryColor(tool.category);
+              const isBookmarked = bookmarks.includes(tool.name);
+              const isComparing = compareList.includes(tool.name);
               return (
-                <Card key={index} className="hover:border-primary/50 transition-all">
-                  <div className="flex items-center gap-4 p-4">
+                <Card key={index} className={`hover:border-primary/50 transition-all ${isComparing ? "ring-2 ring-primary" : ""}`}>
+                  <div className="flex items-center gap-3 p-3">
                     <div className={`p-2 rounded-lg ${categoryColor} shrink-0`}>
-                      <CategoryIcon className="h-5 w-5" />
+                      <CategoryIcon className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold truncate">{tool.name}</h3>
+                        <h3 className="font-semibold text-sm truncate">{tool.name}</h3>
                         {tool.rating && (
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5">
                             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                             <span className="text-xs text-muted-foreground">{tool.rating}</span>
                           </div>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">{tool.description}</p>
+                      <p className="text-xs text-muted-foreground truncate">{tool.description}</p>
                     </div>
                     <div className="hidden sm:block shrink-0">
                       {getPricingBadge(tool.pricing)}
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="shrink-0"
-                      onClick={() => window.open(tool.url, "_blank")}
-                    >
-                      Visit
-                      <ExternalLink className="h-3 w-3 ml-1.5" />
-                    </Button>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => toggleBookmark(tool.name)}
+                      >
+                        <Heart className={`h-4 w-4 ${isBookmarked ? "fill-red-500 text-red-500" : ""}`} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => toggleCompare(tool.name)}
+                      >
+                        {isComparing ? (
+                          <Check className="h-4 w-4 text-primary" />
+                        ) : (
+                          <GitCompare className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="h-8"
+                        onClick={() => window.open(tool.url, "_blank")}
+                      >
+                        Visit
+                        <ExternalLink className="h-3 w-3 ml-1" />
+                      </Button>
+                    </div>
                   </div>
                 </Card>
               );
@@ -573,56 +840,176 @@ const AITools = () => {
 
         {/* No Results */}
         {filteredTools.length === 0 && (
-          <div className="text-center py-16">
+          <div className="text-center py-12">
             <div className="p-4 rounded-full bg-muted inline-block mb-4">
-              <Search className="h-8 w-8 text-muted-foreground" />
+              {showBookmarks ? (
+                <Heart className="h-8 w-8 text-muted-foreground" />
+              ) : (
+                <Search className="h-8 w-8 text-muted-foreground" />
+              )}
             </div>
-            <h3 className="text-lg font-semibold mb-2">No tools found</h3>
-            <p className="text-muted-foreground mb-4">Try adjusting your search or filters</p>
+            <h3 className="text-lg font-semibold mb-2">
+              {showBookmarks ? "No favorites yet" : "No tools found"}
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              {showBookmarks ? "Click the heart icon to save tools" : "Try adjusting your filters"}
+            </p>
             <Button variant="outline" onClick={clearFilters}>
-              Clear all filters
+              {showBookmarks ? "Browse All Tools" : "Clear all filters"}
             </Button>
           </div>
         )}
 
         {/* Stats Section */}
-        <div className="mt-12 grid grid-cols-3 md:grid-cols-6 gap-3">
-          <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-primary mb-0.5">{aiTools.length}+</div>
-            <div className="text-xs text-muted-foreground">Total</div>
+        <div className="mt-10 grid grid-cols-3 md:grid-cols-6 gap-2">
+          <Card className="text-center p-3">
+            <div className="text-xl font-bold text-primary">{aiTools.length}+</div>
+            <div className="text-[10px] text-muted-foreground">Total</div>
           </Card>
-          <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-green-500 mb-0.5">
+          <Card className="text-center p-3">
+            <div className="text-xl font-bold text-green-500">
               {aiTools.filter(t => t.pricing === "free").length}
             </div>
-            <div className="text-xs text-muted-foreground">Free</div>
+            <div className="text-[10px] text-muted-foreground">Free</div>
           </Card>
-          <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-blue-500 mb-0.5">
+          <Card className="text-center p-3">
+            <div className="text-xl font-bold text-blue-500">
               {aiTools.filter(t => t.pricing === "freemium").length}
             </div>
-            <div className="text-xs text-muted-foreground">Freemium</div>
+            <div className="text-[10px] text-muted-foreground">Freemium</div>
           </Card>
-          <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-yellow-500 mb-0.5">
+          <Card className="text-center p-3">
+            <div className="text-xl font-bold text-yellow-500">
               {aiTools.filter(t => t.pricing === "trial").length}
             </div>
-            <div className="text-xs text-muted-foreground">Trial</div>
+            <div className="text-[10px] text-muted-foreground">Trial</div>
           </Card>
-          <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-purple-500 mb-0.5">
+          <Card className="text-center p-3">
+            <div className="text-xl font-bold text-purple-500">
               {aiTools.filter(t => t.pricing === "paid").length}
             </div>
-            <div className="text-xs text-muted-foreground">Paid</div>
+            <div className="text-[10px] text-muted-foreground">Paid</div>
           </Card>
-          <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-accent mb-0.5">
-              {categories.length - 1}
-            </div>
-            <div className="text-xs text-muted-foreground">Categories</div>
+          <Card className="text-center p-3">
+            <div className="text-xl font-bold text-accent">{categories.length - 1}</div>
+            <div className="text-[10px] text-muted-foreground">Categories</div>
           </Card>
         </div>
       </div>
+
+      {/* Compare Dialog */}
+      <Dialog open={showCompareDialog} onOpenChange={setShowCompareDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <GitCompare className="h-5 w-5" />
+              Compare AI Tools ({compareList.length}/4)
+            </DialogTitle>
+            <DialogDescription>
+              Compare features, pricing, and ratings side by side
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh]">
+            {compareTools.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Select tools to compare using the compare icon</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-3 font-medium">Feature</th>
+                      {compareTools.map(tool => (
+                        <th key={tool.name} className="text-left p-3 min-w-[150px]">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold">{tool.name}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => toggleCompare(tool.name)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Category</td>
+                      {compareTools.map(tool => (
+                        <td key={tool.name} className="p-3">{getCategoryName(tool.category)}</td>
+                      ))}
+                    </tr>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Pricing</td>
+                      {compareTools.map(tool => (
+                        <td key={tool.name} className="p-3">
+                          {getPricingBadge(tool.pricing, tool.trialCredits)}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Rating</td>
+                      {compareTools.map(tool => (
+                        <td key={tool.name} className="p-3">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span>{tool.rating || "N/A"}</span>
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Description</td>
+                      {compareTools.map(tool => (
+                        <td key={tool.name} className="p-3 text-muted-foreground">{tool.description}</td>
+                      ))}
+                    </tr>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Features</td>
+                      {compareTools.map(tool => (
+                        <td key={tool.name} className="p-3">
+                          <div className="flex flex-wrap gap-1">
+                            {tool.features.map((f, i) => (
+                              <Badge key={i} variant="outline" className="text-xs">{f}</Badge>
+                            ))}
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-medium">Link</td>
+                      {compareTools.map(tool => (
+                        <td key={tool.name} className="p-3">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => window.open(tool.url, "_blank")}
+                          >
+                            Visit <ExternalLink className="h-3 w-3 ml-1" />
+                          </Button>
+                        </td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </ScrollArea>
+          <div className="flex justify-end gap-2 pt-4 border-t">
+            <Button variant="outline" onClick={() => setCompareList([])}>
+              Clear All
+            </Button>
+            <Button onClick={() => setShowCompareDialog(false)}>
+              Done
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
