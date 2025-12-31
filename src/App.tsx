@@ -34,6 +34,7 @@ import AdminMaterials from "./pages/admin/AdminMaterials";
 import AdminMaterialPurchases from "./pages/admin/AdminMaterialPurchases";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminActivityLogs from "./pages/admin/AdminActivityLogs";
 import AdminCommunity from "./pages/admin/AdminCommunity";
 import AdminSEO from "./pages/admin/AdminSEO";
 import MyPurchases from "./pages/MyPurchases";
@@ -176,6 +177,14 @@ const App = () => (
                 element={
                   <AdminProtectedRoute>
                     <AdminAnalytics />
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/activity-logs"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminActivityLogs />
                   </AdminProtectedRoute>
                 }
               />
