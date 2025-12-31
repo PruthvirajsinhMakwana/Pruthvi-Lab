@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { logActivity } from "@/hooks/useActivityLog";
 
 interface AuthContextType {
   user: User | null;
@@ -28,6 +29,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Log auth events (deferred to avoid deadlock)
+        if (session?.user) {
+          setTimeout(() => {
+            if (event === 'SIGNED_IN') {
+              logActivity({ userId: session.user.id, actionType: 'login' });
+            } else if (event === 'SIGNED_OUT') {
+              // User is signing out
+            }
+          }, 0);
+        }
       }
     );
 
@@ -96,6 +108,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    if (user) {
+      await logActivity({ userId: user.id, actionType: 'logout' });
+    }
     await supabase.auth.signOut();
   };
 

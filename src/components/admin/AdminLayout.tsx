@@ -15,6 +15,7 @@ import {
   Package,
   Shield,
   CreditCard,
+  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { name: "Activity Logs", href: "/admin/activity-logs", icon: Activity, adminOnly: true },
   { name: "Blog Posts", href: "/admin/blogs", icon: FileText },
   { name: "Tutorials", href: "/admin/tutorials", icon: BookOpen },
   { name: "Tutorial Purchases", href: "/admin/tutorial-purchases", icon: CreditCard },
