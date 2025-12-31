@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ContentTable } from "@/components/admin/ContentTable";
 import { TutorialEditor } from "@/components/admin/TutorialEditor";
+import { AITutorialGenerator } from "@/components/admin/AITutorialGenerator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,6 +19,20 @@ import {
 import { useTutorials, useTutorialMutations, type Tutorial } from "@/hooks/useTutorials";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface GeneratedTutorial {
+  title: string;
+  slug: string;
+  description: string;
+  difficulty: string;
+  estimated_minutes: number;
+  tags: string[];
+  steps: Array<{
+    title: string;
+    content: string;
+    code_example: string;
+  }>;
+}
+
 export default function AdminTutorials() {
   const { user } = useAuth();
   const { data: tutorials, isLoading } = useTutorials({ authorId: user?.id });
@@ -27,9 +42,17 @@ export default function AdminTutorials() {
   const [selectedTutorial, setSelectedTutorial] = useState<Tutorial | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [tutorialToDelete, setTutorialToDelete] = useState<Tutorial | null>(null);
+  const [aiGeneratedData, setAiGeneratedData] = useState<GeneratedTutorial | null>(null);
 
   const handleCreate = () => {
     setSelectedTutorial(null);
+    setAiGeneratedData(null);
+    setEditorOpen(true);
+  };
+
+  const handleAIGenerated = (data: GeneratedTutorial) => {
+    setSelectedTutorial(null);
+    setAiGeneratedData(data);
     setEditorOpen(true);
   };
 
@@ -106,7 +129,8 @@ export default function AdminTutorials() {
 
   return (
     <AdminLayout title="Tutorials" description="Create step-by-step learning content">
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-end gap-2 mb-6">
+        <AITutorialGenerator onGenerated={handleAIGenerated} />
         <Button onClick={handleCreate}>
           <Plus className="h-4 w-4 mr-2" />
           New Tutorial
@@ -143,8 +167,40 @@ export default function AdminTutorials() {
 
       <TutorialEditor
         open={editorOpen}
-        onOpenChange={setEditorOpen}
-        tutorial={selectedTutorial}
+        onOpenChange={(open) => {
+          setEditorOpen(open);
+          if (!open) setAiGeneratedData(null);
+        }}
+        tutorial={selectedTutorial || (aiGeneratedData ? {
+          id: "",
+          author_id: user?.id || "",
+          title: aiGeneratedData.title,
+          slug: aiGeneratedData.slug,
+          description: aiGeneratedData.description,
+          difficulty: aiGeneratedData.difficulty as "beginner" | "intermediate" | "advanced",
+          estimated_minutes: aiGeneratedData.estimated_minutes,
+          featured_image: null,
+          external_link: null,
+          is_paid: false,
+          price: null,
+          upi_id: null,
+          qr_code_url: null,
+          published: false,
+          published_at: null,
+          tags: aiGeneratedData.tags,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          steps: aiGeneratedData.steps.map((s, i) => ({
+            id: `temp-${i}`,
+            tutorial_id: "",
+            step_order: i + 1,
+            title: s.title,
+            content: s.content,
+            code_example: s.code_example,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })),
+        } : null)}
         onSave={handleSave}
         isLoading={createTutorial.isPending || updateTutorial.isPending}
       />

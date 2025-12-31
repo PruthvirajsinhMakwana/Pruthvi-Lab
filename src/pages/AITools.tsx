@@ -68,6 +68,8 @@ type AITool = {
   url: string;
   features: string[];
   rating?: number;
+  isNew?: boolean;
+  isTrending?: boolean;
 };
 
 const categories = [
@@ -94,13 +96,27 @@ const pricingFilters = [
   { id: "paid", name: "Paid", icon: DollarSign },
 ];
 
+const statusFilters = [
+  { id: "all", name: "All Tools" },
+  { id: "new", name: "🆕 New" },
+  { id: "trending", name: "🔥 Trending" },
+  { id: "top-rated", name: "⭐ Top Rated (4.5+)" },
+];
+
+const ratingFilters = [
+  { id: "all", name: "All Ratings" },
+  { id: "4.5", name: "4.5+ ⭐⭐⭐⭐⭐" },
+  { id: "4.0", name: "4.0+ ⭐⭐⭐⭐" },
+  { id: "3.5", name: "3.5+ ⭐⭐⭐" },
+];
+
 const aiTools: AITool[] = [
   // ==================== IMAGE GENERATION (80+ tools) ====================
-  { name: "Midjourney", description: "Premium AI art generator with stunning artistic styles", category: "image", pricing: "paid", url: "https://midjourney.com", features: ["Artistic styles", "High quality", "Discord based"], rating: 4.9 },
-  { name: "DALL-E 3", description: "OpenAI's latest image generator with excellent prompt understanding", category: "image", pricing: "freemium", trialCredits: "15 free credits/month", url: "https://openai.com/dall-e-3", features: ["Text in images", "Precise prompts", "ChatGPT integration"], rating: 4.8 },
+  { name: "Midjourney", description: "Premium AI art generator with stunning artistic styles", category: "image", pricing: "paid", url: "https://midjourney.com", features: ["Artistic styles", "High quality", "Discord based"], rating: 4.9, isTrending: true },
+  { name: "DALL-E 3", description: "OpenAI's latest image generator with excellent prompt understanding", category: "image", pricing: "freemium", trialCredits: "15 free credits/month", url: "https://openai.com/dall-e-3", features: ["Text in images", "Precise prompts", "ChatGPT integration"], rating: 4.8, isTrending: true },
   { name: "Stable Diffusion", description: "Open-source image generation you can run locally", category: "image", pricing: "free", url: "https://stability.ai", features: ["Open source", "Local running", "Customizable"], rating: 4.7 },
-  { name: "Leonardo.AI", description: "AI image generation with fine-tuned models for games & design", category: "image", pricing: "freemium", trialCredits: "150 tokens/day free", url: "https://leonardo.ai", features: ["Game assets", "Fine-tuning", "Canvas editor"], rating: 4.6 },
-  { name: "Ideogram", description: "AI that excels at generating text within images", category: "image", pricing: "freemium", trialCredits: "25 free/day", url: "https://ideogram.ai", features: ["Text generation", "Logos", "Typography"], rating: 4.5 },
+  { name: "Leonardo.AI", description: "AI image generation with fine-tuned models for games & design", category: "image", pricing: "freemium", trialCredits: "150 tokens/day free", url: "https://leonardo.ai", features: ["Game assets", "Fine-tuning", "Canvas editor"], rating: 4.6, isNew: true },
+  { name: "Ideogram", description: "AI that excels at generating text within images", category: "image", pricing: "freemium", trialCredits: "25 free/day", url: "https://ideogram.ai", features: ["Text generation", "Logos", "Typography"], rating: 4.5, isNew: true },
   { name: "Playground AI", description: "Free AI image generator with mixed styles", category: "image", pricing: "freemium", trialCredits: "500 free/day", url: "https://playground.ai", features: ["Mixed styles", "Editing tools", "Community"], rating: 4.4 },
   { name: "Adobe Firefly", description: "Adobe's AI image generator integrated with Creative Cloud", category: "image", pricing: "freemium", trialCredits: "25 credits/month free", url: "https://firefly.adobe.com", features: ["Adobe integration", "Commercial safe", "Style transfer"], rating: 4.6 },
   { name: "Canva AI", description: "AI image generation built into Canva's design platform", category: "image", pricing: "freemium", trialCredits: "50 uses/month free", url: "https://canva.com", features: ["Design integration", "Easy to use", "Templates"], rating: 4.5 },
@@ -118,10 +134,10 @@ const aiTools: AITool[] = [
   { name: "Deep Dream Generator", description: "Trippy psychedelic AI art generator", category: "image", pricing: "freemium", trialCredits: "3 free/day", url: "https://deepdreamgenerator.com", features: ["Psychedelic", "Deep style", "Art styles"], rating: 4.1 },
   { name: "Getimg.ai", description: "AI image generation with custom models", category: "image", pricing: "freemium", trialCredits: "100 free credits", url: "https://getimg.ai", features: ["Custom models", "Outpainting", "Real-time"], rating: 4.4 },
   { name: "Clipdrop", description: "AI image tools suite by Stability AI", category: "image", pricing: "freemium", trialCredits: "Basic free", url: "https://clipdrop.co", features: ["Background removal", "Relight", "Cleanup"], rating: 4.5 },
-  { name: "Flux AI", description: "State-of-the-art open source image generation model", category: "image", pricing: "freemium", trialCredits: "Free tier available", url: "https://blackforestlabs.ai", features: ["High quality", "Open source", "Fast generation"], rating: 4.8 },
-  { name: "Recraft AI", description: "AI design tool for professional vector graphics", category: "image", pricing: "freemium", trialCredits: "Free tier", url: "https://recraft.ai", features: ["Vector graphics", "Illustrations", "Icons"], rating: 4.5 },
-  { name: "Krea AI", description: "Real-time AI image generation and enhancement", category: "image", pricing: "freemium", trialCredits: "Free tier", url: "https://krea.ai", features: ["Real-time", "Upscaling", "Enhancement"], rating: 4.6 },
-  { name: "Magnific AI", description: "AI image upscaler with incredible detail", category: "image", pricing: "paid", url: "https://magnific.ai", features: ["Upscaling", "Detail enhancement", "Reimagine"], rating: 4.7 },
+  { name: "Flux AI", description: "State-of-the-art open source image generation model", category: "image", pricing: "freemium", trialCredits: "Free tier available", url: "https://blackforestlabs.ai", features: ["High quality", "Open source", "Fast generation"], rating: 4.8, isNew: true, isTrending: true },
+  { name: "Recraft AI", description: "AI design tool for professional vector graphics", category: "image", pricing: "freemium", trialCredits: "Free tier", url: "https://recraft.ai", features: ["Vector graphics", "Illustrations", "Icons"], rating: 4.5, isNew: true },
+  { name: "Krea AI", description: "Real-time AI image generation and enhancement", category: "image", pricing: "freemium", trialCredits: "Free tier", url: "https://krea.ai", features: ["Real-time", "Upscaling", "Enhancement"], rating: 4.6, isNew: true, isTrending: true },
+  { name: "Magnific AI", description: "AI image upscaler with incredible detail", category: "image", pricing: "paid", url: "https://magnific.ai", features: ["Upscaling", "Detail enhancement", "Reimagine"], rating: 4.7, isTrending: true },
   { name: "Topaz Labs", description: "AI-powered photo and video enhancement suite", category: "image", pricing: "paid", url: "https://topazlabs.com", features: ["Photo AI", "Video AI", "Gigapixel"], rating: 4.6 },
   { name: "Facet AI", description: "AI-powered photo editing for professionals", category: "image", pricing: "freemium", trialCredits: "Free tier", url: "https://facet.ai", features: ["Auto masking", "Batch editing", "Professional"], rating: 4.4 },
   { name: "Runway Inpainting", description: "AI-powered image inpainting and editing", category: "image", pricing: "freemium", trialCredits: "125 credits free", url: "https://runway.ml", features: ["Inpainting", "Object removal", "Generative fill"], rating: 4.6 },
@@ -609,6 +625,8 @@ const AITools = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedPricing, setSelectedPricing] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedRating, setSelectedRating] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState<"rating" | "name" | "pricing">("rating");
   const [bookmarks, setBookmarks] = useState<string[]>([]);
@@ -661,7 +679,12 @@ const AITools = () => {
       const matchesCategory = selectedCategory === "all" || tool.category === selectedCategory;
       const matchesPricing = selectedPricing === "all" || tool.pricing === selectedPricing;
       const matchesBookmarks = !showBookmarks || bookmarks.includes(tool.name);
-      return matchesSearch && matchesCategory && matchesPricing && matchesBookmarks;
+      const matchesStatus = selectedStatus === "all" || 
+        (selectedStatus === "new" && tool.isNew) ||
+        (selectedStatus === "trending" && tool.isTrending) ||
+        (selectedStatus === "top-rated" && (tool.rating || 0) >= 4.5);
+      const matchesRating = selectedRating === "all" || (tool.rating || 0) >= parseFloat(selectedRating);
+      return matchesSearch && matchesCategory && matchesPricing && matchesBookmarks && matchesStatus && matchesRating;
     });
 
     tools.sort((a, b) => {
@@ -675,7 +698,7 @@ const AITools = () => {
     });
 
     return tools;
-  }, [searchQuery, selectedCategory, selectedPricing, sortBy, showBookmarks, bookmarks]);
+  }, [searchQuery, selectedCategory, selectedPricing, sortBy, showBookmarks, bookmarks, selectedStatus, selectedRating]);
 
   const compareTools = useMemo(() => 
     aiTools.filter(t => compareList.includes(t.name)),
@@ -717,10 +740,12 @@ const AITools = () => {
     setSearchQuery("");
     setSelectedCategory("all");
     setSelectedPricing("all");
+    setSelectedStatus("all");
+    setSelectedRating("all");
     setShowBookmarks(false);
   };
 
-  const hasActiveFilters = searchQuery || selectedCategory !== "all" || selectedPricing !== "all" || showBookmarks;
+  const hasActiveFilters = searchQuery || selectedCategory !== "all" || selectedPricing !== "all" || showBookmarks || selectedStatus !== "all" || selectedRating !== "all";
 
   const getCategoryName = (categoryId: string) => {
     return categories.find(c => c.id === categoryId)?.name || categoryId;
