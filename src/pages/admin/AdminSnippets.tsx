@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ContentTable } from "@/components/admin/ContentTable";
 import { SnippetEditor } from "@/components/admin/SnippetEditor";
+import { AISnippetGenerator } from "@/components/admin/AISnippetGenerator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,6 +19,14 @@ import {
 import { useCodeSnippets, useCodeSnippetMutations, type CodeSnippet } from "@/hooks/useCodeSnippets";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface GeneratedSnippet {
+  title: string;
+  description: string;
+  language: string;
+  code: string;
+  tags: string[];
+}
+
 export default function AdminSnippets() {
   const { user } = useAuth();
   const { data: snippets, isLoading } = useCodeSnippets({ authorId: user?.id });
@@ -27,9 +36,17 @@ export default function AdminSnippets() {
   const [selectedSnippet, setSelectedSnippet] = useState<CodeSnippet | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [snippetToDelete, setSnippetToDelete] = useState<CodeSnippet | null>(null);
+  const [aiGeneratedData, setAiGeneratedData] = useState<GeneratedSnippet | null>(null);
 
   const handleCreate = () => {
     setSelectedSnippet(null);
+    setAiGeneratedData(null);
+    setEditorOpen(true);
+  };
+
+  const handleAIGenerated = (data: GeneratedSnippet) => {
+    setSelectedSnippet(null);
+    setAiGeneratedData(data);
     setEditorOpen(true);
   };
 
@@ -69,7 +86,8 @@ export default function AdminSnippets() {
 
   return (
     <AdminLayout title="Code Snippets" description="Share reusable code examples">
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-end gap-2 mb-6">
+        <AISnippetGenerator onGenerated={handleAIGenerated} />
         <Button onClick={handleCreate}>
           <Plus className="h-4 w-4 mr-2" />
           New Snippet
@@ -101,8 +119,24 @@ export default function AdminSnippets() {
 
       <SnippetEditor
         open={editorOpen}
-        onOpenChange={setEditorOpen}
-        snippet={selectedSnippet}
+        onOpenChange={(open) => {
+          setEditorOpen(open);
+          if (!open) setAiGeneratedData(null);
+        }}
+        snippet={selectedSnippet || (aiGeneratedData ? {
+          id: "",
+          author_id: user?.id || "",
+          title: aiGeneratedData.title,
+          description: aiGeneratedData.description,
+          code: aiGeneratedData.code,
+          language: aiGeneratedData.language,
+          tags: aiGeneratedData.tags,
+          published: false,
+          preview_image: null,
+          custom_link: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } : null)}
         onSave={handleSave}
         isLoading={createSnippet.isPending || updateSnippet.isPending}
       />
