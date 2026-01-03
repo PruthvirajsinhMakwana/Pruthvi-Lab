@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -56,6 +57,8 @@ import {
   CheckCircle,
   UserX,
   AlertTriangle,
+  Send,
+  Copy,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -83,6 +86,13 @@ export default function AdminUsers() {
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [isBanDialogOpen, setIsBanDialogOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
+  
+  // Bulk email state
+  const [isBulkEmailDialogOpen, setIsBulkEmailDialogOpen] = useState(false);
+  const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailContent, setEmailContent] = useState("");
+  const [selectAll, setSelectAll] = useState(false);
 
   // Fetch all users with their roles and ban status
   const { data: users, isLoading } = useQuery({
@@ -218,6 +228,35 @@ export default function AdminUsers() {
     },
   });
 
+  // Bulk email mutation
+  const bulkEmailMutation = useMutation({
+    mutationFn: async ({ emails, subject, htmlContent }: { emails: string[]; subject: string; htmlContent: string }) => {
+      const { data, error } = await supabase.functions.invoke("send-bulk-email", {
+        body: { emails, subject, htmlContent },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Bulk email sent",
+        description: `Successfully sent to ${data.success} users. ${data.failed > 0 ? `Failed: ${data.failed}` : ""}`,
+      });
+      setIsBulkEmailDialogOpen(false);
+      setSelectedEmails([]);
+      setEmailSubject("");
+      setEmailContent("");
+      setSelectAll(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send bulk email.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const filteredUsers = users?.filter((user) => {
     const matchesSearch =
       user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -295,6 +334,68 @@ export default function AdminUsers() {
     unbanUserMutation.mutate(userId);
   };
 
+  const toggleEmailSelection = (email: string) => {
+    setSelectedEmails(prev => 
+      prev.includes(email) 
+        ? prev.filter(e => e !== email)
+        : [...prev, email]
+    );
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    setSelectAll(checked);
+    if (checked) {
+      const allEmails = filteredUsers?.filter(u => u.email).map(u => u.email!) || [];
+      setSelectedEmails(allEmails);
+    } else {
+      setSelectedEmails([]);
+    }
+  };
+
+  const copyAllEmails = () => {
+    const emails = users?.filter(u => u.email).map(u => u.email).join(", ") || "";
+    navigator.clipboard.writeText(emails);
+    toast({
+      title: "Copied!",
+      description: `${users?.filter(u => u.email).length || 0} emails copied to clipboard.`,
+    });
+  };
+
+  const handleSendBulkEmail = () => {
+    if (selectedEmails.length === 0) {
+      toast({
+        title: "No recipients",
+        description: "Please select at least one user to send email.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!emailSubject.trim() || !emailContent.trim()) {
+      toast({
+        title: "Missing content",
+        description: "Please enter subject and email content.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Wrap content in basic HTML if not already
+    const htmlContent = emailContent.includes("<") 
+      ? emailContent 
+      : `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #333;">${emailSubject}</h2>
+          <div style="color: #555; line-height: 1.6;">${emailContent.replace(/\n/g, "<br>")}</div>
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+          <p style="color: #888; font-size: 12px;">This email was sent from CodeNest Admin.</p>
+        </div>`;
+
+    bulkEmailMutation.mutate({ 
+      emails: selectedEmails, 
+      subject: emailSubject, 
+      htmlContent 
+    });
+  };
+
   const stats = {
     total: users?.length || 0,
     admins: users?.filter((u) => u.role === "admin" || u.role === "super_admin").length || 0,
@@ -303,7 +404,7 @@ export default function AdminUsers() {
   };
 
   return (
-    <AdminLayout title="User Management" description="View all registered users, manage roles and ban status">
+    <AdminLayout title="User Management" description="View all registered users, manage roles and send bulk emails">
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4 mb-6">
         <Card>
@@ -352,6 +453,32 @@ export default function AdminUsers() {
         </Card>
       </div>
 
+      {/* Bulk Email Action */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <Button 
+          onClick={() => setIsBulkEmailDialogOpen(true)}
+          className="gap-2"
+          disabled={!users || users.length === 0}
+        >
+          <Send className="h-4 w-4" />
+          Send Bulk Email
+        </Button>
+        <Button 
+          variant="outline" 
+          onClick={copyAllEmails}
+          className="gap-2"
+          disabled={!users || users.length === 0}
+        >
+          <Copy className="h-4 w-4" />
+          Copy All Emails
+        </Button>
+        {selectedEmails.length > 0 && (
+          <Badge variant="secondary" className="py-2">
+            {selectedEmails.length} selected
+          </Badge>
+        )}
+      </div>
+
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
@@ -398,6 +525,12 @@ export default function AdminUsers() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox 
+                        checked={selectAll}
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead>User</TableHead>
                     <TableHead className="hidden md:table-cell">Email</TableHead>
                     <TableHead>Role</TableHead>
@@ -410,6 +543,13 @@ export default function AdminUsers() {
                   {filteredUsers && filteredUsers.length > 0 ? (
                     filteredUsers.map((user) => (
                       <TableRow key={user.id} className={user.isBanned ? "bg-red-500/5" : ""}>
+                        <TableCell>
+                          <Checkbox 
+                            checked={user.email ? selectedEmails.includes(user.email) : false}
+                            onCheckedChange={() => user.email && toggleEmailSelection(user.email)}
+                            disabled={!user.email}
+                          />
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
@@ -499,7 +639,7 @@ export default function AdminUsers() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                         No users found
                       </TableCell>
                     </TableRow>
@@ -584,6 +724,79 @@ export default function AdminUsers() {
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               )}
               Ban User
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Email Dialog */}
+      <Dialog open={isBulkEmailDialogOpen} onOpenChange={setIsBulkEmailDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Send Bulk Email
+            </DialogTitle>
+            <DialogDescription>
+              Send an email to {selectedEmails.length > 0 ? `${selectedEmails.length} selected users` : "all users"}. 
+              Select users from the table or send to all.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Badge variant="outline">
+                {selectedEmails.length > 0 ? selectedEmails.length : users?.filter(u => u.email).length || 0} recipients
+              </Badge>
+              {selectedEmails.length === 0 && (
+                <span className="text-xs">(Will send to all users if none selected)</span>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email-subject">Subject *</Label>
+              <Input
+                id="email-subject"
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                placeholder="Enter email subject..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email-content">Email Content *</Label>
+              <Textarea
+                id="email-content"
+                value={emailContent}
+                onChange={(e) => setEmailContent(e.target.value)}
+                placeholder="Enter your email message... (HTML supported)"
+                rows={8}
+              />
+              <p className="text-xs text-muted-foreground">
+                You can use plain text or HTML. Plain text will be automatically formatted.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsBulkEmailDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                // If no emails selected, use all user emails
+                if (selectedEmails.length === 0) {
+                  const allEmails = users?.filter(u => u.email).map(u => u.email!) || [];
+                  setSelectedEmails(allEmails);
+                  setTimeout(handleSendBulkEmail, 100);
+                } else {
+                  handleSendBulkEmail();
+                }
+              }} 
+              disabled={bulkEmailMutation.isPending}
+              className="gap-2"
+            >
+              {bulkEmailMutation.isPending && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+              <Send className="h-4 w-4" />
+              Send Email
             </Button>
           </DialogFooter>
         </DialogContent>
