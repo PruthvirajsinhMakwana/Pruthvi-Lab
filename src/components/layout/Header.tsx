@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Sun, Moon, User, LogOut, Settings, Bookmark, LayoutDashboard, ChevronDown, BookOpen, Code, FileText, Package, Users, ShoppingBag, Bot, Sparkles } from "lucide-react";
+import { Menu, X, Sun, Moon, User, LogOut, Settings, Bookmark, LayoutDashboard, ChevronDown, BookOpen, Code, FileText, Package, Users, ShoppingBag, Bot, Sparkles, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -257,11 +257,18 @@ export function Header() {
                 </Button>
               </div>
               {/* Mobile Auth Button - Show login icon on mobile */}
-              <Button variant="ghost" size="icon" className="sm:hidden h-9 w-9" asChild>
-                <Link to="/auth">
-                  <User className="h-5 w-5" />
-                </Link>
-              </Button>
+              <div className="flex items-center gap-1 sm:hidden">
+                <Button variant="ghost" size="icon" className="h-9 w-9" asChild>
+                  <Link to="/chat">
+                    <MessageCircle className="h-5 w-5 text-primary" />
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9" asChild>
+                  <Link to="/auth">
+                    <User className="h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
             </>
           )}
 

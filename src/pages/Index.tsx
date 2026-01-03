@@ -407,13 +407,21 @@ const Index = () => {
                   </li>
                 ))}
               </ul>
-              <Button size="lg" className="bg-gradient-primary hover:opacity-90 group" asChild>
-                <Link to="/ai-assistant">
-                  <Bot className="mr-2 h-5 w-5" />
-                  Try AI Assistant
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button size="lg" className="bg-gradient-primary hover:opacity-90 group" asChild>
+                  <Link to="/chat">
+                    <Bot className="mr-2 h-5 w-5" />
+                    Start Chat
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" className="border-primary/30 hover:bg-primary/5" asChild>
+                  <Link to="/ai-assistant">
+                    <MessageCircle className="mr-2 h-5 w-5" />
+                    Open Assistant
+                  </Link>
+                </Button>
+              </div>
             </div>
             <div className="relative animate-fade-in-up stagger-2">
               <div className="absolute inset-0 bg-gradient-primary rounded-2xl blur-3xl opacity-20" />
