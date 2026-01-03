@@ -25,6 +25,7 @@ import Materials from "./pages/Materials";
 import Community from "./pages/Community";
 import AIAssistant from "./pages/AIAssistant";
 import AITools from "./pages/AITools";
+import FullscreenChat from "./pages/FullscreenChat";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminBlogs from "./pages/admin/AdminBlogs";
 import AdminTutorials from "./pages/admin/AdminTutorials";
@@ -107,6 +108,7 @@ const App = () => (
               <Route path="/community" element={<Community />} />
               <Route path="/ai-assistant" element={<AIAssistant />} />
               <Route path="/ai-tools" element={<AITools />} />
+              <Route path="/chat" element={<FullscreenChat />} />
               {/* Admin Routes */}
               <Route
                 path="/admin"
