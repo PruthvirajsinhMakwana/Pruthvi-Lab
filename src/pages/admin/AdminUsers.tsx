@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -59,6 +60,14 @@ import {
   AlertTriangle,
   Send,
   Copy,
+  Key,
+  Activity,
+  Globe,
+  Monitor,
+  Eye,
+  EyeOff,
+  ShieldAlert,
+  Clock,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -71,6 +80,16 @@ interface UserWithRole {
   role: string;
   isBanned: boolean;
   banReason?: string | null;
+}
+
+interface ActivityLog {
+  id: string;
+  user_id: string;
+  action_type: string;
+  details: Record<string, unknown>;
+  ip_address: string | null;
+  user_agent: string | null;
+  created_at: string;
 }
 
 export default function AdminUsers() {
@@ -86,6 +105,15 @@ export default function AdminUsers() {
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [isBanDialogOpen, setIsBanDialogOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
+  
+  // Password reset state
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // Activity view state
+  const [isActivityDialogOpen, setIsActivityDialogOpen] = useState(false);
+  const [viewingUserActivity, setViewingUserActivity] = useState<UserWithRole | null>(null);
   
   // Bulk email state
   const [isBulkEmailDialogOpen, setIsBulkEmailDialogOpen] = useState(false);
@@ -130,6 +158,24 @@ export default function AdminUsers() {
 
       return usersWithRoles;
     },
+  });
+
+  // Fetch user activity logs
+  const { data: userActivity, isLoading: activityLoading } = useQuery({
+    queryKey: ["user-activity", viewingUserActivity?.id],
+    queryFn: async () => {
+      if (!viewingUserActivity) return [];
+      const { data, error } = await supabase
+        .from("user_activity_logs")
+        .select("*")
+        .eq("user_id", viewingUserActivity.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      
+      if (error) throw error;
+      return data as ActivityLog[];
+    },
+    enabled: !!viewingUserActivity,
   });
 
   // Update user role mutation
@@ -228,6 +274,34 @@ export default function AdminUsers() {
     },
   });
 
+  // Reset password mutation
+  const resetPasswordMutation = useMutation({
+    mutationFn: async ({ userId, newPassword }: { userId: string; newPassword: string }) => {
+      const { data, error } = await supabase.functions.invoke("admin-reset-password", {
+        body: { userId, newPassword },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password Reset",
+        description: "User password has been updated successfully.",
+      });
+      setIsPasswordDialogOpen(false);
+      setSelectedUser(null);
+      setNewPassword("");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reset password.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Bulk email mutation
   const bulkEmailMutation = useMutation({
     mutationFn: async ({ emails, subject, htmlContent }: { emails: string[]; subject: string; htmlContent: string }) => {
@@ -248,7 +322,7 @@ export default function AdminUsers() {
       setEmailContent("");
       setSelectAll(false);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message || "Failed to send bulk email.",
@@ -306,6 +380,27 @@ export default function AdminUsers() {
     }
   };
 
+  const getActionBadge = (actionType: string) => {
+    const config: Record<string, { color: string; label: string }> = {
+      login: { color: "bg-green-500/10 text-green-600", label: "Login" },
+      logout: { color: "bg-gray-500/10 text-gray-600", label: "Logout" },
+      signup: { color: "bg-blue-500/10 text-blue-600", label: "Signup" },
+      page_view: { color: "bg-purple-500/10 text-purple-600", label: "Page View" },
+      admin_password_reset: { color: "bg-red-500/10 text-red-600", label: "Password Reset" },
+    };
+    const { color, label } = config[actionType] || { color: "bg-gray-500/10 text-gray-600", label: actionType };
+    return <Badge className={color}>{label}</Badge>;
+  };
+
+  const getBrowserInfo = (userAgent: string | null) => {
+    if (!userAgent) return "Unknown";
+    if (userAgent.includes("Chrome")) return "Chrome";
+    if (userAgent.includes("Firefox")) return "Firefox";
+    if (userAgent.includes("Safari")) return "Safari";
+    if (userAgent.includes("Edge")) return "Edge";
+    return "Other";
+  };
+
   const openRoleDialog = (user: UserWithRole) => {
     setSelectedUser(user);
     setNewRole(user.role);
@@ -316,6 +411,18 @@ export default function AdminUsers() {
     setSelectedUser(user);
     setBanReason("");
     setIsBanDialogOpen(true);
+  };
+
+  const openPasswordDialog = (user: UserWithRole) => {
+    setSelectedUser(user);
+    setNewPassword("");
+    setShowPassword(false);
+    setIsPasswordDialogOpen(true);
+  };
+
+  const openActivityDialog = (user: UserWithRole) => {
+    setViewingUserActivity(user);
+    setIsActivityDialogOpen(true);
   };
 
   const handleRoleUpdate = () => {
@@ -332,6 +439,12 @@ export default function AdminUsers() {
 
   const handleUnbanUser = (userId: string) => {
     unbanUserMutation.mutate(userId);
+  };
+
+  const handleResetPassword = () => {
+    if (selectedUser && newPassword) {
+      resetPasswordMutation.mutate({ userId: selectedUser.id, newPassword });
+    }
   };
 
   const toggleEmailSelection = (email: string) => {
@@ -379,7 +492,6 @@ export default function AdminUsers() {
       return;
     }
 
-    // Wrap content in basic HTML if not already
     const htmlContent = emailContent.includes("<") 
       ? emailContent 
       : `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -404,7 +516,23 @@ export default function AdminUsers() {
   };
 
   return (
-    <AdminLayout title="User Management" description="View all registered users, manage roles and send bulk emails">
+    <AdminLayout title="User Management" description="Manage users, passwords, roles, and track activity">
+      {/* Security Notice */}
+      <Card className="mb-6 border-amber-500/30 bg-amber-500/5">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="h-5 w-5 text-amber-500 mt-0.5" />
+            <div>
+              <h4 className="font-medium text-amber-600">Security Information</h4>
+              <p className="text-sm text-muted-foreground">
+                Passwords are securely hashed and cannot be viewed. Admins can <strong>reset passwords</strong> for users who need access. 
+                All password resets are logged for security auditing.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4 mb-6">
         <Card>
@@ -453,7 +581,7 @@ export default function AdminUsers() {
         </Card>
       </div>
 
-      {/* Bulk Email Action */}
+      {/* Bulk Actions */}
       <div className="flex flex-wrap gap-2 mb-4">
         <Button 
           onClick={() => setIsBulkEmailDialogOpen(true)}
@@ -606,11 +734,21 @@ export default function AdminUsers() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => openActivityDialog(user)}>
+                                  <Activity className="h-4 w-4 mr-2" />
+                                  View Activity
+                                </DropdownMenuItem>
                                 {isSuperAdmin && (
-                                  <DropdownMenuItem onClick={() => openRoleDialog(user)}>
-                                    <Shield className="h-4 w-4 mr-2" />
-                                    Change Role
-                                  </DropdownMenuItem>
+                                  <>
+                                    <DropdownMenuItem onClick={() => openPasswordDialog(user)}>
+                                      <Key className="h-4 w-4 mr-2" />
+                                      Reset Password
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => openRoleDialog(user)}>
+                                      <Shield className="h-4 w-4 mr-2" />
+                                      Change Role
+                                    </DropdownMenuItem>
+                                  </>
                                 )}
                                 <DropdownMenuSeparator />
                                 {user.isBanned ? (
@@ -683,6 +821,127 @@ export default function AdminUsers() {
               Update Role
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password Reset Dialog */}
+      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              Reset Password
+            </DialogTitle>
+            <DialogDescription>
+              Set a new password for {selectedUser?.full_name || selectedUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <div className="relative">
+                <Input
+                  id="new-password"
+                  type={showPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password (min 6 characters)"
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                The user will need to use this password to log in. Share it securely.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPasswordDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleResetPassword} 
+              disabled={resetPasswordMutation.isPending || newPassword.length < 6}
+            >
+              {resetPasswordMutation.isPending && (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              )}
+              Reset Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Activity Dialog */}
+      <Dialog open={isActivityDialogOpen} onOpenChange={(open) => {
+        setIsActivityDialogOpen(open);
+        if (!open) setViewingUserActivity(null);
+      }}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              User Activity - {viewingUserActivity?.full_name || viewingUserActivity?.email}
+            </DialogTitle>
+            <DialogDescription>
+              View login history, IP addresses, and activity logs
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto">
+            {activityLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : userActivity && userActivity.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Action</TableHead>
+                    <TableHead>IP Address</TableHead>
+                    <TableHead>Browser</TableHead>
+                    <TableHead>Time</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {userActivity.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell>{getActionBadge(log.action_type)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Globe className="h-3 w-3 text-muted-foreground" />
+                          {log.ip_address || "Unknown"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Monitor className="h-3 w-3" />
+                          {getBrowserInfo(log.user_agent)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          {format(new Date(log.created_at), "MMM d, yyyy h:mm a")}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                No activity logs found for this user.
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -780,7 +1039,6 @@ export default function AdminUsers() {
             </Button>
             <Button 
               onClick={() => {
-                // If no emails selected, use all user emails
                 if (selectedEmails.length === 0) {
                   const allEmails = users?.filter(u => u.email).map(u => u.email!) || [];
                   setSelectedEmails(allEmails);
