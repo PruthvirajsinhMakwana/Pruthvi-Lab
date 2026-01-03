@@ -246,14 +246,23 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="hidden sm:flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/auth">Sign in</Link>
+            <>
+              {/* Desktop Auth Buttons */}
+              <div className="hidden sm:flex items-center gap-2">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/auth">Sign in</Link>
+                </Button>
+                <Button size="sm" className="bg-gradient-primary hover:opacity-90 transition-opacity" asChild>
+                  <Link to="/auth?mode=signup">Get Started</Link>
+                </Button>
+              </div>
+              {/* Mobile Auth Button - Show login icon on mobile */}
+              <Button variant="ghost" size="icon" className="sm:hidden h-9 w-9" asChild>
+                <Link to="/auth">
+                  <User className="h-5 w-5" />
+                </Link>
               </Button>
-              <Button size="sm" className="bg-gradient-primary hover:opacity-90 transition-opacity" asChild>
-                <Link to="/auth?mode=signup">Get Started</Link>
-              </Button>
-            </div>
+            </>
           )}
 
           {/* Mobile Menu Button - Always last for far-right position */}
