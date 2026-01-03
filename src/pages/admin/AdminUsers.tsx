@@ -44,6 +44,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { EmailTemplates } from "@/components/admin/EmailTemplates";
 import {
   Search,
   Users,
@@ -990,7 +991,7 @@ export default function AdminUsers() {
 
       {/* Bulk Email Dialog */}
       <Dialog open={isBulkEmailDialogOpen} onOpenChange={setIsBulkEmailDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Mail className="h-5 w-5" />
@@ -998,39 +999,53 @@ export default function AdminUsers() {
             </DialogTitle>
             <DialogDescription>
               Send an email to {selectedEmails.length > 0 ? `${selectedEmails.length} selected users` : "all users"}. 
-              Select users from the table or send to all.
+              Select users from the table or choose a template below.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4 space-y-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Badge variant="outline">
-                {selectedEmails.length > 0 ? selectedEmails.length : users?.filter(u => u.email).length || 0} recipients
-              </Badge>
-              {selectedEmails.length === 0 && (
-                <span className="text-xs">(Will send to all users if none selected)</span>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email-subject">Subject *</Label>
-              <Input
-                id="email-subject"
-                value={emailSubject}
-                onChange={(e) => setEmailSubject(e.target.value)}
-                placeholder="Enter email subject..."
+          <div className="py-4 space-y-6">
+            {/* Email Templates */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Quick Templates</Label>
+              <EmailTemplates 
+                onSelectTemplate={(subject, content) => {
+                  setEmailSubject(subject);
+                  setEmailContent(content);
+                }}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email-content">Email Content *</Label>
-              <Textarea
-                id="email-content"
-                value={emailContent}
-                onChange={(e) => setEmailContent(e.target.value)}
-                placeholder="Enter your email message... (HTML supported)"
-                rows={8}
-              />
-              <p className="text-xs text-muted-foreground">
-                You can use plain text or HTML. Plain text will be automatically formatted.
-              </p>
+
+            <div className="border-t pt-4 space-y-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Badge variant="outline">
+                  {selectedEmails.length > 0 ? selectedEmails.length : users?.filter(u => u.email).length || 0} recipients
+                </Badge>
+                {selectedEmails.length === 0 && (
+                  <span className="text-xs">(Will send to all users if none selected)</span>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email-subject">Subject *</Label>
+                <Input
+                  id="email-subject"
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  placeholder="Enter email subject..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email-content">Email Content *</Label>
+                <Textarea
+                  id="email-content"
+                  value={emailContent}
+                  onChange={(e) => setEmailContent(e.target.value)}
+                  placeholder="Enter your email message... (HTML supported)"
+                  rows={10}
+                  className="font-mono text-sm"
+                />
+                <p className="text-xs text-muted-foreground">
+                  You can use plain text or HTML. Plain text will be automatically formatted.
+                </p>
+              </div>
             </div>
           </div>
           <DialogFooter>
