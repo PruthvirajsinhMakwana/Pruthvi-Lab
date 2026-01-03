@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Eye, EyeOff, Loader2, Lock, Mail, ArrowLeft, KeyRound } from "lucide-react";
+import { Shield, Eye, EyeOff, Loader2, Lock, Mail, ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+
+type LoginStep = "credentials" | "otp";
 
 export default function AdminLogin() {
   const { user, loading: authLoading, signIn } = useAuth();
@@ -19,6 +22,12 @@ export default function AdminLogin() {
   const [checkingRole, setCheckingRole] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  
+  // 2FA State
+  const [loginStep, setLoginStep] = useState<LoginStep>("credentials");
+  const [otp, setOtp] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Check if already logged in and has admin role
   useEffect(() => {
@@ -40,6 +49,81 @@ export default function AdminLogin() {
 
     checkAdminAccess();
   }, [user, authLoading, navigate]);
+
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
+  const sendOTP = async () => {
+    setOtpLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-admin-otp", {
+        body: { action: "send", email },
+      });
+
+      if (error || data?.error) {
+        throw new Error(data?.error || error?.message || "Failed to send OTP");
+      }
+
+      toast({
+        title: "OTP Sent! 📧",
+        description: "Check your email for the 6-digit verification code.",
+      });
+      setResendCooldown(60);
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "Failed to send OTP",
+        variant: "destructive",
+      });
+      // Go back to credentials if OTP fails
+      setLoginStep("credentials");
+      await supabase.auth.signOut();
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const verifyOTP = async () => {
+    if (otp.length !== 6) {
+      toast({
+        title: "Invalid OTP",
+        description: "Please enter the 6-digit code",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setOtpLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-admin-otp", {
+        body: { action: "verify", email, otp },
+      });
+
+      if (error || !data?.success) {
+        throw new Error(data?.error || "Invalid OTP");
+      }
+
+      toast({
+        title: "Welcome Admin! 👋",
+        description: "2FA verified. Redirecting to admin panel...",
+      });
+      navigate("/admin");
+    } catch (err: any) {
+      toast({
+        title: "Verification Failed",
+        description: err.message || "Invalid OTP",
+        variant: "destructive",
+      });
+      setOtp("");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,11 +175,10 @@ export default function AdminLogin() {
           return;
         }
 
-        toast({
-          title: "Welcome Admin! 👋",
-          description: "Redirecting to admin panel...",
-        });
-        navigate("/admin");
+        // Admin verified, now send 2FA OTP
+        setLoginStep("otp");
+        setLoading(false);
+        await sendOTP();
       }
     } catch (err) {
       toast({
@@ -103,7 +186,6 @@ export default function AdminLogin() {
         description: "An unexpected error occurred",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -149,6 +231,12 @@ export default function AdminLogin() {
     } finally {
       setResetLoading(false);
     }
+  };
+
+  const handleBackToLogin = async () => {
+    setLoginStep("credentials");
+    setOtp("");
+    await supabase.auth.signOut();
   };
 
   if (authLoading || checkingRole) {
@@ -197,13 +285,24 @@ export default function AdminLogin() {
             Authorized administrators only.
           </p>
 
-          <div className="mt-12 flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-foreground/10 backdrop-blur-sm">
-              <Shield className="h-6 w-6 text-primary-foreground" />
+          <div className="mt-12 space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-foreground/10 backdrop-blur-sm">
+                <Shield className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div>
+                <p className="text-primary-foreground font-medium">Secure Access</p>
+                <p className="text-primary-foreground/70 text-sm">Protected by role-based authentication</p>
+              </div>
             </div>
-            <div>
-              <p className="text-primary-foreground font-medium">Secure Access</p>
-              <p className="text-primary-foreground/70 text-sm">Protected by role-based authentication</p>
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-foreground/10 backdrop-blur-sm">
+                <ShieldCheck className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div>
+                <p className="text-primary-foreground font-medium">2FA Protected</p>
+                <p className="text-primary-foreground/70 text-sm">Email OTP verification required</p>
+              </div>
             </div>
           </div>
         </div>
@@ -236,9 +335,82 @@ export default function AdminLogin() {
             </div>
           </div>
 
-            {/* Form Card */}
+          {/* Form Card */}
           <div className="bg-card border border-border rounded-2xl shadow-xl p-8">
-            {showForgotPassword ? (
+            {loginStep === "otp" ? (
+              <>
+                {/* 2FA OTP Verification */}
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
+                    <ShieldCheck className="h-8 w-8 text-primary" />
+                  </div>
+                  <h2 className="font-heading text-2xl font-bold text-foreground">
+                    2FA Verification
+                  </h2>
+                  <p className="text-muted-foreground mt-2 text-sm">
+                    Enter the 6-digit code sent to <strong>{email}</strong>
+                  </p>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex justify-center">
+                    <InputOTP
+                      maxLength={6}
+                      value={otp}
+                      onChange={setOtp}
+                      disabled={otpLoading}
+                    >
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+
+                  <Button
+                    onClick={verifyOTP}
+                    className="w-full h-12 bg-gradient-primary hover:opacity-90 transition-opacity text-base font-medium"
+                    disabled={otpLoading || otp.length !== 6}
+                  >
+                    {otpLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Verifying...
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="mr-2 h-5 w-5" />
+                        Verify & Login
+                      </>
+                    )}
+                  </Button>
+
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="ghost"
+                      onClick={sendOTP}
+                      disabled={resendCooldown > 0 || otpLoading}
+                      className="w-full"
+                    >
+                      {resendCooldown > 0 
+                        ? `Resend OTP in ${resendCooldown}s` 
+                        : "Resend OTP"}
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={handleBackToLogin}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      ← Back to Login
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : showForgotPassword ? (
               <>
                 {/* Forgot Password Header */}
                 <div className="text-center mb-8">
@@ -402,7 +574,9 @@ export default function AdminLogin() {
                 <div>
                   <p className="text-sm font-medium text-foreground">Secure Area</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    This is a restricted area. All access attempts are monitored and logged for security purposes.
+                    {loginStep === "otp" 
+                      ? "Email OTP verification adds an extra layer of security to your admin account."
+                      : "This is a restricted area. All access attempts are monitored and logged for security purposes."}
                   </p>
                 </div>
               </div>

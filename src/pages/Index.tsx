@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
 import { useTutorials } from "@/hooks/useTutorials";
 import { useCodeSnippets } from "@/hooks/useCodeSnippets";
+import { useDynamicCounts, formatCount } from "@/hooks/useDynamicCounts";
 
 const difficultyColors: Record<string, string> = {
   beginner: "bg-success/10 text-success border-success/20",
@@ -28,21 +29,23 @@ const difficultyColors: Record<string, string> = {
   advanced: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
-const stats = [
-  { icon: BookOpen, value: "50+", label: "Tutorials" },
-  { icon: Code2, value: "200+", label: "Snippets" },
-  { icon: Users, value: "5K+", label: "Developers" },
-  { icon: Star, value: "4.9", label: "Rating" },
-];
-
 const Index = () => {
   const { data: blogs, isLoading: blogsLoading } = useBlogPosts({ published: true });
   const { data: tutorials, isLoading: tutorialsLoading } = useTutorials({ published: true });
   const { data: snippets, isLoading: snippetsLoading } = useCodeSnippets({ published: true });
+  const { data: counts } = useDynamicCounts();
 
   const featuredBlogs = blogs?.slice(0, 3) || [];
   const featuredTutorials = tutorials?.slice(0, 3) || [];
   const featuredSnippets = snippets?.slice(0, 4) || [];
+
+  // Dynamic stats based on real data
+  const stats = [
+    { icon: BookOpen, value: counts ? formatCount(counts.tutorials) : "0+", label: "Tutorials" },
+    { icon: Code2, value: counts ? formatCount(counts.snippets) : "0+", label: "Snippets" },
+    { icon: Users, value: "5K+", label: "Developers" },
+    { icon: Star, value: "4.9", label: "Rating" },
+  ];
 
   return (
     <Layout>
