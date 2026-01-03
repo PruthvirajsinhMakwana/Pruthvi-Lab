@@ -189,21 +189,34 @@ export default function BlogPost() {
         </div>
 
         {/* Content */}
-        <div className="container mx-auto px-4 max-w-4xl py-8">
+        <div className="container mx-auto px-4 max-w-4xl py-8 animate-fade-in">
           <div className="prose prose-lg dark:prose-invert max-w-none
-            prose-headings:font-heading prose-headings:font-bold prose-headings:text-foreground
-            prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-border
-            prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
-            prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-4
+            prose-headings:font-heading prose-headings:font-bold prose-headings:text-foreground prose-headings:scroll-mt-20
+            prose-h1:text-3xl prose-h1:mt-12 prose-h1:mb-6
+            prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-3 prose-h2:border-b prose-h2:border-border/50
+            prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4 prose-h3:text-primary/90
+            prose-h4:text-lg prose-h4:mt-6 prose-h4:mb-3
+            prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-6 prose-p:text-base
             prose-strong:text-foreground prose-strong:font-semibold
-            prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-            prose-ul:my-4 prose-ul:space-y-2
-            prose-ol:my-4 prose-ol:space-y-2
-            prose-li:text-muted-foreground
-            prose-blockquote:border-l-primary prose-blockquote:bg-muted/30 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-blockquote:not-italic
-            prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
-            prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:rounded-xl
-            prose-img:rounded-xl prose-img:shadow-lg
+            prose-a:text-primary prose-a:font-medium prose-a:underline-offset-4 hover:prose-a:underline
+            prose-ul:my-6 prose-ul:space-y-3 prose-ul:pl-6
+            prose-ol:my-6 prose-ol:space-y-3 prose-ol:pl-6
+            prose-li:text-muted-foreground prose-li:leading-relaxed prose-li:marker:text-primary
+            prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-xl prose-blockquote:not-italic prose-blockquote:my-8 prose-blockquote:text-foreground/80
+            prose-code:bg-primary/10 prose-code:text-primary prose-code:px-2 prose-code:py-1 prose-code:rounded-md prose-code:text-sm prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
+            prose-pre:bg-card prose-pre:border prose-pre:border-border prose-pre:rounded-xl prose-pre:shadow-sm prose-pre:my-8 prose-pre:p-6
+            prose-img:rounded-xl prose-img:shadow-xl prose-img:my-8 prose-img:mx-auto
+            prose-hr:border-border prose-hr:my-10
+            prose-table:my-8 prose-table:w-full prose-table:overflow-hidden prose-table:rounded-xl prose-table:border prose-table:border-border
+            prose-thead:bg-muted/50 prose-thead:border-b prose-thead:border-border
+            prose-th:px-6 prose-th:py-4 prose-th:text-left prose-th:font-semibold prose-th:text-foreground prose-th:text-sm prose-th:uppercase prose-th:tracking-wider
+            prose-td:px-6 prose-td:py-4 prose-td:text-muted-foreground prose-td:border-b prose-td:border-border/50
+            prose-tr:transition-colors hover:prose-tr:bg-muted/30
+            [&_table]:border-separate [&_table]:border-spacing-0
+            [&_thead_tr]:border-b-2 [&_thead_tr]:border-primary/20
+            [&_tbody_tr:last-child_td]:border-b-0
+            [&_.task-list-item]:list-none [&_.task-list-item]:pl-0
+            [&_input[type=checkbox]]:mr-3 [&_input[type=checkbox]]:accent-primary [&_input[type=checkbox]]:w-4 [&_input[type=checkbox]]:h-4
           ">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {blog.content}
