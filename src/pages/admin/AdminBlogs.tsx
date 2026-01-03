@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ContentTable } from "@/components/admin/ContentTable";
 import { BlogEditor } from "@/components/admin/BlogEditor";
+import { AIBlogGenerator } from "@/components/admin/AIBlogGenerator";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -17,6 +18,14 @@ import {
 import { useBlogPosts, useBlogPostMutations, type BlogPost } from "@/hooks/useBlogPosts";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface GeneratedBlog {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  tags: string[];
+}
+
 export default function AdminBlogs() {
   const { user } = useAuth();
   const { data: blogs, isLoading } = useBlogPosts({ authorId: user?.id });
@@ -26,14 +35,23 @@ export default function AdminBlogs() {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<BlogPost | null>(null);
+  const [prefillData, setPrefillData] = useState<GeneratedBlog | null>(null);
 
   const handleCreate = () => {
+    setSelectedPost(null);
+    setPrefillData(null);
+    setEditorOpen(true);
+  };
+
+  const handleAIGenerated = (blog: GeneratedBlog) => {
+    setPrefillData(blog);
     setSelectedPost(null);
     setEditorOpen(true);
   };
 
   const handleEdit = (post: BlogPost) => {
     setSelectedPost(post);
+    setPrefillData(null);
     setEditorOpen(true);
   };
 
@@ -68,7 +86,8 @@ export default function AdminBlogs() {
 
   return (
     <AdminLayout title="Blog Posts" description="Create and manage your blog content">
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-end gap-3 mb-6">
+        <AIBlogGenerator onGenerated={handleAIGenerated} />
         <Button onClick={handleCreate}>
           <Plus className="h-4 w-4 mr-2" />
           New Post

@@ -99,6 +99,26 @@ Generate a JSON response with this exact structure:
   "isNew": true,
   "isTrending": false
 }`;
+    } else if (type === "blog") {
+      systemPrompt = `You are an expert SEO content writer specializing in AI, automation, and content creation topics. Write engaging, human-like blog posts with proper markdown formatting, tables, code blocks, and embedded YouTube video suggestions. Always respond in valid JSON format.`;
+      
+      userPrompt = `Create a comprehensive SEO-optimized blog post about:
+Topic: ${data.topic}
+Category: ${data.category || "ai-tools"}
+Writing Style: ${data.tone || "tutorial"}
+Additional Notes: ${data.additionalNotes || "None"}
+
+Generate a JSON response with this exact structure:
+{
+  "title": "Engaging SEO title (include main keyword)",
+  "slug": "url-friendly-slug-with-keywords",
+  "excerpt": "Compelling 2-sentence excerpt for previews",
+  "content": "Full markdown content with:\n- H2 and H3 headings\n- Tables for comparisons\n- Bullet points and numbered lists\n- Code blocks where relevant\n- Embedded image suggestions like ![Description](https://images.unsplash.com/...)\n- YouTube video links section\n- Pro tips and common mistakes sections\n- At least 1500 words",
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
+  "keywords": ["primary keyword", "secondary keyword", "long-tail keyword"]
+}
+
+Make the content feel human-written, engaging, and packed with actionable advice.`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
