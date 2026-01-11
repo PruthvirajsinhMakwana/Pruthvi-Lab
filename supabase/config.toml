@@ -9,6 +9,10 @@ verify_jwt = false
 [functions.send-tutorial-approval-email]
 verify_jwt = false
 
+[functions.ai-image]
+enabled = true
+verify_jwt = false
+
 [functions.ai-chat]
 verify_jwt = false
 
