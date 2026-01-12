@@ -285,6 +285,116 @@ export type Database = {
         }
         Relationships: []
       }
+      email_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          html_content: string
+          id: string
+          recipients_count: number | null
+          sent_at: string | null
+          status: string | null
+          subject: string
+          template_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          html_content: string
+          id?: string
+          recipients_count?: number | null
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          template_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          html_content?: string
+          id?: string
+          recipients_count?: number | null
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_campaigns_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          category: string | null
+          created_at: string
+          html_content: string
+          id: string
+          name: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          html_content: string
+          id?: string
+          name: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          html_content?: string
+          id?: string
+          name?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      marketing_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          phone_number: string | null
+          source: string | null
+          subscribed: boolean | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          phone_number?: string | null
+          source?: string | null
+          subscribed?: boolean | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          phone_number?: string | null
+          source?: string | null
+          subscribed?: boolean | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       material_purchases: {
         Row: {
           admin_notes: string | null
@@ -423,6 +533,7 @@ export type Database = {
           interests: string[] | null
           learning_goals: string[] | null
           onboarding_completed: boolean | null
+          phone_number: string | null
           skill_level: string | null
           skills: string[] | null
           updated_at: string
@@ -437,6 +548,7 @@ export type Database = {
           interests?: string[] | null
           learning_goals?: string[] | null
           onboarding_completed?: boolean | null
+          phone_number?: string | null
           skill_level?: string | null
           skills?: string[] | null
           updated_at?: string
@@ -451,6 +563,7 @@ export type Database = {
           interests?: string[] | null
           learning_goals?: string[] | null
           onboarding_completed?: boolean | null
+          phone_number?: string | null
           skill_level?: string | null
           skills?: string[] | null
           updated_at?: string

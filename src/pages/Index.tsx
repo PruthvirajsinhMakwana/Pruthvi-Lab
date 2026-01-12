@@ -22,6 +22,7 @@ import { useBlogPosts } from "@/hooks/useBlogPosts";
 import { useTutorials } from "@/hooks/useTutorials";
 import { useCodeSnippets } from "@/hooks/useCodeSnippets";
 import { useDynamicCounts, formatCount } from "@/hooks/useDynamicCounts";
+import { FloatingAIChat } from "@/components/FloatingAIChat";
 
 const difficultyColors: Record<string, string> = {
   beginner: "bg-success/10 text-success border-success/20",
@@ -606,6 +607,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Floating AI Chat */}
+      <FloatingAIChat />
     </Layout>
   );
 };
