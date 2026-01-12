@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAIChatHistory, ChatMessage } from "@/hooks/useAIChatHistory";
+import { useAIUsageStats } from "@/hooks/useAIUsageStats";
 import { 
   Send, 
   Bot, 
@@ -28,7 +29,9 @@ import {
   Maximize2,
   Settings,
   Zap,
-  Flame
+  Flame,
+  BarChart3,
+  TrendingUp
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -39,6 +42,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { formatDistanceToNow } from "date-fns";
 import {
   Select,
@@ -47,6 +51,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 const IMAGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-image`;
@@ -95,11 +101,16 @@ const AIAssistant = () => {
   const [typingText, setTypingText] = useState("");
   const [showHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   const [languageMode, setLanguageMode] = useState<LanguageMode>("hinglish");
   const [roastLevel, setRoastLevel] = useState<RoastLevel>("medium");
+  const [useCombinedAI, setUseCombinedAI] = useState(true);
+  const [lastApiUsed, setLastApiUsed] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  
+  const { stats, recordCall, recordImageGeneration } = useAIUsageStats();
   
   const {
     conversations,
@@ -139,9 +150,10 @@ const AIAssistant = () => {
   const streamChat = useCallback(async (
     messagesToSend: ChatMessage[],
     onDelta: (chunk: string) => void,
-    onDone: () => void,
+    onDone: (apiUsed?: string) => void,
     language: LanguageMode = "hinglish",
-    roast: RoastLevel = "medium"
+    roast: RoastLevel = "medium",
+    useCombined: boolean = true
   ) => {
     const resp = await fetch(CHAT_URL, {
       method: "POST",
@@ -152,7 +164,8 @@ const AIAssistant = () => {
       body: JSON.stringify({ 
         messages: messagesToSend.map(m => ({ role: m.role, content: m.content })),
         language,
-        roastLevel: roast
+        roastLevel: roast,
+        useCombined
       }),
     });
 
@@ -167,6 +180,7 @@ const AIAssistant = () => {
     const decoder = new TextDecoder();
     let textBuffer = "";
     let streamDone = false;
+    let detectedApiUsed: string | undefined;
 
     while (!streamDone) {
       const { done, value } = await reader.read();
@@ -191,6 +205,9 @@ const AIAssistant = () => {
         try {
           const parsed = JSON.parse(jsonStr);
           const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (parsed.apiUsed) {
+            detectedApiUsed = parsed.apiUsed;
+          }
           if (content) onDelta(content);
         } catch {
           textBuffer = line + "\n" + textBuffer;
@@ -199,7 +216,7 @@ const AIAssistant = () => {
       }
     }
 
-    onDone();
+    onDone(detectedApiUsed);
   }, []);
 
   const generateImage = async (prompt: string): Promise<string | null> => {
@@ -251,6 +268,7 @@ const AIAssistant = () => {
       setIsGeneratingImage(true);
       try {
         const imageUrl = await generateImage(text);
+        recordImageGeneration();
         const assistantMsg: ChatMessage = { 
           role: "assistant", 
           content: imageUrl 
@@ -291,14 +309,19 @@ const AIAssistant = () => {
       await streamChat(
         [...messages, userMsg],
         (chunk) => upsertAssistant(chunk),
-        async () => {
+        async (apiUsed?: string) => {
           setIsLoading(false);
+          if (apiUsed) {
+            setLastApiUsed(apiUsed);
+            recordCall(apiUsed as "gemini" | "lovable" | "combined");
+          }
           if (user && convId && assistantSoFar) {
             await saveMessage(convId, { role: "assistant", content: assistantSoFar });
           }
         },
         languageMode,
-        roastLevel
+        roastLevel,
+        useCombinedAI
       );
     } catch (error) {
       console.error(error);
@@ -500,6 +523,25 @@ const AIAssistant = () => {
                     </div>
                   )}
 
+                  {/* Combined AI Toggle */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm font-medium flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4 text-green-500" />
+                          Use Combined AI
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Use both Gemini + Lovable AI for better results
+                        </p>
+                      </div>
+                      <Switch
+                        checked={useCombinedAI}
+                        onCheckedChange={setUseCombinedAI}
+                      />
+                    </div>
+                  </div>
+
                   {/* Model Info */}
                   <div className="space-y-2">
                     <Label className="text-sm font-medium flex items-center gap-2">
@@ -511,10 +553,64 @@ const AIAssistant = () => {
                       {(languageMode === "hinglish" || languageMode === "gujlish") && (
                         <p><strong>Roast:</strong> {roastLevelOptions.find(r => r.value === roastLevel)?.label}</p>
                       )}
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Using Google Gemini API (Free Tier) with Lovable AI fallback
-                      </p>
+                      <p><strong>AI Mode:</strong> {useCombinedAI ? "🚀 Combined (Gemini + Lovable)" : "⚡ Single API"}</p>
+                      {lastApiUsed && (
+                        <p><strong>Last API Used:</strong> <Badge variant="outline" className="ml-1 text-xs">
+                          {lastApiUsed === "combined" ? "🔥 Both APIs" : lastApiUsed === "gemini" ? "💎 Gemini" : "💜 Lovable"}
+                        </Badge></p>
+                      )}
                     </div>
+                  </div>
+
+                  {/* Usage Stats */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4 text-blue-500" />
+                      Today's Usage Stats
+                    </Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 text-center">
+                        <div className="text-2xl font-bold text-green-500">{stats.today.totalCalls}</div>
+                        <div className="text-xs text-muted-foreground">Total Calls</div>
+                      </div>
+                      <div className="p-3 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 text-center">
+                        <div className="text-2xl font-bold text-blue-500">{stats.today.imageGenerations}</div>
+                        <div className="text-xs text-muted-foreground">Images</div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-1">
+                          <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                          Gemini (Free)
+                        </span>
+                        <span className="font-medium">{stats.today.geminiCalls}</span>
+                      </div>
+                      <Progress value={stats.today.totalCalls ? (stats.today.geminiCalls / stats.today.totalCalls) * 100 : 0} className="h-1.5" />
+                      
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-1">
+                          <span className="h-2 w-2 rounded-full bg-purple-500"></span>
+                          Lovable AI
+                        </span>
+                        <span className="font-medium">{stats.today.lovableCalls}</span>
+                      </div>
+                      <Progress value={stats.today.totalCalls ? (stats.today.lovableCalls / stats.today.totalCalls) * 100 : 0} className="h-1.5" />
+                      
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-1">
+                          <span className="h-2 w-2 rounded-full bg-orange-500"></span>
+                          Combined (Both)
+                        </span>
+                        <span className="font-medium">{stats.today.combinedCalls}</span>
+                      </div>
+                      <Progress value={stats.today.totalCalls ? (stats.today.combinedCalls / stats.today.totalCalls) * 100 : 0} className="h-1.5" />
+                    </div>
+                    
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      💡 Combined mode uses both APIs for smarter responses!
+                    </p>
                   </div>
                 </div>
               </DialogContent>

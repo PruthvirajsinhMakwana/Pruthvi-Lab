@@ -223,25 +223,23 @@ function getSystemPrompt(language: LanguageMode, roastLevel: RoastLevel = "mediu
   return `${basePrompt}\n\n${getRoastModifier(roastLevel)}`;
 }
 
-// Try Google Gemini API first (free tier), fallback to Lovable AI
-async function callGeminiAPI(messages: Array<{role: string; content: string}>, systemPrompt: string) {
+// Try Google Gemini API (free tier)
+async function callGeminiAPI(messages: Array<{role: string; content: string}>, systemPrompt: string): Promise<{ response: Response | null; success: boolean }> {
   const GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
   
   if (!GEMINI_API_KEY) {
-    console.log("Gemini API key not found, will use Lovable AI");
-    return null;
+    console.log("Gemini API key not found");
+    return { response: null, success: false };
   }
 
   try {
-    // Convert messages to Gemini format
     const geminiMessages = messages.map(msg => ({
       role: msg.role === "assistant" ? "model" : "user",
       parts: [{ text: msg.content }]
     }));
 
-    // Add system instruction
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -266,98 +264,114 @@ async function callGeminiAPI(messages: Array<{role: string; content: string}>, s
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Gemini API error:", response.status, errorText);
-      return null;
+      return { response: null, success: false };
     }
 
-    console.log("Using Google Gemini API (free tier) ✓");
-    return response;
+    return { response, success: true };
   } catch (error) {
     console.error("Gemini API error:", error);
-    return null;
+    return { response: null, success: false };
   }
 }
 
-// Fallback to Lovable AI
-async function callLovableAI(messages: Array<{role: string; content: string}>, systemPrompt: string) {
+// Try Lovable AI
+async function callLovableAPI(messages: Array<{role: string; content: string}>, systemPrompt: string): Promise<{ response: Response | null; success: boolean }> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   
   if (!LOVABLE_API_KEY) {
-    throw new Error("No AI API configured");
+    console.log("Lovable API key not found");
+    return { response: null, success: false };
   }
 
-  console.log("Using Lovable AI (fallback)");
+  try {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...messages,
+        ],
+      }),
+    });
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...messages,
-      ],
-      stream: true,
-    }),
-  });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Lovable API error:", response.status, errorText);
+      return { response: null, success: false };
+    }
 
-  return response;
+    return { response, success: true };
+  } catch (error) {
+    console.error("Lovable API error:", error);
+    return { response: null, success: false };
+  }
 }
 
-// Transform Gemini SSE to OpenAI-compatible SSE format
-function transformGeminiStream(geminiStream: ReadableStream): ReadableStream {
-  const reader = geminiStream.getReader();
-  const decoder = new TextDecoder();
-  const encoder = new TextEncoder();
-  let buffer = "";
+// Extract text from Gemini response
+async function extractGeminiText(response: Response): Promise<string> {
+  try {
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  } catch {
+    return "";
+  }
+}
 
+// Extract text from Lovable response
+async function extractLovableText(response: Response): Promise<string> {
+  try {
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || "";
+  } catch {
+    return "";
+  }
+}
+
+// Combine responses from both APIs for better results
+function combineResponses(geminiText: string, lovableText: string): string {
+  // If one is empty, return the other
+  if (!geminiText && !lovableText) return "Sorry, I couldn't generate a response. Please try again!";
+  if (!geminiText) return lovableText;
+  if (!lovableText) return geminiText;
+  
+  // Both have content - take the longer/more detailed one
+  // or combine key insights from both
+  if (geminiText.length > lovableText.length * 1.5) {
+    return geminiText;
+  } else if (lovableText.length > geminiText.length * 1.5) {
+    return lovableText;
+  }
+  
+  // Similar length - prefer Gemini (free tier) but could merge insights
+  return geminiText;
+}
+
+// Stream response in OpenAI format
+function createStreamResponse(content: string, apiUsed: string): ReadableStream {
+  const encoder = new TextEncoder();
+  let sent = false;
+  
   return new ReadableStream({
     async pull(controller) {
-      try {
-        const { done, value } = await reader.read();
-        
-        if (done) {
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          controller.close();
-          return;
-        }
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const jsonStr = line.slice(6).trim();
-            if (!jsonStr || jsonStr === "[DONE]") continue;
-
-            try {
-              const parsed = JSON.parse(jsonStr);
-              const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
-              
-              if (text) {
-                // Convert to OpenAI format
-                const openAIFormat = {
-                  choices: [{
-                    delta: { content: text }
-                  }]
-                };
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify(openAIFormat)}\n\n`));
-              }
-            } catch {
-              // Skip malformed JSON
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Stream transform error:", error);
-        controller.error(error);
+      if (!sent) {
+        // Send the content with API info
+        const chunk = {
+          choices: [{
+            delta: { content }
+          }],
+          apiUsed
+        };
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
+        sent = true;
+      } else {
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        controller.close();
       }
-    },
-    cancel() {
-      reader.cancel();
     }
   });
 }
@@ -368,54 +382,86 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, language = "hinglish", roastLevel = "medium" } = await req.json();
+    const { messages, language = "hinglish", roastLevel = "medium", useCombined = true } = await req.json();
     
-    console.log("Processing AI chat request with", messages.length, "messages, language:", language, "roast:", roastLevel);
+    console.log("Processing AI chat request with", messages.length, "messages, language:", language, "roast:", roastLevel, "combined:", useCombined);
     
     const systemPrompt = getSystemPrompt(language as LanguageMode, roastLevel as RoastLevel);
 
-    // Try Gemini first (free tier)
-    let response = await callGeminiAPI(messages, systemPrompt);
-    let isGemini = !!response;
+    let geminiText = "";
+    let lovableText = "";
+    let apiUsed = "none";
 
-    // Fallback to Lovable AI if Gemini fails
-    if (!response) {
-      response = await callLovableAI(messages, systemPrompt);
-    }
+    if (useCombined) {
+      // Try both APIs simultaneously for better results
+      const [geminiResult, lovableResult] = await Promise.all([
+        callGeminiAPI(messages, systemPrompt),
+        callLovableAPI(messages, systemPrompt)
+      ]);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI API error:", response.status, errorText);
+      if (geminiResult.success && geminiResult.response) {
+        geminiText = await extractGeminiText(geminiResult.response);
+        console.log("Gemini response received, length:", geminiText.length);
+      }
+
+      if (lovableResult.success && lovableResult.response) {
+        lovableText = await extractLovableText(lovableResult.response);
+        console.log("Lovable response received, length:", lovableText.length);
+      }
+
+      // Determine which API was used
+      if (geminiText && lovableText) {
+        apiUsed = "combined";
+      } else if (geminiText) {
+        apiUsed = "gemini";
+      } else if (lovableText) {
+        apiUsed = "lovable";
+      }
+
+      const finalContent = combineResponses(geminiText, lovableText);
       
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
-          status: 429,
+      if (!finalContent || finalContent === "Sorry, I couldn't generate a response. Please try again!") {
+        return new Response(JSON.stringify({ error: "Both AI services failed. Please try again." }), {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add more credits." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+
+      console.log("Sending response via:", apiUsed);
+
+      return new Response(createStreamResponse(finalContent, apiUsed), {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      });
+    } else {
+      // Fallback mode: try Gemini first, then Lovable
+      const geminiResult = await callGeminiAPI(messages, systemPrompt);
       
-      return new Response(JSON.stringify({ error: "AI service error" }), {
+      if (geminiResult.success && geminiResult.response) {
+        geminiText = await extractGeminiText(geminiResult.response);
+        if (geminiText) {
+          apiUsed = "gemini";
+          return new Response(createStreamResponse(geminiText, apiUsed), {
+            headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+          });
+        }
+      }
+
+      const lovableResult = await callLovableAPI(messages, systemPrompt);
+      if (lovableResult.success && lovableResult.response) {
+        lovableText = await extractLovableText(lovableResult.response);
+        if (lovableText) {
+          apiUsed = "lovable";
+          return new Response(createStreamResponse(lovableText, apiUsed), {
+            headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+          });
+        }
+      }
+
+      return new Response(JSON.stringify({ error: "AI service unavailable" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    console.log("Streaming AI response via", isGemini ? "Gemini" : "Lovable AI");
-    
-    // Transform Gemini stream to OpenAI format for compatibility
-    const outputStream = isGemini 
-      ? transformGeminiStream(response.body!) 
-      : response.body;
-
-    return new Response(outputStream, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-    });
   } catch (error) {
     console.error("AI chat error:", error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
