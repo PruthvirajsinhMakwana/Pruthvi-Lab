@@ -34,6 +34,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Wand2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -553,10 +554,10 @@ const AIAssistant = () => {
                       {(languageMode === "hinglish" || languageMode === "gujlish") && (
                         <p><strong>Roast:</strong> {roastLevelOptions.find(r => r.value === roastLevel)?.label}</p>
                       )}
-                      <p><strong>AI Mode:</strong> {useCombinedAI ? "🚀 Combined (Gemini + Lovable)" : "⚡ Single API"}</p>
+                      <p><strong>AI Mode:</strong> {useCombinedAI ? "🚀 Dual Engine (Premium)" : "⚡ Single Engine"}</p>
                       {lastApiUsed && (
-                        <p><strong>Last API Used:</strong> <Badge variant="outline" className="ml-1 text-xs">
-                          {lastApiUsed === "combined" ? "🔥 Both APIs" : lastApiUsed === "gemini" ? "💎 Gemini" : "💜 Lovable"}
+                        <p><strong>Last Engine:</strong> <Badge variant="outline" className="ml-1 text-xs">
+                          {lastApiUsed === "combined" ? "🔥 Dual Power" : lastApiUsed === "gemini" ? "💎 Gemini" : "⚡ Pruthvi Engine"}
                         </Badge></p>
                       )}
                     </div>
@@ -583,7 +584,7 @@ const AIAssistant = () => {
                       <div className="flex items-center justify-between text-xs">
                         <span className="flex items-center gap-1">
                           <span className="h-2 w-2 rounded-full bg-green-500"></span>
-                          Gemini (Free)
+                          Gemini Engine
                         </span>
                         <span className="font-medium">{stats.today.geminiCalls}</span>
                       </div>
@@ -592,7 +593,7 @@ const AIAssistant = () => {
                       <div className="flex items-center justify-between text-xs">
                         <span className="flex items-center gap-1">
                           <span className="h-2 w-2 rounded-full bg-purple-500"></span>
-                          Lovable AI
+                          Pruthvi Engine
                         </span>
                         <span className="font-medium">{stats.today.lovableCalls}</span>
                       </div>
@@ -601,7 +602,7 @@ const AIAssistant = () => {
                       <div className="flex items-center justify-between text-xs">
                         <span className="flex items-center gap-1">
                           <span className="h-2 w-2 rounded-full bg-orange-500"></span>
-                          Combined (Both)
+                          Dual Engine
                         </span>
                         <span className="font-medium">{stats.today.combinedCalls}</span>
                       </div>
@@ -609,7 +610,21 @@ const AIAssistant = () => {
                     </div>
                     
                     <p className="text-xs text-muted-foreground text-center mt-2">
-                      💡 Combined mode uses both APIs for smarter responses!
+                      💡 Dual Engine mode uses multiple AI for smarter responses!
+                    </p>
+                  </div>
+
+                  {/* AI Studio Link */}
+                  <div className="pt-4 border-t">
+                    <Link to="/ai-studio">
+                      <Button variant="outline" className="w-full gap-2">
+                        <Wand2 className="h-4 w-4" />
+                        Open AI Studio
+                        <Badge variant="secondary" className="ml-auto text-[10px]">7 Tools</Badge>
+                      </Button>
+                    </Link>
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      Generate images, music, code & more!
                     </p>
                   </div>
                 </div>
