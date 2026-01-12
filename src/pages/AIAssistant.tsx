@@ -14,7 +14,6 @@ import {
   User, 
   Loader2, 
   Sparkles,
-  Code2,
   Trash2,
   Copy,
   Check,
@@ -27,8 +26,9 @@ import {
   MessageSquare,
   X,
   Maximize2,
-  Languages,
-  Zap
+  Settings,
+  Zap,
+  Flame
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -36,6 +36,9 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 import { formatDistanceToNow } from "date-fns";
 import {
   Select,
@@ -48,12 +51,21 @@ import {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 const IMAGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-image`;
 
-type LanguageMode = "hinglish" | "gujlish" | "coding";
+type LanguageMode = "hinglish" | "gujlish" | "coding" | "coding-advanced" | "debug-expert";
+type RoastLevel = "mild" | "medium" | "spicy";
 
 const languageOptions = [
-  { value: "hinglish", label: "🇮🇳 Hinglish", desc: "Desi style roasts" },
+  { value: "hinglish", label: "🇮🇳 Hinglish", desc: "Desi style with roasts" },
   { value: "gujlish", label: "🦁 Gujlish", desc: "Topa, Dofa, Hopara!" },
-  { value: "coding", label: "💻 Coding Pro", desc: "Serious mode" },
+  { value: "coding", label: "💻 Coding Pro", desc: "Precise code answers" },
+  { value: "coding-advanced", label: "🚀 Advanced Dev", desc: "System design + architecture" },
+  { value: "debug-expert", label: "🔧 Debug Expert", desc: "Find & fix bugs fast" },
+];
+
+const roastLevelOptions = [
+  { value: "mild", label: "😊 Mild", desc: "Friendly & supportive" },
+  { value: "medium", label: "😏 Medium", desc: "Light teasing" },
+  { value: "spicy", label: "🔥 Spicy", desc: "Full desi roasts!" },
 ];
 
 const suggestedPrompts = [
@@ -79,9 +91,12 @@ const AIAssistant = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copiedCodeBlock, setCopiedCodeBlock] = useState<string | null>(null);
   const [typingText, setTypingText] = useState("");
   const [showHistory, setShowHistory] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [languageMode, setLanguageMode] = useState<LanguageMode>("hinglish");
+  const [roastLevel, setRoastLevel] = useState<RoastLevel>("medium");
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -125,7 +140,8 @@ const AIAssistant = () => {
     messagesToSend: ChatMessage[],
     onDelta: (chunk: string) => void,
     onDone: () => void,
-    language: LanguageMode = "hinglish"
+    language: LanguageMode = "hinglish",
+    roast: RoastLevel = "medium"
   ) => {
     const resp = await fetch(CHAT_URL, {
       method: "POST",
@@ -135,7 +151,8 @@ const AIAssistant = () => {
       },
       body: JSON.stringify({ 
         messages: messagesToSend.map(m => ({ role: m.role, content: m.content })),
-        language 
+        language,
+        roastLevel: roast
       }),
     });
 
@@ -280,7 +297,8 @@ const AIAssistant = () => {
             await saveMessage(convId, { role: "assistant", content: assistantSoFar });
           }
         },
-        languageMode
+        languageMode,
+        roastLevel
       );
     } catch (error) {
       console.error(error);
@@ -327,7 +345,14 @@ const AIAssistant = () => {
     navigator.clipboard.writeText(text);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
-    toast({ title: "Copied! 📋" });
+    toast({ title: "Copied! 📋", description: "Message copied to clipboard" });
+  };
+
+  const copyCodeToClipboard = (code: string, blockId: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCodeBlock(blockId);
+    setTimeout(() => setCopiedCodeBlock(null), 2000);
+    toast({ title: "Code Copied! 📋", description: "Code block copied to clipboard" });
   };
 
   const handleReaction = (index: number, reaction: "like" | "dislike") => {
@@ -400,40 +425,129 @@ const AIAssistant = () => {
           </p>
           
           {/* Controls Row */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mt-4">
-            {/* Language/Mode Selector */}
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Languages className="h-4 w-4 text-muted-foreground hidden sm:block" />
-              <Select value={languageMode} onValueChange={(v) => setLanguageMode(v as LanguageMode)}>
-                <SelectTrigger className="w-full sm:w-[180px] h-9 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover">
-                  {languageOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      <div className="flex items-center gap-2">
-                        <span>{opt.label}</span>
-                        <span className="text-xs text-muted-foreground hidden sm:inline">- {opt.desc}</span>
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+            {/* Settings Button */}
+            <Dialog open={showSettings} onOpenChange={setShowSettings}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5 h-9 text-xs sm:text-sm">
+                  <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span>Settings</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    AI Settings
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6 py-4">
+                  {/* Language/Mode Selection */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Bot className="h-4 w-4" />
+                      AI Mode / Language
+                    </Label>
+                    <Select value={languageMode} onValueChange={(v) => setLanguageMode(v as LanguageMode)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover">
+                        {languageOptions.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            <div className="flex flex-col items-start">
+                              <span className="font-medium">{opt.label}</span>
+                              <span className="text-xs text-muted-foreground">{opt.desc}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Roast Level Slider - Only show for Hinglish/Gujlish */}
+                  {(languageMode === "hinglish" || languageMode === "gujlish") && (
+                    <div className="space-y-4">
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        <Flame className="h-4 w-4 text-orange-500" />
+                        Roast Level
+                      </Label>
+                      <div className="px-2">
+                        <Slider
+                          value={[roastLevel === "mild" ? 0 : roastLevel === "medium" ? 50 : 100]}
+                          onValueChange={(v) => {
+                            if (v[0] <= 33) setRoastLevel("mild");
+                            else if (v[0] <= 66) setRoastLevel("medium");
+                            else setRoastLevel("spicy");
+                          }}
+                          max={100}
+                          step={1}
+                          className="w-full"
+                        />
+                        <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                          <span>😊 Mild</span>
+                          <span>😏 Medium</span>
+                          <span>🔥 Spicy</span>
+                        </div>
                       </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                      <div className="p-3 rounded-lg bg-muted/50 border">
+                        <p className="text-sm text-center">
+                          {roastLevel === "mild" && "Friendly & supportive vibes only! 🤗"}
+                          {roastLevel === "medium" && "Light teasing with lots of love! 😏"}
+                          {roastLevel === "spicy" && "Full desi roasts incoming! 🔥🌶️"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Model Info */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-yellow-500" />
+                      Current Configuration
+                    </Label>
+                    <div className="p-3 rounded-lg bg-gradient-to-r from-primary/5 to-accent/5 border text-sm space-y-1">
+                      <p><strong>Mode:</strong> {languageOptions.find(l => l.value === languageMode)?.label}</p>
+                      {(languageMode === "hinglish" || languageMode === "gujlish") && (
+                        <p><strong>Roast:</strong> {roastLevelOptions.find(r => r.value === roastLevel)?.label}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Using Google Gemini API (Free Tier) with Lovable AI fallback
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            {/* Quick Mode Pills */}
+            <div className="flex items-center gap-1.5">
+              {languageOptions.slice(0, 3).map((opt) => (
+                <Button
+                  key={opt.value}
+                  variant={languageMode === opt.value ? "default" : "outline"}
+                  size="sm"
+                  className="h-8 px-2.5 text-xs"
+                  onClick={() => setLanguageMode(opt.value as LanguageMode)}
+                >
+                  {opt.label.split(" ")[0]}
+                </Button>
+              ))}
             </div>
             
             {/* Action Buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <Link to="/chat">
-                <Button variant="outline" size="sm" className="gap-1 sm:gap-2 h-9 text-xs sm:text-sm">
-                  <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs">
+                  <Maximize2 className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">Fullscreen</span>
                 </Button>
               </Link>
               {user && (
                 <Sheet open={showHistory} onOpenChange={setShowHistory}>
                   <SheetTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1 sm:gap-2 h-9 text-xs sm:text-sm">
-                      <History className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs">
+                      <History className="h-3.5 w-3.5" />
                       <span className="hidden sm:inline">History</span>
                     </Button>
                   </SheetTrigger>
@@ -492,26 +606,33 @@ const AIAssistant = () => {
             </div>
           </div>
           
-          {/* Mode Badge */}
-          <div className="mt-3">
+          {/* Mode & Roast Badge */}
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
             <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-              languageMode === "coding" 
+              languageMode.includes("coding") || languageMode === "debug-expert"
                 ? "bg-blue-500/10 text-blue-500" 
                 : languageMode === "gujlish"
                 ? "bg-orange-500/10 text-orange-500"
                 : "bg-green-500/10 text-green-500"
             }`}>
               <Zap className="h-3 w-3" />
-              {languageMode === "coding" ? "Pro Coding Mode" : languageMode === "gujlish" ? "Gujlish Fun Mode 🦁" : "Hinglish Desi Mode 🇮🇳"}
+              {languageOptions.find(l => l.value === languageMode)?.label || "Hinglish Mode"}
             </span>
+            {(languageMode === "hinglish" || languageMode === "gujlish") && (
+              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                roastLevel === "mild" 
+                  ? "bg-emerald-500/10 text-emerald-500" 
+                  : roastLevel === "medium"
+                  ? "bg-yellow-500/10 text-yellow-500"
+                  : "bg-red-500/10 text-red-500"
+              }`}>
+                <Flame className="h-3 w-3" />
+                {roastLevelOptions.find(r => r.value === roastLevel)?.label}
+              </span>
+            )}
           </div>
         </div>
-            <Link to="/chat">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Maximize2 className="h-4 w-4" />
-                Fullscreen Mode
-              </Button>
-            </Link>
+
         {/* Fun Fact Banner */}
         {messages.length === 0 && (
           <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10 text-center">
@@ -582,56 +703,98 @@ const AIAssistant = () => {
                               className="max-w-full rounded-lg mb-2 border border-border"
                             />
                           )}
-                          <div className="text-xs sm:text-sm prose prose-sm dark:prose-invert max-w-none">
+                          <div className="text-xs sm:text-sm prose prose-sm dark:prose-invert max-w-none break-words prose-p:my-1 prose-headings:my-2 prose-strong:text-foreground prose-strong:font-bold">
                             <ReactMarkdown
                               remarkPlugins={[remarkGfm]}
                               components={{
+                                strong: ({ children }) => (
+                                  <strong className="font-bold text-foreground">{children}</strong>
+                                ),
+                                em: ({ children }) => (
+                                  <em className="italic">{children}</em>
+                                ),
+                                p: ({ children }) => (
+                                  <p className="my-1 leading-relaxed">{children}</p>
+                                ),
+                                ul: ({ children }) => (
+                                  <ul className="list-disc list-inside my-2 space-y-1">{children}</ul>
+                                ),
+                                ol: ({ children }) => (
+                                  <ol className="list-decimal list-inside my-2 space-y-1">{children}</ol>
+                                ),
+                                li: ({ children }) => (
+                                  <li className="leading-relaxed">{children}</li>
+                                ),
                                 code({ className, children, ...props }) {
                                   const match = /language-(\w+)/.exec(className || "");
                                   const codeString = String(children).replace(/\n$/, "");
                                   const isInline = !match;
+                                  const blockId = `code-${index}-${codeString.slice(0, 20)}`;
                                   
                                   if (isInline) {
                                     return (
-                                      <code className="bg-background/50 px-1 py-0.5 rounded text-xs" {...props}>
+                                      <code className="bg-background/50 px-1.5 py-0.5 rounded text-xs font-mono text-primary" {...props}>
                                         {children}
                                       </code>
                                     );
                                   }
                                   
                                   return (
-                                    <div className="relative group my-2">
-                                      <div className="flex items-center justify-between bg-background/80 px-2 sm:px-3 py-1 rounded-t-lg border-b border-border text-xs">
-                                        <span className="text-muted-foreground">{match[1]}</span>
+                                    <div className="relative group my-3 -mx-2 sm:mx-0 max-w-[calc(100vw-4rem)] sm:max-w-none overflow-hidden rounded-lg border border-border">
+                                      <div className="flex items-center justify-between bg-muted/80 px-3 py-2 border-b border-border">
+                                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{match[1]}</span>
                                         <div className="flex gap-1">
                                           <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="h-5 sm:h-6 px-1 sm:px-2 text-xs"
-                                            onClick={() => copyToClipboard(codeString, index)}
+                                            className="h-7 px-2 text-xs gap-1.5 hover:bg-background"
+                                            onClick={() => copyCodeToClipboard(codeString, blockId)}
                                           >
-                                            {copiedIndex === index ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                                            {copiedCodeBlock === blockId ? (
+                                              <>
+                                                <Check className="h-3 w-3 text-green-500" />
+                                                <span className="hidden sm:inline text-green-500">Copied!</span>
+                                              </>
+                                            ) : (
+                                              <>
+                                                <Copy className="h-3 w-3" />
+                                                <span className="hidden sm:inline">Copy</span>
+                                              </>
+                                            )}
                                           </Button>
                                           {(match[1] === "javascript" || match[1] === "js") && (
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              className="h-5 sm:h-6 px-1 sm:px-2 text-xs"
+                                              className="h-7 px-2 text-xs gap-1 hover:bg-background"
                                               onClick={() => executeCode(codeString, match[1])}
                                             >
-                                              ▶️
+                                              ▶️ <span className="hidden sm:inline">Run</span>
                                             </Button>
                                           )}
                                         </div>
                                       </div>
-                                      <SyntaxHighlighter
-                                        style={oneDark}
-                                        language={match[1]}
-                                        PreTag="div"
-                                        className="!mt-0 !rounded-t-none text-xs sm:text-sm"
-                                      >
-                                        {codeString}
-                                      </SyntaxHighlighter>
+                                      <div className="overflow-x-auto">
+                                        <SyntaxHighlighter
+                                          style={oneDark}
+                                          language={match[1]}
+                                          PreTag="div"
+                                          className="!mt-0 !rounded-t-none !text-xs sm:!text-sm !m-0"
+                                          customStyle={{
+                                            margin: 0,
+                                            padding: '1rem',
+                                            background: 'hsl(var(--background))',
+                                            fontSize: 'inherit',
+                                          }}
+                                          codeTagProps={{
+                                            style: {
+                                              fontFamily: 'JetBrains Mono, monospace',
+                                            }
+                                          }}
+                                        >
+                                          {codeString}
+                                        </SyntaxHighlighter>
+                                      </div>
                                     </div>
                                   );
                                 },

@@ -5,6 +5,29 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Roast level modifiers
+const ROAST_MILD = `
+ROAST STYLE: Keep it friendly and supportive! 😊
+- Minimal teasing, focus on being helpful
+- Use encouraging words like "Good try!", "You're learning!", "Almost there!"
+- Be gentle with mistakes, guide kindly
+`;
+
+const ROAST_MEDIUM = `
+ROAST STYLE: Light teasing with lots of love! 😏
+- Playful jokes about common mistakes
+- Balance between roasting and helping
+- Use phrases like "Oye oye!", "Haha thoda aur try kar!"
+`;
+
+const ROAST_SPICY = `
+ROAST STYLE: Full desi roasts! 🔥🌶️
+- Go all out with friendly roasts and jokes
+- Use savage but loving comebacks
+- Be brutally honest but always help after roasting
+- "Abe sale!", "Bhai tu pagal hai kya?", "Kesa aadmi hai bhai tu!"
+`;
+
 // Language prompts
 const HINGLISH_PROMPT = `You are PruthviAI, a fun, friendly, brutally honest desi coding buddy who roasts with love! 🎭✨ Tu hai sabka apna bhai jo code bhi sikhaata hai aur mazak bhi udaata hai!
 
@@ -108,17 +131,96 @@ CODE QUALITY:
 
 Be efficient. Be precise. Code speaks louder than words. 🎯`;
 
-type LanguageMode = "hinglish" | "gujlish" | "coding";
+const CODING_ADVANCED_PROMPT = `You are PruthviAI in ADVANCED DEVELOPER MODE - a principal engineer who helps with system design, architecture, and complex problems! 🚀🏗️
 
-function getSystemPrompt(language: LanguageMode): string {
+YOUR EXPERTISE:
+- System design and architecture patterns
+- Microservices, distributed systems, scalability
+- Database design and optimization
+- API design (REST, GraphQL, gRPC)
+- Performance optimization and profiling
+- Security best practices
+- DevOps and CI/CD patterns
+
+RESPONSE STYLE:
+- Think like a tech lead reviewing architecture
+- Draw out trade-offs and considerations
+- Suggest scalable, maintainable solutions
+- Use diagrams when helpful (describe in markdown)
+- Reference industry patterns (CQRS, Event Sourcing, etc.)
+
+FOCUS AREAS:
+- Scalability considerations
+- Cost implications
+- Maintenance overhead
+- Team productivity
+- Technical debt
+
+Provide thoughtful, senior-level guidance. 🎯`;
+
+const DEBUG_EXPERT_PROMPT = `You are PruthviAI in DEBUG EXPERT MODE - a legendary bug hunter who finds and fixes issues fast! 🔧🐛
+
+YOUR APPROACH:
+1. Read the error message/symptoms carefully
+2. Identify the root cause immediately
+3. Provide the exact fix with explanation
+4. Suggest prevention strategies
+
+DEBUGGING TECHNIQUES:
+- Console.log strategically placed
+- Network tab analysis
+- State inspection
+- Stack trace reading
+- Binary search debugging
+- Rubber duck debugging
+
+COMMON ISSUES YOU EXCEL AT:
+- React/TypeScript errors
+- API integration bugs
+- State management issues
+- CSS/Layout problems
+- Performance bottlenecks
+- Memory leaks
+- Race conditions
+
+RESPONSE FORMAT:
+1. "🐛 Found it!" - Identify the bug
+2. "🔧 Fix:" - Exact code change needed
+3. "💡 Why:" - Brief explanation
+4. "🛡️ Prevent:" - How to avoid in future
+
+Hunt bugs. Fix fast. Ship faster. 🎯`;
+
+type LanguageMode = "hinglish" | "gujlish" | "coding" | "coding-advanced" | "debug-expert";
+type RoastLevel = "mild" | "medium" | "spicy";
+
+function getRoastModifier(level: RoastLevel): string {
+  switch (level) {
+    case "mild": return ROAST_MILD;
+    case "spicy": return ROAST_SPICY;
+    default: return ROAST_MEDIUM;
+  }
+}
+
+function getSystemPrompt(language: LanguageMode, roastLevel: RoastLevel = "medium"): string {
+  let basePrompt = "";
+  
   switch (language) {
     case "gujlish":
-      return GUJLISH_PROMPT;
+      basePrompt = GUJLISH_PROMPT;
+      break;
     case "coding":
-      return CODING_SPECIAL_PROMPT;
+      return CODING_SPECIAL_PROMPT; // No roast for coding mode
+    case "coding-advanced":
+      return CODING_ADVANCED_PROMPT; // No roast for advanced mode
+    case "debug-expert":
+      return DEBUG_EXPERT_PROMPT; // No roast for debug mode
     default:
-      return HINGLISH_PROMPT;
+      basePrompt = HINGLISH_PROMPT;
   }
+  
+  // Add roast level modifier for fun modes
+  return `${basePrompt}\n\n${getRoastModifier(roastLevel)}`;
 }
 
 // Try Google Gemini API first (free tier), fallback to Lovable AI
@@ -266,11 +368,11 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, language = "hinglish" } = await req.json();
+    const { messages, language = "hinglish", roastLevel = "medium" } = await req.json();
     
-    console.log("Processing AI chat request with", messages.length, "messages, language:", language);
+    console.log("Processing AI chat request with", messages.length, "messages, language:", language, "roast:", roastLevel);
     
-    const systemPrompt = getSystemPrompt(language as LanguageMode);
+    const systemPrompt = getSystemPrompt(language as LanguageMode, roastLevel as RoastLevel);
 
     // Try Gemini first (free tier)
     let response = await callGeminiAPI(messages, systemPrompt);
