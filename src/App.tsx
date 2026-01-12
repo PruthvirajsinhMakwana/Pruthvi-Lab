@@ -38,6 +38,7 @@ import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminActivityLogs from "./pages/admin/AdminActivityLogs";
 import AdminCommunity from "./pages/admin/AdminCommunity";
 import AdminSEO from "./pages/admin/AdminSEO";
+import AdminMarketing from "./pages/admin/AdminMarketing";
 import MyPurchases from "./pages/MyPurchases";
 import NotFound from "./pages/NotFound";
 
@@ -203,6 +204,14 @@ const App = () => (
                 element={
                   <AdminProtectedRoute>
                     <AdminSEO />
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/marketing"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminMarketing />
                   </AdminProtectedRoute>
                 }
               />
