@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, ArrowRight, Loader2 } from "lucide-react";
+import { Check, ArrowRight, Loader2, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +50,7 @@ export default function Onboarding() {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedSkillLevel, setSelectedSkillLevel] = useState<string>("");
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -76,6 +79,7 @@ export default function Onboarding() {
           interests: selectedInterests,
           skill_level: selectedSkillLevel as "beginner" | "intermediate" | "advanced",
           learning_goals: selectedGoals,
+          phone_number: phoneNumber || null,
           onboarding_completed: true,
         })
         .eq("id", user.id);
@@ -106,10 +110,14 @@ export default function Onboarding() {
         return selectedSkillLevel !== "";
       case 3:
         return selectedGoals.length > 0;
+      case 4:
+        return true; // Phone is optional
       default:
         return false;
     }
   };
+
+  const totalSteps = 4;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -129,7 +137,7 @@ export default function Onboarding() {
       <div className="w-full bg-muted h-1">
         <div
           className="bg-primary h-1 transition-all duration-300"
-          style={{ width: `${(step / 3) * 100}%` }}
+          style={{ width: `${(step / totalSteps) * 100}%` }}
         />
       </div>
 
@@ -251,6 +259,41 @@ export default function Onboarding() {
             </div>
           )}
 
+          {/* Step 4: Phone Number (Optional) */}
+          {step === 4 && (
+            <div className="animate-fade-in">
+              <div className="text-center mb-8">
+                <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <Phone className="h-8 w-8 text-primary" />
+                </div>
+                <h1 className="font-heading text-2xl md:text-3xl font-semibold text-foreground">
+                  Stay connected
+                </h1>
+                <p className="text-muted-foreground mt-2">
+                  Optionally add your phone number for important updates
+                </p>
+              </div>
+              <div className="max-w-md mx-auto space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-foreground">
+                    Phone Number (Optional)
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="+91 9876543210"
+                    className="text-center text-lg"
+                  />
+                  <p className="text-xs text-muted-foreground text-center">
+                    We'll only use this for important updates and exclusive offers
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Navigation */}
           <div className="mt-10 flex justify-between items-center max-w-md mx-auto">
             {step > 1 ? (
@@ -270,13 +313,13 @@ export default function Onboarding() {
                 Skip for now
               </Button>
             )}
-            {step < 3 ? (
+            {step < totalSteps ? (
               <Button onClick={() => setStep(step + 1)} disabled={!canProceed()}>
-                Continue
+                {step === 3 ? "Next" : "Continue"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             ) : (
-              <Button onClick={handleComplete} disabled={!canProceed() || isLoading}>
+              <Button onClick={handleComplete} disabled={isLoading}>
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
