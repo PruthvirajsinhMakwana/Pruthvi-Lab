@@ -26,7 +26,9 @@ import {
   Plus,
   MessageSquare,
   X,
-  Maximize2
+  Maximize2,
+  Languages,
+  Zap
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -35,9 +37,24 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { formatDistanceToNow } from "date-fns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 const IMAGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-image`;
+
+type LanguageMode = "hinglish" | "gujlish" | "coding";
+
+const languageOptions = [
+  { value: "hinglish", label: "🇮🇳 Hinglish", desc: "Desi style roasts" },
+  { value: "gujlish", label: "🦁 Gujlish", desc: "Topa, Dofa, Hopara!" },
+  { value: "coding", label: "💻 Coding Pro", desc: "Serious mode" },
+];
 
 const suggestedPrompts = [
   { text: "Explain React hooks simply", icon: "💡" },
@@ -64,6 +81,7 @@ const AIAssistant = () => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [typingText, setTypingText] = useState("");
   const [showHistory, setShowHistory] = useState(false);
+  const [languageMode, setLanguageMode] = useState<LanguageMode>("hinglish");
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -106,7 +124,8 @@ const AIAssistant = () => {
   const streamChat = useCallback(async (
     messagesToSend: ChatMessage[],
     onDelta: (chunk: string) => void,
-    onDone: () => void
+    onDone: () => void,
+    language: LanguageMode = "hinglish"
   ) => {
     const resp = await fetch(CHAT_URL, {
       method: "POST",
@@ -114,7 +133,10 @@ const AIAssistant = () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ messages: messagesToSend.map(m => ({ role: m.role, content: m.content })) }),
+      body: JSON.stringify({ 
+        messages: messagesToSend.map(m => ({ role: m.role, content: m.content })),
+        language 
+      }),
     });
 
     if (!resp.ok) {
@@ -257,7 +279,8 @@ const AIAssistant = () => {
           if (user && convId && assistantSoFar) {
             await saveMessage(convId, { role: "assistant", content: assistantSoFar });
           }
-        }
+        },
+        languageMode
       );
     } catch (error) {
       console.error(error);
@@ -362,93 +385,137 @@ const AIAssistant = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            <Sparkles className="h-4 w-4" />
+        <div className="text-center mb-4 sm:mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-primary/10 text-primary text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+            <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
             AI-Powered Assistant
           </div>
-          <h1 className="text-4xl font-heading font-bold text-foreground mb-4">
+          <h1 className="text-2xl sm:text-4xl font-heading font-bold text-foreground mb-2 sm:mb-4">
             PruthviAI Assistant 🤖
           </h1>
-          <p className="text-muted-foreground max-w-xl mx-auto">
+          <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto px-2">
             Arre yaar! Main hoon tumhara coding buddy! 💪 Koi bhi sawaal poocho - debugging se lekar jokes tak! 😂
           </p>
-          <div className="flex items-center justify-center gap-2 mt-4">
+          
+          {/* Controls Row */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mt-4">
+            {/* Language/Mode Selector */}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Languages className="h-4 w-4 text-muted-foreground hidden sm:block" />
+              <Select value={languageMode} onValueChange={(v) => setLanguageMode(v as LanguageMode)}>
+                <SelectTrigger className="w-full sm:w-[180px] h-9 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  {languageOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      <div className="flex items-center gap-2">
+                        <span>{opt.label}</span>
+                        <span className="text-xs text-muted-foreground hidden sm:inline">- {opt.desc}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              <Link to="/chat">
+                <Button variant="outline" size="sm" className="gap-1 sm:gap-2 h-9 text-xs sm:text-sm">
+                  <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Fullscreen</span>
+                </Button>
+              </Link>
+              {user && (
+                <Sheet open={showHistory} onOpenChange={setShowHistory}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-1 sm:gap-2 h-9 text-xs sm:text-sm">
+                      <History className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">History</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-72 sm:w-80">
+                    <SheetHeader>
+                      <SheetTitle className="flex items-center gap-2">
+                        <History className="h-5 w-5" />
+                        Chat History
+                      </SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4 space-y-2">
+                      <Button 
+                        onClick={() => { startNewChat(); setShowHistory(false); }}
+                        variant="outline" 
+                        className="w-full justify-start gap-2"
+                      >
+                        <Plus className="h-4 w-4" />
+                        New Chat
+                      </Button>
+                      <ScrollArea className="h-[calc(100vh-200px)]">
+                        {conversations.map((conv) => (
+                          <div
+                            key={conv.id}
+                            className={`flex items-center justify-between p-3 rounded-lg cursor-pointer hover:bg-muted transition-colors ${
+                              currentConversationId === conv.id ? "bg-muted" : ""
+                            }`}
+                            onClick={() => loadConversation(conv.id)}
+                          >
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium truncate">{conv.title}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 shrink-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteConversation(conv.id);
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </ScrollArea>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              )}
+            </div>
+          </div>
+          
+          {/* Mode Badge */}
+          <div className="mt-3">
+            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+              languageMode === "coding" 
+                ? "bg-blue-500/10 text-blue-500" 
+                : languageMode === "gujlish"
+                ? "bg-orange-500/10 text-orange-500"
+                : "bg-green-500/10 text-green-500"
+            }`}>
+              <Zap className="h-3 w-3" />
+              {languageMode === "coding" ? "Pro Coding Mode" : languageMode === "gujlish" ? "Gujlish Fun Mode 🦁" : "Hinglish Desi Mode 🇮🇳"}
+            </span>
+          </div>
+        </div>
             <Link to="/chat">
               <Button variant="outline" size="sm" className="gap-2">
                 <Maximize2 className="h-4 w-4" />
                 Fullscreen Mode
               </Button>
             </Link>
-            {user && (
-              <Sheet open={showHistory} onOpenChange={setShowHistory}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <History className="h-4 w-4" />
-                    Chat History
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-80">
-                  <SheetHeader>
-                    <SheetTitle className="flex items-center gap-2">
-                      <History className="h-5 w-5" />
-                      Chat History
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-4 space-y-2">
-                    <Button 
-                      onClick={() => { startNewChat(); setShowHistory(false); }}
-                      variant="outline" 
-                      className="w-full justify-start gap-2"
-                    >
-                      <Plus className="h-4 w-4" />
-                      New Chat
-                    </Button>
-                    <ScrollArea className="h-[calc(100vh-200px)]">
-                      {conversations.map((conv) => (
-                        <div
-                          key={conv.id}
-                          className={`flex items-center justify-between p-3 rounded-lg cursor-pointer hover:bg-muted transition-colors ${
-                            currentConversationId === conv.id ? "bg-muted" : ""
-                          }`}
-                          onClick={() => loadConversation(conv.id)}
-                        >
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium truncate">{conv.title}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
-                              </p>
-                            </div>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 shrink-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteConversation(conv.id);
-                            }}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                    </ScrollArea>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            )}
-          </div>
-        </div>
-
         {/* Fun Fact Banner */}
         {messages.length === 0 && (
-          <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10 text-center">
-            <p className="text-sm text-muted-foreground">
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10 text-center">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {funFacts[Math.floor(Math.random() * funFacts.length)]}
             </p>
           </div>
@@ -458,28 +525,32 @@ const AIAssistant = () => {
         <Card className="border-border/50">
           <CardContent className="p-0">
             {/* Chat Messages */}
-            <ScrollArea className="h-[500px] p-4" ref={scrollRef}>
+            <ScrollArea className="h-[350px] sm:h-[450px] md:h-[500px] p-3 sm:p-4" ref={scrollRef}>
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                  <div className="p-4 rounded-full bg-primary/10 mb-4 animate-bounce">
-                    <Bot className="h-12 w-12 text-primary" />
+                <div className="flex flex-col items-center justify-center h-full text-center py-8 sm:py-12">
+                  <div className="p-3 sm:p-4 rounded-full bg-primary/10 mb-3 sm:mb-4 animate-bounce">
+                    <Bot className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Namaste! 🙏 Kya help chahiye aaj?
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">
+                    {languageMode === "gujlish" ? "Kem cho! 🙏 Su madad karu?" : languageMode === "coding" ? "Ready to code! 💻" : "Namaste! 🙏 Kya help chahiye aaj?"}
                   </h3>
-                  <p className="text-muted-foreground mb-6 max-w-sm">
-                    Coding, debugging, jokes, ya image generation - sab milega yahan! 🚀
+                  <p className="text-sm text-muted-foreground mb-4 sm:mb-6 max-w-sm px-2">
+                    {languageMode === "gujlish" 
+                      ? "Coding, debugging, jokes - badhu j aave che! Topa nai thavu! 🦁" 
+                      : languageMode === "coding"
+                      ? "Ask any technical question. I'll give you clean, production-ready code."
+                      : "Coding, debugging, jokes, ya image generation - sab milega yahan! 🚀"}
                   </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full max-w-lg">
+                  <div className="grid grid-cols-2 gap-2 w-full max-w-lg px-2">
                     {suggestedPrompts.map((prompt) => (
                       <Button
                         key={prompt.text}
                         variant="outline"
-                        className="text-left h-auto py-3 px-4 justify-start hover:bg-primary/5 hover:border-primary/50"
+                        className="text-left h-auto py-2 sm:py-3 px-2 sm:px-4 justify-start hover:bg-primary/5 hover:border-primary/50"
                         onClick={() => handleSend(prompt.text)}
                       >
-                        <span className="mr-2">{prompt.icon}</span>
-                        <span className="text-xs truncate">{prompt.text}</span>
+                        <span className="mr-1 sm:mr-2 text-sm sm:text-base">{prompt.icon}</span>
+                        <span className="text-[10px] sm:text-xs truncate">{prompt.text}</span>
                       </Button>
                     ))}
                   </div>
@@ -489,16 +560,16 @@ const AIAssistant = () => {
                   {messages.map((msg, index) => (
                     <div
                       key={index}
-                      className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
+                      className={`flex gap-2 sm:gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
                     >
-                      <Avatar className="h-8 w-8 shrink-0">
-                        <AvatarFallback className={msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-gradient-to-br from-primary to-accent text-white"}>
-                          {msg.role === "user" ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                      <Avatar className="h-6 w-6 sm:h-8 sm:w-8 shrink-0">
+                        <AvatarFallback className={msg.role === "user" ? "bg-primary text-primary-foreground text-xs" : "bg-gradient-to-br from-primary to-accent text-white text-xs"}>
+                          {msg.role === "user" ? <User className="h-3 w-3 sm:h-4 sm:w-4" /> : <Bot className="h-3 w-3 sm:h-4 sm:w-4" />}
                         </AvatarFallback>
                       </Avatar>
-                      <div className={`flex-1 max-w-[85%] ${msg.role === "user" ? "text-right" : ""}`}>
+                      <div className={`flex-1 max-w-[90%] sm:max-w-[85%] ${msg.role === "user" ? "text-right" : ""}`}>
                         <div
-                          className={`inline-block rounded-2xl px-4 py-2 ${
+                          className={`inline-block rounded-2xl px-3 py-2 sm:px-4 sm:py-2 ${
                             msg.role === "user"
                               ? "bg-primary text-primary-foreground rounded-tr-sm"
                               : "bg-muted text-foreground rounded-tl-sm"
@@ -511,7 +582,7 @@ const AIAssistant = () => {
                               className="max-w-full rounded-lg mb-2 border border-border"
                             />
                           )}
-                          <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
+                          <div className="text-xs sm:text-sm prose prose-sm dark:prose-invert max-w-none">
                             <ReactMarkdown
                               remarkPlugins={[remarkGfm]}
                               components={{
@@ -530,13 +601,13 @@ const AIAssistant = () => {
                                   
                                   return (
                                     <div className="relative group my-2">
-                                      <div className="flex items-center justify-between bg-background/80 px-3 py-1 rounded-t-lg border-b border-border text-xs">
+                                      <div className="flex items-center justify-between bg-background/80 px-2 sm:px-3 py-1 rounded-t-lg border-b border-border text-xs">
                                         <span className="text-muted-foreground">{match[1]}</span>
                                         <div className="flex gap-1">
                                           <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="h-6 px-2 text-xs"
+                                            className="h-5 sm:h-6 px-1 sm:px-2 text-xs"
                                             onClick={() => copyToClipboard(codeString, index)}
                                           >
                                             {copiedIndex === index ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
@@ -545,10 +616,10 @@ const AIAssistant = () => {
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              className="h-6 px-2 text-xs"
+                                              className="h-5 sm:h-6 px-1 sm:px-2 text-xs"
                                               onClick={() => executeCode(codeString, match[1])}
                                             >
-                                              ▶️ Run
+                                              ▶️
                                             </Button>
                                           )}
                                         </div>
@@ -557,7 +628,7 @@ const AIAssistant = () => {
                                         style={oneDark}
                                         language={match[1]}
                                         PreTag="div"
-                                        className="!mt-0 !rounded-t-none"
+                                        className="!mt-0 !rounded-t-none text-xs sm:text-sm"
                                       >
                                         {codeString}
                                       </SyntaxHighlighter>
@@ -571,11 +642,11 @@ const AIAssistant = () => {
                           </div>
                         </div>
                         {msg.role === "assistant" && (
-                          <div className="flex items-center gap-1 mt-1">
+                          <div className="flex items-center gap-0.5 sm:gap-1 mt-1 flex-wrap">
                             <Button
                               variant="ghost"
                               size="sm"
-                              className={`h-7 px-2 ${msg.reaction === "like" ? "text-green-500" : "text-muted-foreground"}`}
+                              className={`h-6 sm:h-7 px-1.5 sm:px-2 ${msg.reaction === "like" ? "text-green-500" : "text-muted-foreground"}`}
                               onClick={() => handleReaction(index, "like")}
                             >
                               <ThumbsUp className="h-3 w-3" />
@@ -583,7 +654,7 @@ const AIAssistant = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className={`h-7 px-2 ${msg.reaction === "dislike" ? "text-red-500" : "text-muted-foreground"}`}
+                              className={`h-6 sm:h-7 px-1.5 sm:px-2 ${msg.reaction === "dislike" ? "text-red-500" : "text-muted-foreground"}`}
                               onClick={() => handleReaction(index, "dislike")}
                             >
                               <ThumbsDown className="h-3 w-3" />
@@ -591,17 +662,16 @@ const AIAssistant = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 px-2 text-muted-foreground hover:text-foreground"
+                              className="h-6 sm:h-7 px-1.5 sm:px-2 text-muted-foreground hover:text-foreground"
                               onClick={() => handleRegenerate(index)}
                               disabled={isLoading}
                             >
-                              <RefreshCw className="h-3 w-3 mr-1" />
-                              Regenerate
+                              <RefreshCw className="h-3 w-3" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 px-2 text-muted-foreground hover:text-foreground"
+                              className="h-6 sm:h-7 px-1.5 sm:px-2 text-muted-foreground hover:text-foreground"
                               onClick={() => copyToClipboard(msg.content, index)}
                             >
                               {copiedIndex === index ? (
@@ -616,22 +686,22 @@ const AIAssistant = () => {
                     </div>
                   ))}
                   {isLoading && messages[messages.length - 1]?.role === "user" && (
-                    <div className="flex gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white">
-                          <Bot className="h-4 w-4" />
+                    <div className="flex gap-2 sm:gap-3">
+                      <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-xs">
+                          <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
                         </AvatarFallback>
                       </Avatar>
-                      <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
+                      <div className="bg-muted rounded-2xl rounded-tl-sm px-3 py-2 sm:px-4 sm:py-3 flex items-center gap-2">
                         {isGeneratingImage ? (
                           <>
-                            <ImageIcon className="h-4 w-4 animate-pulse text-primary" />
-                            <span className="text-sm text-muted-foreground">Image bana raha hoon... 🎨</span>
+                            <ImageIcon className="h-3 w-3 sm:h-4 sm:w-4 animate-pulse text-primary" />
+                            <span className="text-xs sm:text-sm text-muted-foreground">Image bana raha hoon... 🎨</span>
                           </>
                         ) : (
                           <>
-                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                            <span className="text-sm text-muted-foreground">{typingText || "Typing..."}</span>
+                            <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-primary" />
+                            <span className="text-xs sm:text-sm text-muted-foreground">{typingText || "Typing..."}</span>
                           </>
                         )}
                       </div>
@@ -642,41 +712,45 @@ const AIAssistant = () => {
             </ScrollArea>
 
             {/* Input Area */}
-            <div className="border-t border-border p-4">
-              <div className="flex items-center gap-2">
+            <div className="border-t border-border p-2 sm:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 {messages.length > 0 && (
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={clearChat}
-                    className="shrink-0 text-muted-foreground hover:text-destructive"
+                    className="shrink-0 text-muted-foreground hover:text-destructive h-8 w-8 sm:h-9 sm:w-9"
                     title="Clear chat"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </Button>
                 )}
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Poocho kuch bhi... (type 'generate image of...' for images!) 🚀"
+                  placeholder={languageMode === "gujlish" ? "Bol bhai, su madad karu? 🦁" : languageMode === "coding" ? "Ask any coding question..." : "Poocho kuch bhi... 🚀"}
                   disabled={isLoading}
-                  className="flex-1"
+                  className="flex-1 text-sm h-9 sm:h-10"
                 />
                 <Button
                   onClick={() => handleSend()}
                   disabled={!input.trim() || isLoading}
-                  className="shrink-0 bg-gradient-primary"
+                  className="shrink-0 bg-gradient-primary h-8 w-8 sm:h-10 sm:w-10 p-0"
                 >
                   {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
                   ) : (
-                    <Send className="h-4 w-4" />
+                    <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   )}
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                PruthviAI kabhi kabhi galti kar sakta hai yaar! Important info verify karna 🙏 | Made with ❤️ for developers
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-2 text-center px-2">
+                {languageMode === "gujlish" 
+                  ? "PruthviAI kabhi bhool kari shake! Important info verify karje 🙏 | Fafda power! 🫓"
+                  : languageMode === "coding"
+                  ? "PruthviAI may make mistakes. Always verify important code. 💻"
+                  : "PruthviAI kabhi kabhi galti kar sakta hai yaar! Important info verify karna 🙏"}
               </p>
             </div>
           </CardContent>
