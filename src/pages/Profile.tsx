@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Camera, Save, User, Mail, FileText, Sparkles, Target, BookOpen } from "lucide-react";
+import { Camera, Save, User, Mail, FileText, Sparkles, Target, BookOpen, Phone } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,7 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     full_name: "",
     bio: "",
+    phone_number: "",
     skills: [] as string[],
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -40,6 +41,7 @@ export default function Profile() {
     setFormData({
       full_name: profile.full_name || "",
       bio: profile.bio || "",
+      phone_number: (profile as any).phone_number || "",
       skills: profile.skills || [],
     });
     setInitialized(true);
@@ -80,8 +82,9 @@ export default function Profile() {
     await updateProfile({
       full_name: formData.full_name,
       bio: formData.bio,
+      phone_number: formData.phone_number,
       skills: formData.skills,
-    });
+    } as any);
     setIsSaving(false);
   };
 
@@ -195,6 +198,27 @@ export default function Profile() {
                 <Input value={user?.email || ""} disabled className="bg-muted" />
                 <p className="text-xs text-muted-foreground">
                   Email cannot be changed
+                </p>
+              </div>
+
+              {/* Phone Number */}
+              <div className="space-y-2">
+                <Label htmlFor="phone_number" className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  Phone Number
+                  <span className="text-xs text-muted-foreground">(Optional)</span>
+                </Label>
+                <Input
+                  id="phone_number"
+                  type="tel"
+                  value={formData.phone_number}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, phone_number: e.target.value }))
+                  }
+                  placeholder="+91 9876543210"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Used for important updates and marketing (optional)
                 </p>
               </div>
 
