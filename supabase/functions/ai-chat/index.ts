@@ -5,33 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  try {
-    const { messages } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
-
-    console.log("Processing AI chat request with", messages.length, "messages");
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { 
-            role: "system", 
-            content: `You are PruthviAI, a fun, friendly, brutally honest desi coding buddy who roasts with love! 🎭✨ Tu hai sabka apna bhai jo code bhi sikhaata hai aur mazak bhi udaata hai!
+const SYSTEM_PROMPT = `You are PruthviAI, a fun, friendly, brutally honest desi coding buddy who roasts with love! 🎭✨ Tu hai sabka apna bhai jo code bhi sikhaata hai aur mazak bhi udaata hai!
 
 YOUR PERSONALITY & VIBE:
 - Tu hai full-on desi developer friend - speak naturally in Hinglish
@@ -88,17 +62,169 @@ CLOSING LINES (rotate these):
 - "Chal nikal, kaam kar! Aur error aaye toh wapas aana 😂"
 - "Remember: Har expert kabhi noob tha. Keep going! 🚀"
 
-Remember: Roast with LOVE! Code should ALWAYS be correct. Be the fun senior developer everyone wishes they had! 😊`
+Remember: Roast with LOVE! Code should ALWAYS be correct. Be the fun senior developer everyone wishes they had! 😊`;
+
+// Try Google Gemini API first (free tier), fallback to Lovable AI
+async function callGeminiAPI(messages: Array<{role: string; content: string}>) {
+  const GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
+  
+  if (!GEMINI_API_KEY) {
+    console.log("Gemini API key not found, will use Lovable AI");
+    return null;
+  }
+
+  try {
+    // Convert messages to Gemini format
+    const geminiMessages = messages.map(msg => ({
+      role: msg.role === "assistant" ? "model" : "user",
+      parts: [{ text: msg.content }]
+    }));
+
+    // Add system instruction
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents: geminiMessages,
+          generationConfig: {
+            temperature: 0.9,
+            topP: 0.95,
+            maxOutputTokens: 8192,
           },
-          ...messages,
-        ],
-        stream: true,
-      }),
-    });
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+          ]
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("Gemini API error:", response.status, errorText);
+      return null;
+    }
+
+    console.log("Using Google Gemini API (free tier) ✓");
+    return response;
+  } catch (error) {
+    console.error("Gemini API error:", error);
+    return null;
+  }
+}
+
+// Fallback to Lovable AI
+async function callLovableAI(messages: Array<{role: string; content: string}>) {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  
+  if (!LOVABLE_API_KEY) {
+    throw new Error("No AI API configured");
+  }
+
+  console.log("Using Lovable AI (fallback)");
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...messages,
+      ],
+      stream: true,
+    }),
+  });
+
+  return response;
+}
+
+// Transform Gemini SSE to OpenAI-compatible SSE format
+function transformGeminiStream(geminiStream: ReadableStream): ReadableStream {
+  const reader = geminiStream.getReader();
+  const decoder = new TextDecoder();
+  const encoder = new TextEncoder();
+  let buffer = "";
+
+  return new ReadableStream({
+    async pull(controller) {
+      try {
+        const { done, value } = await reader.read();
+        
+        if (done) {
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+          return;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const jsonStr = line.slice(6).trim();
+            if (!jsonStr || jsonStr === "[DONE]") continue;
+
+            try {
+              const parsed = JSON.parse(jsonStr);
+              const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+              
+              if (text) {
+                // Convert to OpenAI format
+                const openAIFormat = {
+                  choices: [{
+                    delta: { content: text }
+                  }]
+                };
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(openAIFormat)}\n\n`));
+              }
+            } catch {
+              // Skip malformed JSON
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Stream transform error:", error);
+        controller.error(error);
+      }
+    },
+    cancel() {
+      reader.cancel();
+    }
+  });
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { messages } = await req.json();
+    
+    console.log("Processing AI chat request with", messages.length, "messages");
+
+    // Try Gemini first (free tier)
+    let response = await callGeminiAPI(messages);
+    let isGemini = !!response;
+
+    // Fallback to Lovable AI if Gemini fails
+    if (!response) {
+      response = await callLovableAI(messages);
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("AI API error:", response.status, errorText);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
@@ -119,9 +245,14 @@ Remember: Roast with LOVE! Code should ALWAYS be correct. Be the fun senior deve
       });
     }
 
-    console.log("Streaming AI response");
+    console.log("Streaming AI response via", isGemini ? "Gemini" : "Lovable AI");
     
-    return new Response(response.body, {
+    // Transform Gemini stream to OpenAI format for compatibility
+    const outputStream = isGemini 
+      ? transformGeminiStream(response.body!) 
+      : response.body;
+
+    return new Response(outputStream, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (error) {
