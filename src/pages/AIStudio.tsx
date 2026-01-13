@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
   Image, 
@@ -11,12 +10,14 @@ import {
   Volume2, 
   Code2,
   Sparkles,
-  Wand2
+  Wand2,
+  Eraser
 } from "lucide-react";
 
 // Tool Components
 import { TextToImageTool } from "@/components/ai-studio/TextToImageTool";
 import { ImageEditorTool } from "@/components/ai-studio/ImageEditorTool";
+import { BackgroundRemoverTool } from "@/components/ai-studio/BackgroundRemoverTool";
 import { WritingAssistantTool } from "@/components/ai-studio/WritingAssistantTool";
 import { ResumeBuilderTool } from "@/components/ai-studio/ResumeBuilderTool";
 import { CodeGeneratorTool } from "@/components/ai-studio/CodeGeneratorTool";
@@ -37,6 +38,14 @@ const tools = [
     name: "Image Editor", 
     icon: Wand2, 
     description: "Edit images with AI prompts",
+    badge: "FREE",
+    badgeVariant: "default" as const
+  },
+  { 
+    id: "bg-remover", 
+    name: "BG Remover", 
+    icon: Eraser, 
+    description: "Remove image backgrounds",
     badge: "FREE",
     badgeVariant: "default" as const
   },
@@ -131,6 +140,10 @@ export default function AIStudio() {
 
           <TabsContent value="image-editor" className="mt-0">
             <ImageEditorTool />
+          </TabsContent>
+
+          <TabsContent value="bg-remover" className="mt-0">
+            <BackgroundRemoverTool />
           </TabsContent>
 
           <TabsContent value="writing-assistant" className="mt-0">
