@@ -5,14 +5,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// ElevenLabs voice IDs - using popular preset voices
+// Real ElevenLabs voice IDs
 const voiceMap: Record<string, string> = {
-  "alloy": "21m00Tcm4TlvDq8ikWAM", // Rachel
-  "echo": "AZnzlk1XvdvUeBnXmlld",   // Domi
-  "fable": "EXAVITQu4vr4xnSDxMaL",  // Bella
-  "onyx": "VR6AewLTigWG4xSOukaG",   // Arnold
-  "nova": "ThT5KcBeYPX3keUQqHPh",   // Dorothy
-  "shimmer": "pNInz6obpgDQGcFmaJgB", // Adam
+  "alloy": "EXAVITQu4vr4xnSDxMaL",   // Sarah
+  "echo": "IKne3meq5aSn9XLyUdCD",    // Charlie
+  "fable": "XrExE9yKIg1WjnnlVkGX",   // Matilda
+  "onyx": "onwK4e9ZLuTAKqWW03F9",    // Daniel
+  "nova": "pFZP5JQG7iQjIQuC4Bku",    // Lily
+  "shimmer": "nPczCjzI2devNBz1zQrb", // Brian
 };
 
 serve(async (req) => {
@@ -47,10 +47,10 @@ serve(async (req) => {
     }
 
     const voiceId = voiceMap[voice] || voiceMap["alloy"];
-    console.log("Generating TTS with voice:", voice, "voiceId:", voiceId);
+    console.log("Generating TTS with voice:", voice, "voiceId:", voiceId, "text length:", text.length);
 
     const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
       {
         method: "POST",
         headers: {
@@ -59,10 +59,10 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           text,
-          model_id: "eleven_monolingual_v1",
+          model_id: "eleven_multilingual_v2",
           voice_settings: {
             stability: 0.5,
-            similarity_boost: 0.5,
+            similarity_boost: 0.75,
           },
         }),
       }
@@ -85,7 +85,7 @@ serve(async (req) => {
         );
       }
       
-      throw new Error(`ElevenLabs API error: ${response.status}`);
+      throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
     }
 
     const audioBuffer = await response.arrayBuffer();
