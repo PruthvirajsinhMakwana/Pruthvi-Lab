@@ -1,35 +1,29 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Music, Loader2, Play, Pause, Download, AlertCircle, Zap } from "lucide-react";
+import { Music, Loader2, Play, Pause, Download, Info, Zap } from "lucide-react";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
 
 const musicExamples = [
   "Upbeat electronic dance music with synth leads",
   "Calm lo-fi hip hop for studying",
   "Epic orchestral cinematic trailer music",
-  "Acoustic guitar folk song with warm tones",
-  "Ambient space music with ethereal pads",
 ];
 
 const sfxExamples = [
   "Magical sparkle sound effect",
   "Heavy footsteps on gravel",
   "Sci-fi laser gun shot",
-  "Door creaking open slowly",
-  "Thunder rumbling in the distance",
 ];
 
 export function MusicGeneratorTool() {
   const [prompt, setPrompt] = useState("");
   const [duration, setDuration] = useState([10]);
-  const [mode, setMode] = useState<"music" | "sfx">("music");
+  const [mode, setMode] = useState<"music" | "sfx">("sfx");
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -115,50 +109,46 @@ export function MusicGeneratorTool() {
   const examples = mode === "music" ? musicExamples : sfxExamples;
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-violet-500/10">
-            <Music className="h-5 w-5 text-violet-500" />
-          </div>
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              Music & SFX Generator
-              <Badge variant="secondary" className="text-xs">API</Badge>
-            </CardTitle>
-            <CardDescription>
-              Generate music tracks and sound effects using ElevenLabs AI
-            </CardDescription>
-          </div>
+    <div className="space-y-6">
+      {/* Info Banner */}
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/5 border border-red-500/20">
+        <Info className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-medium text-foreground">ElevenLabs Powered</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Generate music tracks and sound effects using AI. Make sure your API key is connected.
+          </p>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            This tool requires an ElevenLabs API key. Connect your ElevenLabs account to use this feature.
-          </AlertDescription>
-        </Alert>
+      </div>
 
-        {/* Mode Toggle */}
-        <Tabs value={mode} onValueChange={(v) => setMode(v as "music" | "sfx")}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="music" className="gap-2">
-              <Music className="h-4 w-4" />
-              Music
-            </TabsTrigger>
-            <TabsTrigger value="sfx" className="gap-2">
-              <Zap className="h-4 w-4" />
-              Sound Effects
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+      {/* Mode Toggle */}
+      <div className="flex gap-2 p-1 bg-muted/50 rounded-xl w-fit">
+        <Button
+          variant={mode === "sfx" ? "default" : "ghost"}
+          size="sm"
+          className={cn("gap-2 px-4", mode === "sfx" && "shadow-sm")}
+          onClick={() => setMode("sfx")}
+        >
+          <Zap className="h-4 w-4" />
+          Sound Effects
+        </Button>
+        <Button
+          variant={mode === "music" ? "default" : "ghost"}
+          size="sm"
+          className={cn("gap-2 px-4", mode === "music" && "shadow-sm")}
+          onClick={() => setMode("music")}
+        >
+          <Music className="h-4 w-4" />
+          Music
+        </Button>
+      </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Input Section */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="audio-prompt">
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Input Section */}
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardContent className="p-6 space-y-5">
+            <div className="space-y-3">
+              <Label htmlFor="audio-prompt" className="text-sm font-medium">
                 Describe your {mode === "music" ? "music" : "sound effect"}
               </Label>
               <Textarea
@@ -169,14 +159,17 @@ export function MusicGeneratorTool() {
                   ? "e.g., Upbeat electronic dance music with energetic synths..."
                   : "e.g., A magical sparkle sound with reverb..."
                 }
-                rows={4}
-                className="resize-none"
+                rows={5}
+                className="resize-none bg-background/50 border-border/50 focus:border-primary/50"
               />
             </div>
 
             {/* Duration Slider */}
-            <div className="space-y-2">
-              <Label>Duration: {duration[0]} seconds</Label>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Duration</Label>
+                <span className="text-sm font-medium text-primary">{duration[0]}s</span>
+              </div>
               <Slider
                 value={duration}
                 onValueChange={setDuration}
@@ -186,23 +179,23 @@ export function MusicGeneratorTool() {
                 className="py-2"
               />
               <p className="text-xs text-muted-foreground">
-                {mode === "sfx" ? "Max 22 seconds for sound effects" : "5-60 seconds for music"}
+                {mode === "sfx" ? "1-22 seconds for sound effects" : "5-60 seconds for music"}
               </p>
             </div>
 
             {/* Example Prompts */}
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Try an example:</Label>
+              <Label className="text-xs text-muted-foreground">Quick examples:</Label>
               <div className="flex flex-wrap gap-2">
-                {examples.slice(0, 3).map((example, i) => (
+                {examples.map((example, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     size="sm"
-                    className="text-xs h-auto py-1 px-2"
+                    className="text-xs h-auto py-1.5 px-3 bg-background/50 hover:bg-primary/10 hover:border-primary/30 transition-colors"
                     onClick={() => setPrompt(example)}
                   >
-                    {example.slice(0, 30)}...
+                    {example.slice(0, 28)}...
                   </Button>
                 ))}
               </div>
@@ -211,7 +204,8 @@ export function MusicGeneratorTool() {
             <Button 
               onClick={handleGenerate} 
               disabled={isGenerating || !prompt.trim()}
-              className="w-full gap-2"
+              className="w-full gap-2 h-11 font-medium"
+              size="lg"
             >
               {isGenerating ? (
                 <>
@@ -220,30 +214,35 @@ export function MusicGeneratorTool() {
                 </>
               ) : (
                 <>
-                  <Music className="h-4 w-4" />
+                  {mode === "music" ? <Music className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
                   Generate {mode === "music" ? "Music" : "Sound Effect"}
                 </>
               )}
             </Button>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Output Section */}
-          <div className="space-y-4">
-            <Label>Generated Audio</Label>
-            <div className="aspect-video rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 flex items-center justify-center">
+        {/* Output Section */}
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardContent className="p-6 space-y-4">
+            <Label className="text-sm font-medium">Generated Audio</Label>
+            <div className="aspect-[4/3] rounded-xl border border-border/50 bg-muted/30 flex items-center justify-center">
               {audioUrl ? (
-                <div className="flex flex-col items-center gap-4 p-4">
-                  <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Music className="h-12 w-12 text-primary" />
+                <div className="flex flex-col items-center gap-5 p-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full animate-pulse" />
+                    <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center">
+                      <Music className="h-10 w-10 text-red-500" />
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {mode === "music" ? "Music" : "Sound effect"} ready to play
+                  <p className="text-sm font-medium text-foreground">
+                    {mode === "music" ? "Music" : "Sound effect"} ready
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <Button 
                       onClick={togglePlayback} 
                       variant="default"
-                      className="gap-2"
+                      className="gap-2 px-6"
                     >
                       {isPlaying ? (
                         <>
@@ -268,15 +267,20 @@ export function MusicGeneratorTool() {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-3 text-muted-foreground p-4 text-center">
-                  <Music className="h-8 w-8" />
-                  <p className="text-sm">Generated audio will appear here</p>
+                <div className="flex flex-col items-center gap-4 text-muted-foreground p-6 text-center">
+                  <div className="p-4 rounded-2xl bg-muted/50">
+                    <Music className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">No audio yet</p>
+                    <p className="text-xs mt-1">Generated audio will appear here</p>
+                  </div>
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

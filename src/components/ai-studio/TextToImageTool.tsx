@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Image, Loader2, Download, Sparkles, Wand2 } from "lucide-react";
+import { Loader2, Download, Sparkles, Wand2, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -64,112 +63,109 @@ export function TextToImageTool() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-pink-500/10">
-            <Image className="h-5 w-5 text-pink-500" />
+    <div className="grid lg:grid-cols-2 gap-6">
+      {/* Input Section */}
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <CardContent className="p-6 space-y-5">
+          <div className="space-y-3">
+            <Label htmlFor="prompt" className="text-sm font-medium">
+              Describe your image
+            </Label>
+            <Textarea
+              id="prompt"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="A beautiful sunset over mountains with a lake in the foreground..."
+              rows={6}
+              className="resize-none bg-background/50 border-border/50 focus:border-primary/50"
+            />
           </div>
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              Text to Image
-              <Badge variant="default" className="text-xs">FREE</Badge>
-            </CardTitle>
-            <CardDescription>
-              Generate stunning images from text descriptions using AI
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Input Section */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="prompt">Describe your image</Label>
-              <Textarea
-                id="prompt"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="A beautiful sunset over mountains with a lake in the foreground..."
-                rows={5}
-                className="resize-none"
-              />
-            </div>
 
-            {/* Example Prompts */}
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Try an example:</Label>
-              <div className="flex flex-wrap gap-2">
-                {examplePrompts.map((example, i) => (
-                  <Button
-                    key={i}
-                    variant="outline"
-                    size="sm"
-                    className="text-xs h-auto py-1 px-2"
-                    onClick={() => setPrompt(example)}
-                  >
-                    {example.slice(0, 30)}...
-                  </Button>
-                ))}
+          {/* Example Prompts */}
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Quick examples:</Label>
+            <div className="flex flex-wrap gap-2">
+              {examplePrompts.map((example, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs h-auto py-1.5 px-3 bg-background/50 hover:bg-primary/10 hover:border-primary/30 transition-colors"
+                  onClick={() => setPrompt(example)}
+                >
+                  {example.slice(0, 28)}...
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <Button 
+            onClick={handleGenerate} 
+            disabled={isGenerating || !prompt.trim()}
+            className="w-full gap-2 h-11 font-medium"
+            size="lg"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                Generate Image
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Output Section */}
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <CardContent className="p-6 space-y-4">
+          <Label className="text-sm font-medium">Generated Image</Label>
+          <div className="aspect-square rounded-xl border border-border/50 bg-muted/30 flex items-center justify-center overflow-hidden">
+            {isGenerating ? (
+              <div className="flex flex-col items-center gap-4 text-muted-foreground">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
+                  <div className="relative p-4 rounded-2xl bg-primary/10">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                </div>
+                <p className="text-sm font-medium">Creating your masterpiece...</p>
               </div>
-            </div>
-
-            <Button 
-              onClick={handleGenerate} 
-              disabled={isGenerating || !prompt.trim()}
-              className="w-full gap-2"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  Generate Image
-                </>
-              )}
-            </Button>
-          </div>
-
-          {/* Output Section */}
-          <div className="space-y-4">
-            <Label>Generated Image</Label>
-            <div className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 flex items-center justify-center overflow-hidden">
-              {isGenerating ? (
-                <div className="flex flex-col items-center gap-3 text-muted-foreground">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                  <p className="text-sm">Creating your masterpiece...</p>
+            ) : generatedImage ? (
+              <img 
+                src={generatedImage} 
+                alt="Generated" 
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-4 text-muted-foreground p-6 text-center">
+                <div className="p-4 rounded-2xl bg-muted/50">
+                  <ImagePlus className="h-8 w-8" />
                 </div>
-              ) : generatedImage ? (
-                <img 
-                  src={generatedImage} 
-                  alt="Generated" 
-                  className="w-full h-full object-contain"
-                />
-              ) : (
-                <div className="flex flex-col items-center gap-3 text-muted-foreground p-4 text-center">
-                  <Wand2 className="h-8 w-8" />
-                  <p className="text-sm">Your generated image will appear here</p>
+                <div>
+                  <p className="text-sm font-medium">No image yet</p>
+                  <p className="text-xs mt-1">Your creation will appear here</p>
                 </div>
-              )}
-            </div>
-
-            {generatedImage && (
-              <Button 
-                onClick={handleDownload} 
-                variant="outline" 
-                className="w-full gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Download Image
-              </Button>
+              </div>
             )}
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          {generatedImage && (
+            <Button 
+              onClick={handleDownload} 
+              variant="outline" 
+              className="w-full gap-2 h-10"
+            >
+              <Download className="h-4 w-4" />
+              Download Image
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

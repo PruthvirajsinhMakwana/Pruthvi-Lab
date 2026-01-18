@@ -1,21 +1,19 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Volume2, Loader2, Play, Pause, Download, AlertCircle } from "lucide-react";
+import { Volume2, Loader2, Play, Pause, Download, Info } from "lucide-react";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const voices = [
-  { id: "alloy", name: "Alloy", description: "Neutral and balanced" },
-  { id: "echo", name: "Echo", description: "Warm and conversational" },
-  { id: "fable", name: "Fable", description: "Narrative storyteller" },
-  { id: "onyx", name: "Onyx", description: "Deep and authoritative" },
-  { id: "nova", name: "Nova", description: "Youthful and bright" },
-  { id: "shimmer", name: "Shimmer", description: "Soft and soothing" },
+  { id: "alloy", name: "Sarah", description: "Neutral and balanced" },
+  { id: "echo", name: "Charlie", description: "Warm and conversational" },
+  { id: "fable", name: "Matilda", description: "Narrative storyteller" },
+  { id: "onyx", name: "Daniel", description: "Deep and authoritative" },
+  { id: "nova", name: "Lily", description: "Youthful and bright" },
+  { id: "shimmer", name: "Brian", description: "Soft and soothing" },
 ];
 
 export function TextToSpeechTool() {
@@ -25,7 +23,6 @@ export function TextToSpeechTool() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-  const [hasApiKey, setHasApiKey] = useState(false);
 
   const handleGenerate = async () => {
     if (!text.trim()) {
@@ -58,13 +55,9 @@ export function TextToSpeechTool() {
       const audioBlob = await response.blob();
       const url = URL.createObjectURL(audioBlob);
       setAudioUrl(url);
-      setHasApiKey(true);
       toast.success("Audio generated!");
     } catch (error: any) {
       console.error("Error generating audio:", error);
-      if (error.message?.includes("API key") || error.message?.includes("not configured")) {
-        setHasApiKey(false);
-      }
       toast.error(error.message || "Failed to generate audio. API key may not be configured.");
     } finally {
       setIsGenerating(false);
@@ -104,46 +97,34 @@ export function TextToSpeechTool() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-orange-500/10">
-            <Volume2 className="h-5 w-5 text-orange-500" />
-          </div>
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              Text to Speech
-              <Badge variant="secondary" className="text-xs">API</Badge>
-            </CardTitle>
-            <CardDescription>
-              Convert text to natural-sounding speech using ElevenLabs
-            </CardDescription>
-          </div>
+    <div className="space-y-6">
+      {/* Info Banner */}
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-fuchsia-500/5 border border-fuchsia-500/20">
+        <Info className="h-5 w-5 text-fuchsia-500 shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-medium text-foreground">ElevenLabs Powered</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            This tool uses ElevenLabs for natural voice synthesis. Make sure your API key is connected.
+          </p>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            This tool requires an ElevenLabs API key. Connect your ElevenLabs account to use this feature.
-          </AlertDescription>
-        </Alert>
+      </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Input Section */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Voice</Label>
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Input Section */}
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardContent className="p-6 space-y-5">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Select Voice</Label>
               <Select value={voice} onValueChange={setVoice}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background/50 border-border/50">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {voices.map((v) => (
                     <SelectItem key={v.id} value={v.id}>
-                      <div className="flex flex-col">
-                        <span>{v.name}</span>
-                        <span className="text-xs text-muted-foreground">{v.description}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{v.name}</span>
+                        <span className="text-xs text-muted-foreground">• {v.description}</span>
                       </div>
                     </SelectItem>
                   ))}
@@ -151,25 +132,26 @@ export function TextToSpeechTool() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="tts-text">Text to Convert</Label>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="tts-text" className="text-sm font-medium">Text to Convert</Label>
+                <span className="text-xs text-muted-foreground">{text.length} / 5000</span>
+              </div>
               <Textarea
                 id="tts-text"
                 value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Enter the text you want to convert to speech..."
-                rows={8}
-                className="resize-none"
+                onChange={(e) => setText(e.target.value.slice(0, 5000))}
+                placeholder="Enter the text you want to convert to natural speech..."
+                rows={10}
+                className="resize-none bg-background/50 border-border/50 focus:border-primary/50"
               />
-              <p className="text-xs text-muted-foreground">
-                {text.length} characters
-              </p>
             </div>
 
             <Button 
               onClick={handleGenerate} 
               disabled={isGenerating || !text.trim()}
-              className="w-full gap-2"
+              className="w-full gap-2 h-11 font-medium"
+              size="lg"
             >
               {isGenerating ? (
                 <>
@@ -183,23 +165,28 @@ export function TextToSpeechTool() {
                 </>
               )}
             </Button>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Output Section */}
-          <div className="space-y-4">
-            <Label>Generated Audio</Label>
-            <div className="aspect-video rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 flex items-center justify-center">
+        {/* Output Section */}
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardContent className="p-6 space-y-4">
+            <Label className="text-sm font-medium">Generated Audio</Label>
+            <div className="aspect-[4/3] rounded-xl border border-border/50 bg-muted/30 flex items-center justify-center">
               {audioUrl ? (
-                <div className="flex flex-col items-center gap-4 p-4">
-                  <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Volume2 className="h-12 w-12 text-primary" />
+                <div className="flex flex-col items-center gap-5 p-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-fuchsia-500/20 blur-2xl rounded-full animate-pulse" />
+                    <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 flex items-center justify-center">
+                      <Volume2 className="h-10 w-10 text-fuchsia-500" />
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">Audio ready to play</p>
-                  <div className="flex gap-2">
+                  <p className="text-sm font-medium text-foreground">Audio ready to play</p>
+                  <div className="flex gap-3">
                     <Button 
                       onClick={togglePlayback} 
                       variant="default"
-                      className="gap-2"
+                      className="gap-2 px-6"
                     >
                       {isPlaying ? (
                         <>
@@ -224,15 +211,20 @@ export function TextToSpeechTool() {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-3 text-muted-foreground p-4 text-center">
-                  <Volume2 className="h-8 w-8" />
-                  <p className="text-sm">Generated audio will appear here</p>
+                <div className="flex flex-col items-center gap-4 text-muted-foreground p-6 text-center">
+                  <div className="p-4 rounded-2xl bg-muted/50">
+                    <Volume2 className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">No audio yet</p>
+                    <p className="text-xs mt-1">Generated speech will appear here</p>
+                  </div>
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

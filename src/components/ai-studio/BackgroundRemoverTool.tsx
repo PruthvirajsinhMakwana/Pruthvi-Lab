@@ -1,9 +1,8 @@
 import { useState, useRef } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Eraser, Loader2, Download, Upload, ImageIcon } from "lucide-react";
+import { Eraser, Loader2, Download, Upload, ImageIcon, X, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -81,131 +80,153 @@ export function BackgroundRemoverTool() {
     toast.success("Image downloaded!");
   };
 
+  const clearImage = () => {
+    setOriginalImage(null);
+    setProcessedImage(null);
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-emerald-500/10">
-            <Eraser className="h-5 w-5 text-emerald-500" />
-          </div>
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              Background Remover
-              <Badge variant="default" className="text-xs">FREE</Badge>
-            </CardTitle>
-            <CardDescription>
-              Remove backgrounds from images using AI - perfect for product photos and portraits
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Input Section */}
-          <div className="space-y-4">
-            {/* Upload Area */}
-            <div className="space-y-2">
-              <Label>Upload Image</Label>
-              <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
-              >
-                {originalImage ? (
+    <div className="grid lg:grid-cols-2 gap-6">
+      {/* Input Section */}
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <CardContent className="p-6 space-y-5">
+          {/* Upload Area */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Upload Image</Label>
+            <div 
+              onClick={() => !originalImage && fileInputRef.current?.click()}
+              className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${
+                originalImage 
+                  ? "border-border/50 cursor-default" 
+                  : "border-muted-foreground/25 cursor-pointer hover:border-primary/50 hover:bg-primary/5"
+              }`}
+            >
+              {originalImage ? (
+                <div className="relative">
                   <img 
                     src={originalImage} 
                     alt="Original" 
-                    className="max-h-48 mx-auto rounded-lg object-contain"
+                    className="max-h-52 mx-auto rounded-lg object-contain"
                   />
-                ) : (
-                  <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
-                    <Upload className="h-10 w-10" />
-                    <p className="text-sm font-medium">Click to upload an image</p>
-                    <p className="text-xs">PNG, JPG up to 5MB</p>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-md"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      clearImage();
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3 py-10 text-muted-foreground">
+                  <div className="p-4 rounded-xl bg-muted/50">
+                    <Upload className="h-8 w-8" />
                   </div>
-                )}
+                  <div>
+                    <p className="text-sm font-medium">Click to upload an image</p>
+                    <p className="text-xs mt-1">PNG, JPG up to 5MB</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+          </div>
+
+          {/* Tips */}
+          <div className="p-4 rounded-xl bg-cyan-500/5 border border-cyan-500/20">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 text-cyan-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-foreground">Best Results</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Works best with clear subjects, product photos, and portraits with distinct backgrounds.
+                </p>
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="hidden"
+            </div>
+          </div>
+
+          <Button 
+            onClick={handleRemoveBackground} 
+            disabled={isProcessing || !originalImage}
+            className="w-full gap-2 h-11 font-medium"
+            size="lg"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Removing Background...
+              </>
+            ) : (
+              <>
+                <Eraser className="h-4 w-4" />
+                Remove Background
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Output Section */}
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <CardContent className="p-6 space-y-4">
+          <Label className="text-sm font-medium">Result</Label>
+          <div 
+            className="aspect-square rounded-xl border border-border/50 flex items-center justify-center overflow-hidden"
+            style={{
+              backgroundImage: processedImage ? `url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImNoZWNrZXJib2FyZCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cmVjdCBmaWxsPSIjZjBmMGYwIiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiLz48cmVjdCBmaWxsPSIjZTBlMGUwIiB4PSIxMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIi8+PHJlY3QgZmlsbD0iI2UwZTBlMCIgeT0iMTAiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIvPjxyZWN0IGZpbGw9IiNmMGYwZjAiIHg9IjEwIiB5PSIxMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCBmaWxsPSJ1cmwoI2NoZWNrZXJib2FyZCkiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48L3N2Zz4=")` : undefined,
+              backgroundColor: processedImage ? undefined : 'hsl(var(--muted) / 0.3)'
+            }}
+          >
+            {isProcessing ? (
+              <div className="flex flex-col items-center gap-4 text-muted-foreground bg-background/80 p-8 rounded-xl">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-full animate-pulse" />
+                  <div className="relative p-4 rounded-2xl bg-cyan-500/10">
+                    <Loader2 className="h-8 w-8 animate-spin text-cyan-500" />
+                  </div>
+                </div>
+                <p className="text-sm font-medium">Removing background...</p>
+              </div>
+            ) : processedImage ? (
+              <img 
+                src={processedImage} 
+                alt="Processed" 
+                className="w-full h-full object-contain"
               />
-            </div>
-
-            {originalImage && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  setOriginalImage(null);
-                  setProcessedImage(null);
-                }}
-              >
-                Clear Image
-              </Button>
-            )}
-
-            <Button 
-              onClick={handleRemoveBackground} 
-              disabled={isProcessing || !originalImage}
-              className="w-full gap-2"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Removing Background...
-                </>
-              ) : (
-                <>
-                  <Eraser className="h-4 w-4" />
-                  Remove Background
-                </>
-              )}
-            </Button>
-
-            <p className="text-xs text-muted-foreground text-center">
-              Works best with clear subjects and distinct backgrounds
-            </p>
-          </div>
-
-          {/* Output Section */}
-          <div className="space-y-4">
-            <Label>Result</Label>
-            <div className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImNoZWNrZXJib2FyZCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cmVjdCBmaWxsPSIjZjBmMGYwIiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiLz48cmVjdCBmaWxsPSIjZTBlMGUwIiB4PSIxMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIi8+PHJlY3QgZmlsbD0iI2UwZTBlMCIgeT0iMTAiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIvPjxyZWN0IGZpbGw9IiNmMGYwZjAiIHg9IjEwIiB5PSIxMCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCBmaWxsPSJ1cmwoI2NoZWNrZXJib2FyZCkiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48L3N2Zz4=')] flex items-center justify-center overflow-hidden">
-              {isProcessing ? (
-                <div className="flex flex-col items-center gap-3 text-muted-foreground">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                  <p className="text-sm">Removing background...</p>
-                </div>
-              ) : processedImage ? (
-                <img 
-                  src={processedImage} 
-                  alt="Processed" 
-                  className="w-full h-full object-contain"
-                />
-              ) : (
-                <div className="flex flex-col items-center gap-3 text-muted-foreground p-4 text-center bg-background/80 rounded-lg">
+            ) : (
+              <div className="flex flex-col items-center gap-4 text-muted-foreground p-6 text-center">
+                <div className="p-4 rounded-2xl bg-muted/50">
                   <ImageIcon className="h-8 w-8" />
-                  <p className="text-sm">Processed image will appear here</p>
-                  <p className="text-xs">Transparent background shown as checkerboard</p>
                 </div>
-              )}
-            </div>
-
-            {processedImage && (
-              <Button 
-                onClick={handleDownload} 
-                variant="outline" 
-                className="w-full gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Download Image
-              </Button>
+                <div>
+                  <p className="text-sm font-medium">No result yet</p>
+                  <p className="text-xs mt-1">Transparent background shown as checkerboard</p>
+                </div>
+              </div>
             )}
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          {processedImage && (
+            <Button 
+              onClick={handleDownload} 
+              variant="outline" 
+              className="w-full gap-2 h-10"
+            >
+              <Download className="h-4 w-4" />
+              Download Image
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
