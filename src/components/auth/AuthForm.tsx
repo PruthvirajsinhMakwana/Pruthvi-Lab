@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Mail, Lock, User, Eye, EyeOff, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Loader2, Mail, Lock, User, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -51,7 +51,6 @@ export function AuthForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   const { signIn, signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -124,29 +123,35 @@ export function AuthForm() {
         description: message,
         variant: "destructive",
       });
-    } else {
-      // Send welcome email
-      try {
-        await supabase.functions.invoke("send-welcome-email", {
-          body: { 
-            email: data.email, 
-            name: data.fullName,
-            type: "signup" 
-          },
-        });
-      } catch (emailError) {
-        console.error("Failed to send welcome email:", emailError);
-      }
+      setIsLoading(false);
+      return;
+    }
 
+    // Send welcome email (don't wait for it)
+    supabase.functions.invoke("send-welcome-email", {
+      body: { 
+        email: data.email, 
+        name: data.fullName,
+        type: "signup" 
+      },
+    }).catch(err => console.error("Failed to send welcome email:", err));
+
+    // Auto-login after signup (since email confirmation is disabled)
+    const { error: signInError } = await signIn(data.email, data.password);
+    
+    if (signInError) {
       toast({
-        title: "Check your email!",
-        description: "We've sent you a verification link. Please verify your email before signing in.",
+        title: "Account created!",
+        description: "Please sign in with your new credentials.",
       });
-      
-      // Switch to sign in mode and show verification message
       setMode("signin");
-      setShowVerificationMessage(true);
       signInForm.setValue("email", data.email);
+    } else {
+      toast({
+        title: "Welcome to Pruthvi's Lab! 🎉",
+        description: "Your account has been created. Check your email for a welcome message!",
+      });
+      navigate("/");
     }
     setIsLoading(false);
   };
@@ -276,18 +281,7 @@ export function AuthForm() {
             </button>
           </div>
 
-          {/* Verification Message */}
-          {mode === "signin" && showVerificationMessage && (
-            <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30 flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="font-medium text-green-500">Account created successfully!</p>
-                <p className="text-sm text-muted-foreground">
-                  Please check your email and click the verification link before signing in.
-                </p>
-              </div>
-            </div>
-          )}
+          {/* Removed verification message - auto-confirm is enabled */}
 
           {/* Sign In Form */}
           {mode === "signin" && (
