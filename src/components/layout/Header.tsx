@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Sun, Moon, User, LogOut, Settings, Bookmark, LayoutDashboard, ChevronDown, BookOpen, Code, FileText, Package, Users, ShoppingBag, Bot, Sparkles, MessageCircle, Wand2 } from "lucide-react";
+import { Menu, X, Sun, Moon, User, LogOut, Settings, Bookmark, LayoutDashboard, ChevronDown, BookOpen, Code, FileText, Package, Users, ShoppingBag, Bot, Sparkles, MessageCircle, Wand2, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,7 +36,8 @@ const resourcesNavigation = [
   { name: "Blogs", href: "/blogs", icon: FileText, description: "Articles and insights" },
   { name: "Tutorials", href: "/tutorials", icon: BookOpen, description: "Step-by-step guides" },
   { name: "Code Library", href: "/code-library", icon: Code, description: "Reusable code snippets" },
-  { name: "Materials", href: "/materials", icon: Package, description: "Learning resources" },
+  { name: "Materials", href: "/materials", icon: Package, description: "Premium resources" },
+  { name: "Free Resources", href: "/resources", icon: Globe, description: "Curated free tools & sites" },
 ];
 
 const mobileUserNavigation = [
