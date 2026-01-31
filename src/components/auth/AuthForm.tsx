@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Mail, Lock, User, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Loader2, Mail, Lock, User, Eye, EyeOff, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -49,6 +49,7 @@ export function AuthForm() {
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   const { signIn, signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -83,9 +84,18 @@ export function AuthForm() {
     const { error } = await signIn(data.email, data.password);
 
     if (error) {
+      let errorMessage = error.message || "Invalid email or password";
+      
+      // Provide more helpful error messages
+      if (error.message.includes("Invalid login credentials")) {
+        errorMessage = "Invalid email or password. If you just signed up, please verify your email first.";
+      } else if (error.message.includes("Email not confirmed")) {
+        errorMessage = "Please verify your email before signing in. Check your inbox for the verification link.";
+      }
+      
       toast({
         title: "Sign in failed",
-        description: error.message || "Invalid email or password",
+        description: errorMessage,
         variant: "destructive",
       });
     } else {
@@ -127,10 +137,14 @@ export function AuthForm() {
       }
 
       toast({
-        title: "Account created!",
-        description: "Welcome to Pruthvi's Lab. Let's set up your profile.",
+        title: "Check your email!",
+        description: "We've sent you a verification link. Please verify your email before signing in.",
       });
-      navigate("/onboarding");
+      
+      // Switch to sign in mode and show verification message
+      setMode("signin");
+      setShowVerificationMessage(true);
+      signInForm.setValue("email", data.email);
     }
     setIsLoading(false);
   };
@@ -235,6 +249,19 @@ export function AuthForm() {
               Sign Up
             </button>
           </div>
+
+          {/* Verification Message */}
+          {mode === "signin" && showVerificationMessage && (
+            <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30 flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-medium text-green-500">Account created successfully!</p>
+                <p className="text-sm text-muted-foreground">
+                  Please check your email and click the verification link before signing in.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Sign In Form */}
           {mode === "signin" && (
