@@ -11,7 +11,10 @@ export type ResourceCategory =
   | "privacy"
   | "ai-tools"
   | "audio-music"
-  | "reading";
+  | "reading"
+  | "mobile"
+  | "tools"
+  | "anime";
 
 export type ResourceSubcategory = string;
 
@@ -663,6 +666,191 @@ export const resourceCategories: CategoryData[] = [
           { id: "arxiv", name: "arXiv", url: "https://arxiv.org/", description: "Preprint Archive", tags: ["academic", "preprint", "research"] },
           { id: "semanticscholar", name: "Semantic Scholar", url: "https://www.semanticscholar.org/", description: "AI Research Search", tags: ["academic", "ai", "search"] },
           { id: "researchgate", name: "ResearchGate", url: "https://www.researchgate.net/", description: "Research Network", tags: ["academic", "network", "papers"] },
+        ]
+      }
+    ]
+  },
+  {
+    id: "mobile",
+    name: "Mobile",
+    description: "Android, iOS apps, modded APKs, and mobile tools",
+    icon: "Smartphone",
+    color: "from-lime-500 to-green-500",
+    subcategories: [
+      {
+        name: "Android Apps",
+        resources: [
+          { id: "revanced", name: "ReVanced", url: "https://revanced.app/", description: "YouTube Without Ads", tags: ["youtube", "adblock", "android"], isFeatured: true },
+          { id: "newpipe", name: "NewPipe", url: "https://newpipe.net/", description: "Lightweight YouTube Client", tags: ["youtube", "privacy", "android"], isFeatured: true },
+          { id: "tachiyomij2k", name: "TachiyomiJ2K", url: "https://tachiyomi.org/", description: "Manga Reader App", tags: ["manga", "reader", "android"] },
+          { id: "fdroid", name: "F-Droid", url: "https://f-droid.org/", description: "FOSS App Store", tags: ["appstore", "foss", "android"], isFeatured: true },
+          { id: "aurora", name: "Aurora Store", url: "https://auroraoss.com/", description: "Anonymous Play Store Access", tags: ["appstore", "privacy", "android"] },
+          { id: "obtainium", name: "Obtainium", url: "https://github.com/ImranR98/Obtainium", description: "Get App Updates Directly", tags: ["updates", "github", "android"] },
+          { id: "lucky-patcher", name: "Lucky Patcher", url: "https://www.luckypatchers.com/", description: "App Modifier", tags: ["modding", "patches", "android"] },
+        ]
+      },
+      {
+        name: "Modded APKs",
+        resources: [
+          { id: "mobilism-apk", name: "Mobilism", url: "https://forum.mobilism.org/", description: "Modded Apps Forum", tags: ["modded", "forum", "android"], isFeatured: true },
+          { id: "liteapks", name: "LiteAPKs", url: "https://liteapks.com/", description: "Modded APKs", tags: ["modded", "apk", "android"] },
+          { id: "modyolo", name: "MODYOLO", url: "https://modyolo.com/", description: "Modded Games & Apps", tags: ["modded", "games", "android"] },
+          { id: "apkmirror", name: "APKMirror", url: "https://www.apkmirror.com/", description: "APK Download Site", tags: ["apk", "official", "android"], isFeatured: true },
+          { id: "apkpure", name: "APKPure", url: "https://apkpure.com/", description: "APK Download Site", tags: ["apk", "android"] },
+        ]
+      },
+      {
+        name: "iOS Apps",
+        resources: [
+          { id: "altstore", name: "AltStore", url: "https://altstore.io/", description: "iOS Sideloading", tags: ["sideload", "ios"], isFeatured: true },
+          { id: "sideloadly", name: "Sideloadly", url: "https://sideloadly.io/", description: "iOS Sideloading Tool", tags: ["sideload", "ios"] },
+          { id: "appdb", name: "AppDB", url: "https://appdb.to/", description: "iOS Apps & Games", tags: ["apps", "games", "ios"] },
+          { id: "scarlet", name: "Scarlet", url: "https://usescarlet.com/", description: "iOS App Installer", tags: ["installer", "ios"] },
+        ]
+      },
+      {
+        name: "Mobile Streaming",
+        resources: [
+          { id: "cloudstream", name: "CloudStream", url: "https://cloudstream.on.fleek.co/", description: "Movies & TV Streaming App", tags: ["streaming", "movies", "android"], isFeatured: true },
+          { id: "stremio-mobile", name: "Stremio", url: "https://www.stremio.com/", description: "Streaming App with Addons", tags: ["streaming", "addons", "android"] },
+          { id: "aniyomi", name: "Aniyomi", url: "https://aniyomi.org/", description: "Anime & Manga App", tags: ["anime", "manga", "android"], isFeatured: true },
+          { id: "flixclusive", name: "Flixclusive", url: "https://github.com/rhenwinch/Flixclusive", description: "Movies & TV App", tags: ["streaming", "movies", "android"] },
+        ]
+      },
+      {
+        name: "Mobile Tools",
+        resources: [
+          { id: "termux", name: "Termux", url: "https://termux.dev/", description: "Linux Terminal for Android", tags: ["terminal", "linux", "android"], isFeatured: true },
+          { id: "acode", name: "Acode", url: "https://acode.app/", description: "Code Editor for Android", tags: ["editor", "coding", "android"] },
+          { id: "tasker", name: "Tasker", url: "https://tasker.joaoapps.com/", description: "Automation App", tags: ["automation", "android"] },
+          { id: "shizuku", name: "Shizuku", url: "https://shizuku.rikka.app/", description: "Use System APIs", tags: ["system", "adb", "android"] },
+        ]
+      }
+    ]
+  },
+  {
+    id: "tools",
+    name: "Tools & Utilities",
+    description: "Browser extensions, userscripts, download managers, and utilities",
+    icon: "Settings",
+    color: "from-slate-500 to-zinc-500",
+    subcategories: [
+      {
+        name: "Browser Extensions",
+        resources: [
+          { id: "ublock", name: "uBlock Origin", url: "https://ublockorigin.com/", description: "Best Ad Blocker", tags: ["adblock", "privacy", "extension"], isFeatured: true },
+          { id: "sponsorblock", name: "SponsorBlock", url: "https://sponsor.ajay.app/", description: "Skip YouTube Sponsors", tags: ["youtube", "extension"], isFeatured: true },
+          { id: "violentmonkey", name: "Violentmonkey", url: "https://violentmonkey.github.io/", description: "Userscript Manager", tags: ["userscripts", "extension"] },
+          { id: "tampermonkey", name: "Tampermonkey", url: "https://www.tampermonkey.net/", description: "Userscript Manager", tags: ["userscripts", "extension"], isFeatured: true },
+          { id: "bypass-paywalls", name: "Bypass Paywalls Clean", url: "https://github.com/bpc-clone/bpc_updates", description: "Bypass Article Paywalls", tags: ["paywall", "news", "extension"] },
+          { id: "decentraleyes", name: "Decentraleyes", url: "https://decentraleyes.org/", description: "Local CDN Emulation", tags: ["privacy", "extension"] },
+          { id: "privacy-badger", name: "Privacy Badger", url: "https://privacybadger.org/", description: "Tracker Blocker", tags: ["privacy", "tracker", "extension"] },
+        ]
+      },
+      {
+        name: "Userscripts",
+        resources: [
+          { id: "greasy-fork", name: "Greasy Fork", url: "https://greasyfork.org/", description: "Userscript Repository", tags: ["userscripts", "repository"], isFeatured: true },
+          { id: "openuserjs", name: "OpenUserJS", url: "https://openuserjs.org/", description: "Userscript Repository", tags: ["userscripts", "repository"] },
+          { id: "adsbypasser", name: "AdsBypasser", url: "https://adsbypasser.github.io/", description: "Skip Link Shorteners", tags: ["adblock", "userscript"] },
+          { id: "fastforward", name: "FastForward", url: "https://fastforward.team/", description: "Skip Link Shorteners", tags: ["link", "bypass", "extension"], isFeatured: true },
+        ]
+      },
+      {
+        name: "Download Managers",
+        resources: [
+          { id: "jdownloader", name: "JDownloader", url: "https://jdownloader.org/", description: "Best Download Manager", tags: ["download", "manager"], isFeatured: true },
+          { id: "idm", name: "Internet Download Manager", url: "https://www.internetdownloadmanager.com/", description: "Windows Download Manager", tags: ["download", "windows"] },
+          { id: "xdm", name: "Xtreme Download Manager", url: "https://xtremedownloadmanager.com/", description: "Cross-Platform Manager", tags: ["download", "opensource"] },
+          { id: "motrix", name: "Motrix", url: "https://motrix.app/", description: "Full-Featured Manager", tags: ["download", "opensource"] },
+          { id: "free-download-manager", name: "Free Download Manager", url: "https://www.freedownloadmanager.org/", description: "Download Accelerator", tags: ["download", "free"] },
+        ]
+      },
+      {
+        name: "Activation Tools",
+        resources: [
+          { id: "massgrave", name: "Microsoft Activation Scripts", url: "https://massgrave.dev/", description: "Windows & Office Activation", tags: ["windows", "activation"], isFeatured: true },
+          { id: "kms", name: "KMS_VL_ALL_AIO", url: "https://github.com/abbodi1406/KMS_VL_ALL_AIO", description: "Windows KMS Activator", tags: ["windows", "kms"] },
+        ]
+      },
+      {
+        name: "Media Tools",
+        resources: [
+          { id: "handbrake", name: "HandBrake", url: "https://handbrake.fr/", description: "Video Transcoder", tags: ["video", "converter"], isFeatured: true },
+          { id: "ffmpeg", name: "FFmpeg", url: "https://ffmpeg.org/", description: "Media Framework", tags: ["video", "audio", "cli"], isFeatured: true },
+          { id: "obs", name: "OBS Studio", url: "https://obsproject.com/", description: "Screen Recording & Streaming", tags: ["recording", "streaming"] },
+          { id: "vlc", name: "VLC Media Player", url: "https://www.videolan.org/vlc/", description: "Universal Media Player", tags: ["player", "video", "audio"], isFeatured: true },
+          { id: "mpv", name: "mpv", url: "https://mpv.io/", description: "Minimal Media Player", tags: ["player", "minimal"] },
+          { id: "staxrip", name: "StaxRip", url: "https://github.com/staxrip/staxrip", description: "Video Encoding GUI", tags: ["video", "encoding"] },
+        ]
+      },
+      {
+        name: "System Utilities",
+        resources: [
+          { id: "bleachbit", name: "BleachBit", url: "https://www.bleachbit.org/", description: "System Cleaner", tags: ["cleaner", "privacy"], isFeatured: true },
+          { id: "everything", name: "Everything", url: "https://www.voidtools.com/", description: "Instant File Search", tags: ["search", "files", "windows"], isFeatured: true },
+          { id: "7zip", name: "7-Zip", url: "https://www.7-zip.org/", description: "File Archiver", tags: ["archive", "compression"] },
+          { id: "revo", name: "Revo Uninstaller", url: "https://www.revouninstaller.com/", description: "Complete Uninstaller", tags: ["uninstaller", "windows"] },
+          { id: "wiztree", name: "WizTree", url: "https://diskanalyzer.com/", description: "Disk Space Analyzer", tags: ["disk", "analyzer", "windows"] },
+          { id: "bulk-crap", name: "Bulk Crap Uninstaller", url: "https://www.bcuninstaller.com/", description: "Bulk Uninstaller", tags: ["uninstaller", "windows"] },
+        ]
+      }
+    ]
+  },
+  {
+    id: "anime",
+    name: "Anime",
+    description: "Anime streaming, downloads, tracking, and community resources",
+    icon: "Tv",
+    color: "from-fuchsia-500 to-pink-500",
+    subcategories: [
+      {
+        name: "Anime Streaming",
+        resources: [
+          { id: "aniwave-full", name: "AniWave", url: "https://aniwave.live/", description: "Sub / Dub / Auto-Next", tags: ["anime", "streaming", "sub", "dub"], isFeatured: true },
+          { id: "hianime-full", name: "HiAnime", url: "https://hianime.nz/", description: "Sub / Dub / Auto-Next", tags: ["anime", "streaming", "sub", "dub"], isFeatured: true },
+          { id: "animekai", name: "AnimeKai", url: "https://animekai.to/", description: "HD Anime Streaming", tags: ["anime", "streaming", "hd"] },
+          { id: "gogoanime", name: "GoGoAnime", url: "https://anitaku.pe/", description: "Classic Anime Site", tags: ["anime", "streaming"] },
+          { id: "animesuge", name: "AnimeSuge", url: "https://animesuge.to/", description: "Anime Streaming", tags: ["anime", "streaming"] },
+          { id: "aniwatch", name: "AniWatch", url: "https://aniwatch.to/", description: "HD Anime Streaming", tags: ["anime", "streaming", "hd"] },
+        ]
+      },
+      {
+        name: "Anime Downloads",
+        resources: [
+          { id: "nyaa", name: "Nyaa.si", url: "https://nyaa.si/", description: "Anime Torrents", tags: ["anime", "torrent", "download"], isFeatured: true },
+          { id: "subsplease", name: "SubsPlease", url: "https://subsplease.org/", description: "Fast Anime Releases", tags: ["anime", "torrent", "fast"] },
+          { id: "erai-raws", name: "Erai-raws", url: "https://www.erai-raws.info/", description: "Multi-Sub Anime", tags: ["anime", "torrent", "sub"] },
+          { id: "judas", name: "Judas", url: "https://rentry.org/judas-ddl", description: "Small Anime Encodes", tags: ["anime", "download", "small"] },
+          { id: "anidl", name: "AniDL", url: "https://anidl.org/", description: "Anime Direct Downloads", tags: ["anime", "download", "ddl"] },
+        ]
+      },
+      {
+        name: "Anime Tracking",
+        resources: [
+          { id: "myanimelist", name: "MyAnimeList", url: "https://myanimelist.net/", description: "Anime Database & Tracking", tags: ["anime", "database", "tracking"], isFeatured: true },
+          { id: "anilist", name: "AniList", url: "https://anilist.co/", description: "Modern Anime Tracker", tags: ["anime", "tracking", "social"], isFeatured: true },
+          { id: "anidb", name: "AniDB", url: "https://anidb.net/", description: "Comprehensive Anime Database", tags: ["anime", "database"] },
+          { id: "kitsu", name: "Kitsu", url: "https://kitsu.app/", description: "Anime & Manga Community", tags: ["anime", "manga", "social"] },
+          { id: "simkl", name: "Simkl", url: "https://simkl.com/", description: "TV & Anime Tracker", tags: ["anime", "tv", "tracking"] },
+        ]
+      },
+      {
+        name: "Anime Apps",
+        resources: [
+          { id: "aniyomi-app", name: "Aniyomi", url: "https://aniyomi.org/", description: "Anime & Manga Android App", tags: ["anime", "manga", "android"], isFeatured: true },
+          { id: "saikou", name: "Saikou", url: "https://saikou.app/", description: "Anime Android App", tags: ["anime", "android"] },
+          { id: "miru", name: "Miru", url: "https://miru.watch/", description: "Cross-Platform Anime App", tags: ["anime", "desktop", "app"], isFeatured: true },
+          { id: "ani-cli", name: "ani-cli", url: "https://github.com/pystardust/ani-cli", description: "CLI Anime Watcher", tags: ["anime", "cli", "terminal"] },
+        ]
+      },
+      {
+        name: "Anime Resources",
+        resources: [
+          { id: "wotaku", name: "Wotaku", url: "https://wotaku.wiki/", description: "Japanese Media Wiki", tags: ["anime", "manga", "wiki"], isFeatured: true },
+          { id: "theindex", name: "The Index", url: "https://theindex.moe/", description: "Anime Resource Index", tags: ["anime", "index", "resources"] },
+          { id: "seadex", name: "SeaDex", url: "https://releases.moe/", description: "Best Release Comparisons", tags: ["anime", "quality", "releases"] },
+          { id: "chiaki", name: "Chiaki", url: "https://chiaki.site/", description: "Anime Schedule", tags: ["anime", "schedule"] },
         ]
       }
     ]
