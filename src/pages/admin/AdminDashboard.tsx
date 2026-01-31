@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { FileText, BookOpen, Code2, Users, TrendingUp, Eye, BarChart3, MessageCircle, Package } from "lucide-react";
+import { FileText, BookOpen, Code2, Users, TrendingUp, Eye, BarChart3, MessageCircle, Package, Activity, Globe } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,10 @@ import { useTutorials } from "@/hooks/useTutorials";
 import { useCodeSnippets } from "@/hooks/useCodeSnippets";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useVisitorStats } from "@/hooks/useVisitorStats";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -19,6 +21,7 @@ export default function AdminDashboard() {
   const { data: blogs } = useBlogPosts({ authorId: user?.id });
   const { data: tutorials } = useTutorials({ authorId: user?.id });
   const { data: snippets } = useCodeSnippets({ authorId: user?.id });
+  const { data: visitorStats, isLoading: loadingVisitors } = useVisitorStats();
 
   // Fetch additional stats for admins
   const { data: adminStats } = useQuery({
@@ -30,12 +33,22 @@ export default function AdminDashboard() {
         { count: totalTutorials },
         { count: totalMessages },
         { count: totalMaterials },
+        { count: todayLogins },
+        { count: todaySignups },
       ] = await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }),
         supabase.from("blog_posts").select("*", { count: "exact", head: true }),
         supabase.from("tutorials").select("*", { count: "exact", head: true }),
         supabase.from("community_messages").select("*", { count: "exact", head: true }),
         supabase.from("materials").select("*", { count: "exact", head: true }),
+        supabase.from("user_activity_logs")
+          .select("*", { count: "exact", head: true })
+          .eq("action_type", "login")
+          .gte("created_at", new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
+        supabase.from("user_activity_logs")
+          .select("*", { count: "exact", head: true })
+          .eq("action_type", "signup")
+          .gte("created_at", new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
       ]);
 
       return {
@@ -44,6 +57,8 @@ export default function AdminDashboard() {
         totalTutorials: totalTutorials || 0,
         totalMessages: totalMessages || 0,
         totalMaterials: totalMaterials || 0,
+        todayLogins: todayLogins || 0,
+        todaySignups: todaySignups || 0,
       };
     },
     enabled: isAdmin || isSuperAdmin,
@@ -124,6 +139,120 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout title="Dashboard" description="Overview of your content and platform activity">
+      {/* Visitor Analytics - Real-time Stats */}
+      {(isAdmin || isSuperAdmin) && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-heading font-semibold flex items-center gap-2">
+              <Globe className="h-5 w-5 text-primary" />
+              Visitor Analytics (Live)
+            </h2>
+            <Badge variant="outline" className="animate-pulse">
+              <Activity className="h-3 w-3 mr-1" />
+              Real-time
+            </Badge>
+          </div>
+          <div className="grid gap-4 grid-cols-2 md:grid-cols-4 mb-6">
+            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-medium text-muted-foreground">Today's Views</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-blue-600">{visitorStats?.todayViews || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {visitorStats?.todayUnique || 0} unique visitors
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-medium text-muted-foreground">This Week</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-green-600">{visitorStats?.weeklyViews || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">page views</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-medium text-muted-foreground">Total Unique</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-purple-600">{visitorStats?.uniqueVisitors || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">unique sessions (30d)</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-medium text-muted-foreground">Today's Activity</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg font-bold text-orange-600">
+                  {adminStats?.todayLogins || 0} logins
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {adminStats?.todaySignups || 0} new signups
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Weekly Traffic Chart */}
+          {visitorStats?.dailyStats && visitorStats.dailyStats.length > 0 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-base">Weekly Traffic</CardTitle>
+                <CardDescription>Page views and unique visitors over the last 7 days</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={visitorStats.dailyStats}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="date" className="text-xs" />
+                      <YAxis className="text-xs" />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))', 
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }} 
+                      />
+                      <Legend />
+                      <Bar dataKey="views" fill="hsl(var(--primary))" name="Page Views" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="unique" fill="hsl(var(--secondary))" name="Unique Visitors" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Top Pages */}
+          {visitorStats?.topPages && visitorStats.topPages.length > 0 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-base">Top Pages</CardTitle>
+                <CardDescription>Most visited pages in the last 30 days</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {visitorStats.topPages.slice(0, 5).map((page, index) => (
+                    <div key={page.path} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                      <div className="flex items-center gap-3">
+                        <span className="text-muted-foreground font-mono text-sm">#{index + 1}</span>
+                        <span className="font-medium text-sm truncate max-w-[200px]">{page.path}</span>
+                      </div>
+                      <Badge variant="secondary">{page.count} views</Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
       {/* Admin Platform Stats */}
       {(isAdmin || isSuperAdmin) && (
         <div className="mb-8">

@@ -30,3 +30,6 @@ verify_jwt = false
 
 [functions.send-admin-otp]
 verify_jwt = false
+
+[functions.notify-telegram-activity]
+verify_jwt = false

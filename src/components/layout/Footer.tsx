@@ -1,35 +1,35 @@
 import { Link } from "react-router-dom";
-import { Github, Twitter, Linkedin, Mail } from "lucide-react";
+import { Instagram, Globe, Mail, MessageCircle } from "lucide-react";
 
 const footerLinks = {
   learn: [
     { name: "Blogs", href: "/blogs" },
     { name: "Tutorials", href: "/tutorials" },
     { name: "Code Library", href: "/code-library" },
-    { name: "API Marketplace", href: "/apis" },
+    { name: "Free Resources", href: "/resources" },
   ],
   community: [
-    { name: "Chat Groups", href: "/community" },
-    { name: "Forums", href: "/forums" },
-    { name: "Discord", href: "#" },
+    { name: "Community Chat", href: "/community" },
+    { name: "AI Studio", href: "/ai-studio" },
+    { name: "Telegram", href: "https://t.me/BAPU_EMPIRE", external: true },
   ],
   company: [
-    { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
-    { name: "Careers", href: "/careers" },
+    { name: "Support", href: "/support" },
+    { name: "Materials", href: "/materials" },
   ],
   legal: [
     { name: "Privacy Policy", href: "/privacy" },
     { name: "Terms of Service", href: "/terms" },
-    { name: "Cookie Policy", href: "/cookies" },
+    { name: "Disclaimer", href: "/resources" },
   ],
 };
 
 const socialLinks = [
-  { name: "GitHub", icon: Github, href: "#" },
-  { name: "Twitter", icon: Twitter, href: "#" },
-  { name: "LinkedIn", icon: Linkedin, href: "#" },
-  { name: "Email", icon: Mail, href: "mailto:hello@pruthvislab.com" },
+  { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/pruthvirajsinh__makwana/" },
+  { name: "Telegram", icon: MessageCircle, href: "https://t.me/BAPU_EMPIRE" },
+  { name: "Website", icon: Globe, href: "https://pruthvirajsinh.in/" },
+  { name: "Email", icon: Mail, href: "mailto:pruthvirajsinh.biz@gmail.com" },
 ];
 
 export function Footer() {
@@ -95,12 +95,23 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.community.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    to={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.name}
-                  </Link>
+                  {'external' in link && link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.name}
+                    </a>
+                  ) : (
+                    <Link
+                      to={link.href}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.name}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
