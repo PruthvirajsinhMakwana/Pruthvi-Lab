@@ -22,6 +22,7 @@ import Tutorials from "./pages/Tutorials";
 import TutorialPage from "./pages/TutorialPage";
 import CodeLibrary from "./pages/CodeLibrary";
 import Materials from "./pages/Materials";
+import Resources from "./pages/Resources";
 import Community from "./pages/Community";
 import AIAssistant from "./pages/AIAssistant";
 import AITools from "./pages/AITools";
@@ -107,6 +108,7 @@ const App = () => (
               <Route path="/tutorials/:slug" element={<TutorialPage />} />
               <Route path="/code-library" element={<CodeLibrary />} />
               <Route path="/materials" element={<Materials />} />
+              <Route path="/resources" element={<Resources />} />
               <Route path="/community" element={<Community />} />
               <Route path="/ai-assistant" element={<AIAssistant />} />
               <Route path="/ai-tools" element={<AITools />} />
