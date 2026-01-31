@@ -10,7 +10,6 @@ interface LoginPopupProps {
 
 export function LoginPopup({ delayInSeconds = 60 }: LoginPopupProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const [hasBeenDismissed, setHasBeenDismissed] = useState(false);
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -18,24 +17,28 @@ export function LoginPopup({ delayInSeconds = 60 }: LoginPopupProps) {
     // Check if popup was dismissed in this session
     const dismissed = sessionStorage.getItem("login_popup_dismissed");
     if (dismissed) {
-      setHasBeenDismissed(true);
       return;
     }
 
     // Don't show if user is logged in or still loading
-    if (loading || user) return;
+    if (loading) return;
+    
+    // If user is logged in, never show popup
+    if (user) {
+      setIsVisible(false);
+      return;
+    }
 
-    // Show popup after delay
+    // Show popup after delay only for non-logged-in users
     const timer = setTimeout(() => {
-      if (!user && !hasBeenDismissed) {
-        setIsVisible(true);
-      }
+      // Double check user is still not logged in
+      setIsVisible(true);
     }, delayInSeconds * 1000);
 
     return () => clearTimeout(timer);
-  }, [user, loading, delayInSeconds, hasBeenDismissed]);
+  }, [user, loading, delayInSeconds]);
 
-  // Hide popup when user logs in
+  // Hide popup immediately when user logs in
   useEffect(() => {
     if (user) {
       setIsVisible(false);
@@ -44,7 +47,6 @@ export function LoginPopup({ delayInSeconds = 60 }: LoginPopupProps) {
 
   const handleDismiss = () => {
     setIsVisible(false);
-    setHasBeenDismissed(true);
     sessionStorage.setItem("login_popup_dismissed", "true");
   };
 
