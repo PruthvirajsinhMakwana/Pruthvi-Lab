@@ -101,36 +101,31 @@
 ## 📸 Screenshots
 
 ### 🏠 Homepage
-![Homepage](https://dev-api-learn.lovable.app/placeholder.svg)
-
-> **Beautiful dark-themed landing page with:**
-> - Hero section with gradient effects
-> - Feature highlights
-> - Quick access to all sections
-> - Responsive design for all devices
+> **Beautiful dark-themed landing page featuring:**
+> - ✨ Hero section with gradient effects and animations
+> - 📊 Stats showing tutorials, snippets, and community size
+> - 📚 Featured tutorials, blog posts, and code snippets
+> - 🤖 AI Assistant section with quick access
+> - 📱 Fully responsive design for all devices
 
 ### 🤖 AI Studio
-![AI Studio](https://dev-api-learn.lovable.app/placeholder.svg)
-
-> **Professional creative tools suite featuring:**
-> - Text-to-Image Generation
-> - Image Editor with AI
-> - Writing Assistant
-> - Resume Builder
-> - Code Generator
-> - Background Remover
-> - Text-to-Speech (ElevenLabs)
-> - Music & SFX Generator
+> **Professional creative tools suite including:**
+> - 🖼️ Text-to-Image Generation (FREE)
+> - ✏️ Image Editor with AI prompts (FREE)
+> - ✍️ Writing Assistant for essays & emails (FREE)
+> - 📄 Resume Builder (FREE)
+> - 💻 Code Generator in multiple languages (FREE)
+> - 🎨 Background Remover (FREE)
+> - 🎤 Text-to-Speech (ElevenLabs API)
+> - 🎵 Music & SFX Generator (ElevenLabs API)
 
 ### 📊 Admin Dashboard
-![Admin Dashboard](https://dev-api-learn.lovable.app/placeholder.svg)
-
 > **Comprehensive admin panel with:**
-> - Real-time analytics
-> - Content management
-> - User management
-> - Activity logs
-> - Marketing tools
+> - 📈 Real-time visitor analytics and traffic charts
+> - 📝 Content management (Blogs, Tutorials, Snippets)
+> - 👥 User management with role controls
+> - 📋 Activity logs with IP and browser tracking
+> - 📧 Marketing tools with Brevo integration
 
 ---
 
