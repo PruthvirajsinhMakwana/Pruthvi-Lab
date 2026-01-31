@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { 
   Play, Gamepad2, Download, Share2, GraduationCap, Wrench, Shield,
   Search, ExternalLink, Star, ChevronRight, Sparkles, BookOpen, 
-  Globe, Zap, Heart, Info, Bookmark, BookmarkCheck, Music
+  Globe, Zap, Heart, Info, Bookmark, BookmarkCheck, Music, Smartphone,
+  Settings, Tv, AlertTriangle
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSavedItems } from "@/hooks/useSavedItems";
@@ -36,6 +37,9 @@ const iconMap: Record<string, React.ElementType> = {
   Sparkles,
   Music,
   BookOpen,
+  Smartphone,
+  Settings,
+  Tv,
 };
 
 function ResourceCard({ 
@@ -414,25 +418,63 @@ export default function Resources() {
               })}
             </Tabs>
 
+            {/* Educational Disclaimer */}
+            <Card className="mt-12 glass border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
+              <CardContent className="py-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-full bg-amber-500/20">
+                    <AlertTriangle className="h-6 w-6 text-amber-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold mb-2 text-amber-500">⚠️ Educational Purpose Disclaimer</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      This resource hub is provided strictly for <strong>educational and informational purposes only</strong>. 
+                      We do not host, upload, or distribute any copyrighted content. All links direct to external third-party websites 
+                      that we have no control over.
+                    </p>
+                    <ul className="text-sm text-muted-foreground space-y-1 mb-3 list-disc list-inside">
+                      <li>We do not condone or encourage any illegal activities or copyright infringement</li>
+                      <li>Users are solely responsible for complying with the laws of their respective jurisdictions</li>
+                      <li>Always use legal streaming services and support content creators when possible</li>
+                      <li>Some resources may require VPN usage depending on your location</li>
+                    </ul>
+                    <p className="text-xs text-muted-foreground italic">
+                      By accessing these resources, you acknowledge that you understand and agree to use them responsibly 
+                      and in accordance with applicable laws. If you are a copyright holder and believe any content infringes 
+                      your rights, please contact the respective website owners directly.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Info Banner */}
-            <Card className="mt-12 glass border-border/50 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
-              <CardContent className="flex items-center gap-4 py-6">
+            <Card className="mt-6 glass border-border/50 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+              <CardContent className="flex flex-col sm:flex-row items-center gap-4 py-6">
                 <div className="p-3 rounded-full bg-primary/10">
                   <Info className="h-6 w-6 text-primary" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 text-center sm:text-left">
                   <h3 className="font-semibold mb-1">About This Resource Hub</h3>
                   <p className="text-sm text-muted-foreground">
-                    This collection is curated from FMHY (FreeMediaHeckYeah) - the largest collection of free stuff on the internet. 
-                    Always use an adblocker and VPN when accessing these resources. We recommend uBlock Origin and Mullvad VPN.
+                    This collection is curated from FMHY (FreeMediaHeckYeah) and r/Piracy Megathread - comprehensive directories of free resources on the internet. 
+                    Always use an adblocker and VPN when accessing these resources. We recommend uBlock Origin and Mullvad/ProtonVPN.
                   </p>
                 </div>
-                <Button variant="outline" asChild>
-                  <a href="https://fmhy.net/" target="_blank" rel="noopener noreferrer">
-                    Visit FMHY
-                    <ExternalLink className="h-4 w-4 ml-2" />
-                  </a>
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" asChild>
+                    <a href="https://fmhy.net/" target="_blank" rel="noopener noreferrer">
+                      FMHY
+                      <ExternalLink className="h-3 w-3 ml-1" />
+                    </a>
+                  </Button>
+                  <Button variant="outline" size="sm" asChild>
+                    <a href="https://rentry.org/megathread" target="_blank" rel="noopener noreferrer">
+                      Megathread
+                      <ExternalLink className="h-3 w-3 ml-1" />
+                    </a>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
