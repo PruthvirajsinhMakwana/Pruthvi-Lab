@@ -36,6 +36,21 @@ const notifyTelegram = async (type: "login" | "signup", user: User) => {
   }
 };
 
+// Helper function to send welcome email
+const sendWelcomeEmail = async (email: string, name?: string, type: "signup" | "login" = "signup") => {
+  try {
+    await supabase.functions.invoke("send-welcome-email", {
+      body: {
+        email,
+        name,
+        type,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to send welcome email:", error);
+  }
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -87,9 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
 
-    // Send Telegram notification for new signup
+    // Send Telegram notification and welcome email for new signup
     if (!error && data.user) {
       notifyTelegram('signup', data.user);
+      sendWelcomeEmail(email, fullName, 'signup');
     }
 
     return { error: error as Error | null };
