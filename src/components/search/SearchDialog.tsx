@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Search, X, FileText, BookOpen, Code2, Loader2 } from "lucide-react";
+import { Search, X, FileText, BookOpen, Code2, Loader2, Globe, Package } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,18 +14,21 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
 import { useTutorials } from "@/hooks/useTutorials";
 import { useCodeSnippets } from "@/hooks/useCodeSnippets";
+import { useMaterials } from "@/hooks/useMaterials";
+import { searchResources, Resource } from "@/data/fmhyResources";
 import { cn } from "@/lib/utils";
 
-type ContentType = "all" | "blogs" | "tutorials" | "snippets";
+type ContentType = "all" | "blogs" | "tutorials" | "snippets" | "resources" | "materials";
 
 interface SearchResult {
   id: string;
-  type: "blog" | "tutorial" | "snippet";
+  type: "blog" | "tutorial" | "snippet" | "resource" | "material";
   title: string;
   description?: string;
   slug?: string;
   language?: string;
   tags?: string[];
+  url?: string;
 }
 
 export function SearchDialog({
@@ -42,8 +45,9 @@ export function SearchDialog({
   const { data: blogs, isLoading: blogsLoading } = useBlogPosts({ published: true });
   const { data: tutorials, isLoading: tutorialsLoading } = useTutorials({ published: true });
   const { data: snippets, isLoading: snippetsLoading } = useCodeSnippets({ published: true });
+  const { data: materials, isLoading: materialsLoading } = useMaterials();
 
-  const isLoading = blogsLoading || tutorialsLoading || snippetsLoading;
+  const isLoading = blogsLoading || tutorialsLoading || snippetsLoading || materialsLoading;
 
   useEffect(() => {
     if (open && inputRef.current) {
@@ -67,10 +71,18 @@ export function SearchDialog({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onOpenChange]);
 
-  // Filter and search results
-  const searchResults: SearchResult[] = [];
+  // Search resources from FMHY data
+  const fmhyResults = useMemo(() => {
+    if (!query.trim()) return [];
+    return searchResources(query).slice(0, 15);
+  }, [query]);
 
-  if (query.trim()) {
+  // Filter and search results
+  const searchResults: SearchResult[] = useMemo(() => {
+    const results: SearchResult[] = [];
+    
+    if (!query.trim()) return results;
+    
     const q = query.toLowerCase();
 
     if (filter === "all" || filter === "blogs") {
@@ -80,7 +92,7 @@ export function SearchDialog({
           blog.excerpt?.toLowerCase().includes(q) ||
           blog.tags?.some((tag) => tag.toLowerCase().includes(q))
         ) {
-          searchResults.push({
+          results.push({
             id: blog.id,
             type: "blog",
             title: blog.title,
@@ -99,7 +111,7 @@ export function SearchDialog({
           tutorial.description?.toLowerCase().includes(q) ||
           tutorial.tags?.some((tag) => tag.toLowerCase().includes(q))
         ) {
-          searchResults.push({
+          results.push({
             id: tutorial.id,
             type: "tutorial",
             title: tutorial.title,
@@ -119,7 +131,7 @@ export function SearchDialog({
           snippet.language.toLowerCase().includes(q) ||
           snippet.tags?.some((tag) => tag.toLowerCase().includes(q))
         ) {
-          searchResults.push({
+          results.push({
             id: snippet.id,
             type: "snippet",
             title: snippet.title,
@@ -130,9 +142,42 @@ export function SearchDialog({
         }
       });
     }
-  }
 
-  const getResultIcon = (type: "blog" | "tutorial" | "snippet") => {
+    if (filter === "all" || filter === "materials") {
+      materials?.forEach((material) => {
+        if (
+          material.title.toLowerCase().includes(q) ||
+          material.description?.toLowerCase().includes(q) ||
+          material.category.toLowerCase().includes(q)
+        ) {
+          results.push({
+            id: material.id,
+            type: "material",
+            title: material.title,
+            description: material.description || undefined,
+            tags: [material.category],
+          });
+        }
+      });
+    }
+
+    if (filter === "all" || filter === "resources") {
+      fmhyResults.forEach((resource: Resource) => {
+        results.push({
+          id: resource.id,
+          type: "resource",
+          title: resource.name,
+          description: resource.description,
+          tags: resource.tags,
+          url: resource.url,
+        });
+      });
+    }
+
+    return results;
+  }, [query, filter, blogs, tutorials, snippets, materials, fmhyResults]);
+
+  const getResultIcon = (type: "blog" | "tutorial" | "snippet" | "resource" | "material") => {
     switch (type) {
       case "blog":
         return <FileText className="h-4 w-4 text-primary" />;
@@ -140,10 +185,14 @@ export function SearchDialog({
         return <BookOpen className="h-4 w-4 text-accent" />;
       case "snippet":
         return <Code2 className="h-4 w-4 text-success" />;
+      case "resource":
+        return <Globe className="h-4 w-4 text-cyan-500" />;
+      case "material":
+        return <Package className="h-4 w-4 text-amber-500" />;
     }
   };
 
-  const getResultLink = (result: SearchResult) => {
+  const getResultLink = (result: SearchResult): string => {
     switch (result.type) {
       case "blog":
         return `/blogs/${result.slug}`;
@@ -151,8 +200,14 @@ export function SearchDialog({
         return `/tutorials/${result.slug}`;
       case "snippet":
         return `/code-library`;
+      case "resource":
+        return `/resources`;
+      case "material":
+        return `/materials`;
     }
   };
+
+  const isExternalLink = (result: SearchResult) => result.type === "resource" && result.url;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -164,7 +219,7 @@ export function SearchDialog({
             <Input
               ref={inputRef}
               type="text"
-              placeholder="Search blogs, tutorials, snippets..."
+              placeholder="Search everything..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="pl-10 pr-10 h-12 text-lg border-0 border-b rounded-none focus-visible:ring-0"
@@ -184,19 +239,27 @@ export function SearchDialog({
 
         <div className="p-4 border-b border-border">
           <Tabs value={filter} onValueChange={(v) => setFilter(v as ContentType)}>
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="blogs">
+            <TabsList className="grid w-full grid-cols-6 h-auto">
+              <TabsTrigger value="all" className="text-xs px-2">All</TabsTrigger>
+              <TabsTrigger value="blogs" className="text-xs px-2">
                 <FileText className="h-3 w-3 mr-1" />
                 Blogs
               </TabsTrigger>
-              <TabsTrigger value="tutorials">
+              <TabsTrigger value="tutorials" className="text-xs px-2">
                 <BookOpen className="h-3 w-3 mr-1" />
                 Tutorials
               </TabsTrigger>
-              <TabsTrigger value="snippets">
+              <TabsTrigger value="snippets" className="text-xs px-2">
                 <Code2 className="h-3 w-3 mr-1" />
                 Code
+              </TabsTrigger>
+              <TabsTrigger value="resources" className="text-xs px-2">
+                <Globe className="h-3 w-3 mr-1" />
+                Free
+              </TabsTrigger>
+              <TabsTrigger value="materials" className="text-xs px-2">
+                <Package className="h-3 w-3 mr-1" />
+                Materials
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -222,45 +285,88 @@ export function SearchDialog({
             </div>
           ) : (
             <div className="p-2">
-              {searchResults.map((result, index) => (
-                <Link
-                  key={`${result.type}-${result.id}`}
-                  to={getResultLink(result)}
-                  onClick={() => onOpenChange(false)}
-                  className={cn(
-                    "flex items-start gap-3 p-3 rounded-lg transition-all hover:bg-muted group",
-                    "animate-fade-in-up"
-                  )}
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <div className="mt-0.5">{getResultIcon(result.type)}</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                      {result.title}
-                    </p>
-                    {result.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">
-                        {result.description}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline" className="text-xs capitalize">
-                        {result.type}
-                      </Badge>
-                      {result.language && (
-                        <Badge variant="secondary" className="text-xs">
-                          {result.language}
-                        </Badge>
+              {searchResults.map((result, index) => {
+                const isExternal = isExternalLink(result);
+                
+                if (isExternal && result.url) {
+                  return (
+                    <a
+                      key={`${result.type}-${result.id}`}
+                      href={result.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => onOpenChange(false)}
+                      className={cn(
+                        "flex items-start gap-3 p-3 rounded-lg transition-all hover:bg-muted group",
+                        "animate-fade-in-up"
                       )}
-                      {result.tags?.slice(0, 2).map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <div className="mt-0.5">{getResultIcon(result.type)}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                          {result.title}
+                        </p>
+                        {result.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">
+                            {result.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {result.type}
+                          </Badge>
+                          {result.tags?.slice(0, 2).map((tag) => (
+                            <Badge key={tag} variant="secondary" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </a>
+                  );
+                }
+                
+                return (
+                  <Link
+                    key={`${result.type}-${result.id}`}
+                    to={getResultLink(result)}
+                    onClick={() => onOpenChange(false)}
+                    className={cn(
+                      "flex items-start gap-3 p-3 rounded-lg transition-all hover:bg-muted group",
+                      "animate-fade-in-up"
+                    )}
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className="mt-0.5">{getResultIcon(result.type)}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                        {result.title}
+                      </p>
+                      {result.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">
+                          {result.description}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {result.type}
                         </Badge>
-                      ))}
+                        {result.language && (
+                          <Badge variant="secondary" className="text-xs">
+                            {result.language}
+                          </Badge>
+                        )}
+                        {result.tags?.slice(0, 2).map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>

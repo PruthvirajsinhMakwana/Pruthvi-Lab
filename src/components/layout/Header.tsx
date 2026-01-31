@@ -29,6 +29,7 @@ const mainNavigation = [
   { name: "AI Assistant", href: "/ai-assistant", icon: Bot },
   { name: "AI Studio", href: "/ai-studio", icon: Wand2 },
   { name: "AI Tools", href: "/ai-tools", icon: Sparkles },
+  { name: "Free Resources", href: "/resources", icon: Globe },
   { name: "Community", href: "/community", icon: Users },
 ];
 
