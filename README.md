@@ -1,5 +1,5 @@
 # 🚀 Pruthvi's Lab - AI-Powered Learning Platform
-
+ 
 <div align="center">
 
 ![Pruthvi's Lab](https://img.shields.io/badge/Pruthvi's%20Lab-AI%20Platform-8B5CF6?style=for-the-badge&logo=rocket&logoColor=white)
