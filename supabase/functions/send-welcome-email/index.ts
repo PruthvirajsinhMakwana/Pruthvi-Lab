@@ -220,7 +220,7 @@ const handler = async (req: Request): Promise<Response> => {
             `}
             
             <div style="text-align: center;">
-              <a href="https://pruthvislab.com" class="button">
+              <a href="https://dev-api-learn.lovable.app/dashboard" class="button">
                 ${isSignup ? "Start Exploring →" : "Continue Learning →"}
               </a>
             </div>
@@ -229,12 +229,12 @@ const handler = async (req: Request): Promise<Response> => {
               <p>Happy coding! 💜</p>
               <p><strong>The Pruthvi's Lab Team</strong></p>
               <div class="social-links">
-                <a href="#">Twitter</a> • 
-                <a href="#">GitHub</a> • 
-                <a href="#">Discord</a>
+                <a href="https://www.instagram.com/pruthvirajsinh__makwana/">Instagram</a> • 
+                <a href="https://t.me/BAPU_EMPIRE">Telegram</a> • 
+                <a href="https://pruthvirajsinh.in/">Website</a>
               </div>
               <p style="margin-top: 16px; font-size: 12px;">
-                © ${new Date().getFullYear()} Pruthvi's Lab. All rights reserved.
+                © ${new Date().getFullYear()} Dev API Learn | Pruthvi's Lab. All rights reserved.
               </p>
             </div>
           </div>
