@@ -42,6 +42,10 @@ import AdminCommunity from "./pages/admin/AdminCommunity";
 import AdminSEO from "./pages/admin/AdminSEO";
 import AdminMarketing from "./pages/admin/AdminMarketing";
 import MyPurchases from "./pages/MyPurchases";
+import Contact from "./pages/Contact";
+import Support from "./pages/Support";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -114,6 +118,10 @@ const App = () => (
               <Route path="/ai-tools" element={<AITools />} />
               <Route path="/ai-studio" element={<AIStudio />} />
               <Route path="/chat" element={<FullscreenChat />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
               {/* Admin Routes */}
               <Route
                 path="/admin"

@@ -17,6 +17,25 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper function to notify via Telegram
+const notifyTelegram = async (type: "login" | "signup", user: User) => {
+  try {
+    await supabase.functions.invoke("notify-telegram-activity", {
+      body: {
+        type,
+        userName: user.user_metadata?.full_name || user.email?.split("@")[0] || "Unknown",
+        userEmail: user.email,
+        details: {
+          provider: user.app_metadata?.provider || "email",
+          userId: user.id,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Failed to send Telegram notification:", error);
+  }
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -30,11 +49,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Log auth events (deferred to avoid deadlock)
+        // Log auth events and send Telegram notifications (deferred to avoid deadlock)
         if (session?.user) {
           setTimeout(() => {
             if (event === 'SIGNED_IN') {
               logActivity({ userId: session.user.id, actionType: 'login' });
+              notifyTelegram('login', session.user);
             } else if (event === 'SIGNED_OUT') {
               // User is signing out
             }
@@ -56,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName?: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -66,6 +86,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       },
     });
+
+    // Send Telegram notification for new signup
+    if (!error && data.user) {
+      notifyTelegram('signup', data.user);
+    }
 
     return { error: error as Error | null };
   };
