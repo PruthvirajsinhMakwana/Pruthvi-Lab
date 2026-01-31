@@ -18,6 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import { PageSEO } from "@/components/PageSEO";
 
 const transactionIdSchema = z.string()
   .min(5, "Transaction ID must be at least 5 characters")
@@ -204,6 +205,17 @@ export default function TutorialPage() {
 
   return (
     <Layout>
+      <PageSEO
+        title={`${tutorial.title} - Tutorial`}
+        description={tutorial.description || `Learn ${tutorial.title} step by step at Pruthvi's Lab`}
+        keywords={tutorial.tags || []}
+        image={tutorial.featured_image || undefined}
+        url={`https://dev-api-learn.lovable.app/tutorials/${tutorial.slug}`}
+        type="article"
+        author={tutorial.author?.full_name || "Pruthvirajsinh Makwana"}
+        publishedTime={tutorial.published_at || tutorial.created_at}
+        modifiedTime={tutorial.updated_at}
+      />
       <div className="container mx-auto px-4 py-12">
         {/* Back Link */}
         <Link

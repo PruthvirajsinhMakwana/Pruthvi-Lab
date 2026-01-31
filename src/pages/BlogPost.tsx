@@ -12,6 +12,8 @@ import { CommentSection } from "@/components/comments/CommentSection";
 import { useBlogPost } from "@/hooks/useBlogPosts";
 import { useSavedItems } from "@/hooks/useSavedItems";
 import { useAuth } from "@/contexts/AuthContext";
+import { PageSEO } from "@/components/PageSEO";
+
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const { data: blog, isLoading } = useBlogPost(slug || "");
@@ -86,6 +88,17 @@ export default function BlogPost() {
 
   return (
     <Layout>
+      <PageSEO
+        title={blog.title}
+        description={blog.excerpt || blog.content.slice(0, 160)}
+        keywords={blog.tags || []}
+        image={blog.featured_image || undefined}
+        url={`https://dev-api-learn.lovable.app/blogs/${blog.slug}`}
+        type="article"
+        author={blog.author?.full_name || "Pruthvirajsinh Makwana"}
+        publishedTime={blog.published_at || blog.created_at}
+        modifiedTime={blog.updated_at}
+      />
       <article className="min-h-screen">
         {/* Hero Section */}
         <div className="relative">

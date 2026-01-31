@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { PageSEO } from "@/components/PageSEO";
 import { 
   Image, 
   PenTool, 
@@ -138,6 +139,12 @@ export default function AIStudio() {
 
   return (
     <Layout>
+      <PageSEO
+        title="AI Studio - Free AI Tools for Creators"
+        description="Create with AI at Pruthvi's Lab AI Studio. Free text-to-image, image editor, writing assistant, code generator, background remover, and more. Powered by Pruthvi Engine."
+        keywords={["AI tools", "text to image", "AI image generator", "writing assistant", "code generator", "background remover", "AI studio", "free AI tools"]}
+        url="https://dev-api-learn.lovable.app/ai-studio"
+      />
       <div className="min-h-[calc(100vh-4rem)]">
         {/* Hero Section */}
         <div className="relative overflow-hidden border-b border-border/50 bg-gradient-to-br from-background via-background to-primary/5">

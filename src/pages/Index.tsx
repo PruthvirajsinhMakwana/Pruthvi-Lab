@@ -23,6 +23,7 @@ import { useTutorials } from "@/hooks/useTutorials";
 import { useCodeSnippets } from "@/hooks/useCodeSnippets";
 import { useDynamicCounts, formatCount } from "@/hooks/useDynamicCounts";
 import { FloatingAIChat } from "@/components/FloatingAIChat";
+import { PageSEO } from "@/components/PageSEO";
 
 const difficultyColors: Record<string, string> = {
   beginner: "bg-success/10 text-success border-success/20",
@@ -50,6 +51,12 @@ const Index = () => {
 
   return (
     <Layout>
+      <PageSEO
+        title="Pruthvi's Lab - AI-Powered Learning Platform | Tutorials, Code & AI Tools"
+        description="Welcome to Pruthvi's Lab! Learn coding with 400+ AI tools, free tutorials, code library, and AI Studio. Your ultimate destination for web development, programming, and AI-powered learning."
+        keywords={["Pruthvi's Lab", "Pruthvis Lab", "learn coding", "AI tools", "coding tutorials", "programming", "web development", "AI Studio", "free resources"]}
+        url="https://dev-api-learn.lovable.app"
+      />
       {/* Hero Section */}
       <section className="relative overflow-hidden hero-pattern">
         {/* Background decorations */}
