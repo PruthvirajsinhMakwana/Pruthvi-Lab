@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-export type ItemType = "blog" | "tutorial" | "code_snippet" | "api";
+export type ItemType = "blog" | "tutorial" | "code_snippet" | "api" | "resource";
 
 interface SavedItem {
   id: string;

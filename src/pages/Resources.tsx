@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import { 
   Play, Gamepad2, Download, Share2, GraduationCap, Wrench, Shield,
   Search, ExternalLink, Star, ChevronRight, Sparkles, BookOpen, 
-  Globe, Zap, Heart, Info
+  Globe, Zap, Heart, Info, Bookmark, BookmarkCheck
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSavedItems } from "@/hooks/useSavedItems";
+import { toast } from "sonner";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,58 +35,97 @@ const iconMap: Record<string, React.ElementType> = {
   Shield,
 };
 
-function ResourceCard({ resource, showCategory = false }: { resource: Resource; showCategory?: boolean }) {
+function ResourceCard({ 
+  resource, 
+  showCategory = false,
+  isSaved,
+  onToggleSave,
+  isAuthenticated
+}: { 
+  resource: Resource; 
+  showCategory?: boolean;
+  isSaved: boolean;
+  onToggleSave: (resourceId: string) => void;
+  isAuthenticated: boolean;
+}) {
+  const handleBookmarkClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggleSave(resource.id);
+  };
+
   return (
-    <a
-      href={resource.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block"
-    >
-      <Card className="h-full glass border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-base font-semibold group-hover:text-primary transition-colors flex items-center gap-2">
-              {resource.name}
-              {resource.isFeatured && (
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+    <div className="group relative">
+      <a
+        href={resource.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block"
+      >
+        <Card className="h-full glass border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
+          <CardHeader className="pb-2">
+            <div className="flex items-start justify-between gap-2">
+              <CardTitle className="text-base font-semibold group-hover:text-primary transition-colors flex items-center gap-2 pr-8">
+                {resource.name}
+                {resource.isFeatured && (
+                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                )}
+              </CardTitle>
+              <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+            </div>
+            <CardDescription className="text-sm line-clamp-2">
+              {resource.description}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex flex-wrap gap-1">
+              {resource.tags.slice(0, 3).map((tag) => (
+                <Badge key={tag} variant="secondary" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+              {resource.mirrors && resource.mirrors.length > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant="outline" className="text-xs cursor-help">
+                      +{resource.mirrors.length} mirrors
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Alternative URLs available</p>
+                  </TooltipContent>
+                </Tooltip>
               )}
-            </CardTitle>
-            <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-          </div>
-          <CardDescription className="text-sm line-clamp-2">
-            {resource.description}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="flex flex-wrap gap-1">
-            {resource.tags.slice(0, 3).map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-            {resource.mirrors && resource.mirrors.length > 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge variant="outline" className="text-xs cursor-help">
-                    +{resource.mirrors.length} mirrors
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Alternative URLs available</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </a>
+            </div>
+          </CardContent>
+        </Card>
+      </a>
+      
+      {/* Bookmark Button */}
+      <button
+        onClick={handleBookmarkClick}
+        className={`absolute top-3 right-3 p-1.5 rounded-full transition-all duration-200 z-10 ${
+          isSaved 
+            ? "bg-primary text-primary-foreground" 
+            : "bg-background/80 backdrop-blur-sm text-muted-foreground hover:text-primary hover:bg-background"
+        }`}
+        title={isSaved ? "Remove from saved" : "Save resource"}
+      >
+        {isSaved ? (
+          <BookmarkCheck className="h-4 w-4" />
+        ) : (
+          <Bookmark className="h-4 w-4" />
+        )}
+      </button>
+    </div>
   );
 }
 
 export default function Resources() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<ResourceCategory | "all">("all");
+  const { user } = useAuth();
+  const { savedItems, saveItem, unsaveItem, isItemSaved } = useSavedItems("resource");
   
   const featuredResources = useMemo(() => getFeaturedResources().slice(0, 8), []);
   
@@ -102,6 +144,19 @@ export default function Resources() {
       return total + cat.subcategories.reduce((subTotal, sub) => subTotal + sub.resources.length, 0);
     }, 0);
   }, []);
+
+  const handleToggleSave = async (resourceId: string) => {
+    if (!user) {
+      toast.error("Please sign in to save resources");
+      return;
+    }
+    
+    if (isItemSaved(resourceId, "resource")) {
+      await unsaveItem(resourceId, "resource");
+    } else {
+      await saveItem(resourceId, "resource");
+    }
+  };
 
   return (
     <Layout>
@@ -171,7 +226,14 @@ export default function Resources() {
             {searchResults.length > 0 ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {searchResults.slice(0, 20).map((resource) => (
-                  <ResourceCard key={resource.id} resource={resource} showCategory />
+                  <ResourceCard 
+                    key={resource.id} 
+                    resource={resource} 
+                    showCategory 
+                    isSaved={isItemSaved(resource.id, "resource")}
+                    onToggleSave={handleToggleSave}
+                    isAuthenticated={!!user}
+                  />
                 ))}
               </div>
             ) : (
@@ -199,7 +261,13 @@ export default function Resources() {
               
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {featuredResources.map((resource) => (
-                  <ResourceCard key={resource.id} resource={resource} />
+                  <ResourceCard 
+                    key={resource.id} 
+                    resource={resource} 
+                    isSaved={isItemSaved(resource.id, "resource")}
+                    onToggleSave={handleToggleSave}
+                    isAuthenticated={!!user}
+                  />
                 ))}
               </div>
             </section>
@@ -325,7 +393,13 @@ export default function Resources() {
                           <AccordionContent>
                             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 py-4">
                               {subcategory.resources.map((resource) => (
-                                <ResourceCard key={resource.id} resource={resource} />
+                                <ResourceCard 
+                                  key={resource.id} 
+                                  resource={resource} 
+                                  isSaved={isItemSaved(resource.id, "resource")}
+                                  onToggleSave={handleToggleSave}
+                                  isAuthenticated={!!user}
+                                />
                               ))}
                             </div>
                           </AccordionContent>
