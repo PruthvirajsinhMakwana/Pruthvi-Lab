@@ -52,6 +52,14 @@ export const resourceCategories: CategoryData[] = [
     color: "from-red-500 to-pink-500",
     subcategories: [
       {
+        name: "Telegram Channels",
+        resources: [
+          { id: "bapu-empire", name: "BAPU EMPIRE", url: "https://t.me/BAPU_EMPIRE", description: "Main Resource Hub / Community", tags: ["telegram", "community", "resources"], isFeatured: true, isNew: true },
+          { id: "hindu-ki-duniya", name: "Hindu Ki Duniya", url: "https://t.me/HINDU_KI_DUNIYA", description: "Movies & Entertainment", tags: ["telegram", "movies", "entertainment"], isFeatured: true, isNew: true },
+          { id: "bapu-zone", name: "Bapu Zone Official", url: "https://t.me/bapu_zone_official", description: "PFP / Videos / Creative Content", tags: ["telegram", "pfp", "videos"], isNew: true },
+        ]
+      },
+      {
         name: "Multi-Server Sites",
         resources: [
           { id: "cineby", name: "Cineby", url: "https://www.cineby.gd/", description: "Movies / TV / Anime / Auto-Next", tags: ["movies", "tv", "anime"], isFeatured: true },
@@ -692,6 +700,7 @@ export const resourceCategories: CategoryData[] = [
       {
         name: "Modded APKs",
         resources: [
+          { id: "bapu-apk", name: "BAPU APK", url: "https://t.me/BAPU_APK", description: "Modded APKs via Telegram", tags: ["telegram", "modded", "apk", "android"], isFeatured: true, isNew: true },
           { id: "mobilism-apk", name: "Mobilism", url: "https://forum.mobilism.org/", description: "Modded Apps Forum", tags: ["modded", "forum", "android"], isFeatured: true },
           { id: "liteapks", name: "LiteAPKs", url: "https://liteapks.com/", description: "Modded APKs", tags: ["modded", "apk", "android"] },
           { id: "modyolo", name: "MODYOLO", url: "https://modyolo.com/", description: "Modded Games & Apps", tags: ["modded", "games", "android"] },
