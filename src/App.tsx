@@ -60,7 +60,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <LoginPopup delayInSeconds={60} />
+            <LoginPopup delayInSeconds={45} />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
