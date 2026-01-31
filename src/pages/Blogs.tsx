@@ -6,12 +6,19 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
+import { PageSEO } from "@/components/PageSEO";
 
 export default function Blogs() {
   const { data: blogs, isLoading } = useBlogPosts({ published: true });
 
   return (
     <Layout>
+      <PageSEO
+        title="Developer Blog - Coding Articles & Tech Insights"
+        description="Read the latest coding articles, tech insights, and developer tutorials at Pruthvi's Lab. Learn web development, programming tips, and industry best practices."
+        keywords={["tech blog", "coding articles", "developer tutorials", "programming tips", "web development blog"]}
+        url="https://dev-api-learn.lovable.app/blogs"
+      />
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <div className="max-w-3xl mb-12">

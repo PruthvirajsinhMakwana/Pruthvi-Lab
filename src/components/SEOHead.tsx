@@ -48,13 +48,18 @@ export function SEOHead() {
     // Update basic meta tags
     updateMetaTag('meta[name="description"]', "content", seoSettings.site_description);
     updateMetaTag('meta[name="keywords"]', "content", seoSettings.site_keywords.join(", "));
-    updateMetaTag('meta[name="author"]', "content", seoSettings.site_title);
+    updateMetaTag('meta[name="author"]', "content", "Pruthvirajsinh Makwana");
+    updateMetaTag('meta[name="robots"]', "content", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
+    updateMetaTag('meta[name="googlebot"]', "content", "index, follow");
+    updateMetaTag('meta[name="bingbot"]', "content", "index, follow");
 
     // Update Open Graph tags
     updateMetaTag('meta[property="og:title"]', "content", seoSettings.site_title);
     updateMetaTag('meta[property="og:description"]', "content", seoSettings.site_description);
     updateMetaTag('meta[property="og:image"]', "content", seoSettings.og_image);
     updateMetaTag('meta[property="og:type"]', "content", "website");
+    updateMetaTag('meta[property="og:site_name"]', "content", "Pruthvi's Lab");
+    updateMetaTag('meta[property="og:locale"]', "content", "en_US");
 
     // Update Twitter tags
     updateMetaTag('meta[name="twitter:card"]', "content", "summary_large_image");
@@ -63,15 +68,18 @@ export function SEOHead() {
     updateMetaTag('meta[name="twitter:image"]', "content", seoSettings.og_image);
     if (seoSettings.twitter_handle) {
       updateMetaTag('meta[name="twitter:site"]', "content", `@${seoSettings.twitter_handle.replace("@", "")}`);
+      updateMetaTag('meta[name="twitter:creator"]', "content", `@${seoSettings.twitter_handle.replace("@", "")}`);
     }
 
     // Update PWA theme color
     updateMetaTag('meta[name="theme-color"]', "content", seoSettings.pwa_theme_color);
+    updateMetaTag('meta[name="msapplication-TileColor"]', "content", seoSettings.pwa_theme_color);
 
     // Update favicon
     if (seoSettings.favicon_url) {
       updateLinkTag("icon", seoSettings.favicon_url);
       updateLinkTag("apple-touch-icon", seoSettings.favicon_url);
+      updateLinkTag("shortcut icon", seoSettings.favicon_url);
     }
 
     // Update or create manifest link

@@ -16,6 +16,7 @@ import { useCodeSnippets } from "@/hooks/useCodeSnippets";
 import { useSavedItems } from "@/hooks/useSavedItems";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { PageSEO } from "@/components/PageSEO";
 
 const LANGUAGES = [
   "all",
@@ -63,6 +64,12 @@ export default function CodeLibrary() {
 
   return (
     <Layout>
+      <PageSEO
+        title="Code Library - Ready-to-Use Code Snippets"
+        description="Browse and copy ready-to-use code snippets at Pruthvi's Lab. JavaScript, TypeScript, Python, React, and more. Copy-paste code for your projects."
+        keywords={["code snippets", "code library", "JavaScript code", "React snippets", "Python code", "TypeScript examples", "copy paste code"]}
+        url="https://dev-api-learn.lovable.app/code-library"
+      />
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">

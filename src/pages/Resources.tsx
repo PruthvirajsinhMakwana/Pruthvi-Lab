@@ -6,6 +6,7 @@ import {
   Globe, Zap, Heart, Info, Bookmark, BookmarkCheck, Music, Smartphone,
   Settings, Tv, AlertTriangle
 } from "lucide-react";
+import { PageSEO } from "@/components/PageSEO";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSavedItems } from "@/hooks/useSavedItems";
 import { toast } from "sonner";
@@ -167,6 +168,12 @@ export default function Resources() {
 
   return (
     <Layout>
+      <PageSEO
+        title="Free Resources - 400+ Curated Tools & Links"
+        description="Explore 400+ free resources at Pruthvi's Lab. Streaming, gaming, downloads, educational content, and more. FMHY-inspired curated collection of the best free tools."
+        keywords={["free resources", "free tools", "streaming sites", "educational resources", "FMHY", "free downloads", "curated links"]}
+        url="https://dev-api-learn.lovable.app/resources"
+      />
       <div className="min-h-screen">
         {/* Hero Section */}
         <div className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background">

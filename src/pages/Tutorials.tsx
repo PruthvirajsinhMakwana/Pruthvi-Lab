@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTutorials } from "@/hooks/useTutorials";
+import { PageSEO } from "@/components/PageSEO";
 
 const difficultyColors: Record<string, string> = {
   beginner: "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20",
@@ -22,6 +23,12 @@ export default function Tutorials() {
 
   return (
     <Layout>
+      <PageSEO
+        title="Coding Tutorials - Learn Programming Step by Step"
+        description="Master coding with step-by-step tutorials at Pruthvi's Lab. Learn React, TypeScript, Python, web development, and more. Free and premium courses for all levels."
+        keywords={["coding tutorials", "learn programming", "React tutorials", "web development courses", "Python tutorials", "JavaScript tutorials"]}
+        url="https://dev-api-learn.lovable.app/tutorials"
+      />
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <div className="max-w-3xl mb-8">
