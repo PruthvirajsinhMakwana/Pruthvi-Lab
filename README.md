@@ -20,13 +20,13 @@
 
 - [Overview](#-overview)
 - [Live Links](#-live-links)
+- [What You'll Find](#-what-youll-find-is-website-mein-kya-milega)
+- [Screenshots](#-screenshots)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
-- [Screenshots](#-screenshots)
 - [Getting Started](#-getting-started)
 - [Project Structure](#-project-structure)
 - [Admin Panel](#-admin-panel)
-- [AI Integration](#-ai-integration)
 - [Security](#-security)
 - [Contributing](#-contributing)
 - [License](#-license)
@@ -52,6 +52,85 @@
 | 🌐 **Production** | [https://dev-api-learn.lovable.app](https://dev-api-learn.lovable.app) |
 | 💬 **Telegram Community** | [https://t.me/BAPU_EMPIRE](https://t.me/BAPU_EMPIRE) |
 | 🌍 **Portfolio** | [https://pruthvirajsinh.in](https://pruthvirajsinh.in) |
+
+---
+
+## 🎁 What You'll Find (Is Website Mein Kya Milega?)
+
+### 📚 Learning Resources
+| Resource | Description |
+|----------|-------------|
+| **Tutorials** | Step-by-step coding guides (Free + Paid) - React, Python, Web Dev, aur bahut kuch! |
+| **Blog Posts** | Educational articles on tech topics - naye trends aur tips |
+| **Code Library** | Ready-to-use code snippets - copy-paste karke use karo! |
+| **Free Resources** | 400+ curated links to free tools aur resources |
+
+### 🤖 AI Tools
+| Tool | Kya Kar Sakte Ho? |
+|------|-------------------|
+| **AI Assistant** | Chat with AI - coding help, questions, aur guidance |
+| **Text-to-Image** | Text likhke images banao - free mein! |
+| **Image Editor** | AI se images edit karo - enhance, modify, transform |
+| **Background Remover** | Photos ka background hatao - 1 click mein! |
+| **Writing Assistant** | Essays, emails, content likhwao AI se |
+| **Resume Builder** | Professional resume banao AI ki help se |
+| **Code Generator** | Code generate karo kisi bhi language mein |
+| **Text-to-Speech** | Text ko speech mein convert karo (ElevenLabs) |
+| **Music Generator** | AI se music banao - unique tracks |
+| **Sound Effects** | Custom sound effects generate karo |
+
+### 👤 User Features
+| Feature | Description |
+|---------|-------------|
+| **Account Creation** | Free signup with email verification |
+| **Personal Dashboard** | Apna progress aur activity dekho |
+| **Profile Customization** | Avatar, bio, skills add karo |
+| **Library** | Favorite items save karo |
+| **Community Chat** | Dusre users se baat karo in real-time |
+| **Purchase History** | Apni purchases track karo |
+
+### 🛒 Premium Content
+| Category | What's Included |
+|----------|----------------|
+| **Paid Tutorials** | In-depth courses with step-by-step lessons |
+| **Study Materials** | PDFs, notes, cheat sheets - exam ready! |
+| **UPI Payment** | Easy payment via UPI QR code |
+
+---
+
+## 📸 Screenshots
+
+### 🏠 Homepage
+![Homepage](https://dev-api-learn.lovable.app/placeholder.svg)
+
+> **Beautiful dark-themed landing page with:**
+> - Hero section with gradient effects
+> - Feature highlights
+> - Quick access to all sections
+> - Responsive design for all devices
+
+### 🤖 AI Studio
+![AI Studio](https://dev-api-learn.lovable.app/placeholder.svg)
+
+> **Professional creative tools suite featuring:**
+> - Text-to-Image Generation
+> - Image Editor with AI
+> - Writing Assistant
+> - Resume Builder
+> - Code Generator
+> - Background Remover
+> - Text-to-Speech (ElevenLabs)
+> - Music & SFX Generator
+
+### 📊 Admin Dashboard
+![Admin Dashboard](https://dev-api-learn.lovable.app/placeholder.svg)
+
+> **Comprehensive admin panel with:**
+> - Real-time analytics
+> - Content management
+> - User management
+> - Activity logs
+> - Marketing tools
 
 ---
 
@@ -152,55 +231,6 @@
 ### External Services
 - **Brevo** - Email marketing
 - **Telegram Bot** - Notifications
-
----
-
-## 📸 Screenshots
-
-### 🏠 Homepage
-```
-┌─────────────────────────────────────────────┐
-│  🚀 Pruthvi's Lab                    [Menu] │
-├─────────────────────────────────────────────┤
-│                                             │
-│     Welcome to Pruthvi's Lab                │
-│     Your AI-Powered Learning Hub            │
-│                                             │
-│     [Get Started]  [Explore Tools]          │
-│                                             │
-├─────────────────────────────────────────────┤
-│  📚 Tutorials  |  💻 Code  |  🤖 AI Tools   │
-└─────────────────────────────────────────────┘
-```
-
-### 🤖 AI Studio
-```
-┌─────────────────────────────────────────────┐
-│  AI Studio - Creative Tools Suite           │
-├─────────────────────────────────────────────┤
-│                                             │
-│  [Text-to-Image]  [Image Editor]            │
-│  [Writing]        [Resume Builder]          │
-│  [Code Gen]       [Background Remover]      │
-│  [TTS]            [Music]  [SFX]            │
-│                                             │
-└─────────────────────────────────────────────┘
-```
-
-### 📊 Admin Dashboard
-```
-┌─────────────────────────────────────────────┐
-│  Admin Panel                                │
-├──────────┬──────────────────────────────────┤
-│ Dashboard│  📊 Analytics Overview           │
-│ Analytics│  ┌─────────────────────────────┐ │
-│ Blogs    │  │ Visitors: 45 | Unique: 11   │ │
-│ Tutorials│  │ Users: 25  | Blogs: 15      │ │
-│ Snippets │  └─────────────────────────────┘ │
-│ Users    │                                  │
-│ Settings │  [Traffic Chart]                 │
-└──────────┴──────────────────────────────────┘
-```
 
 ---
 
@@ -352,5 +382,7 @@ This project is proprietary software. All rights reserved.
 <div align="center">
 
 **Made with ❤️ by [Pruthvirajsinh Makwana](https://pruthvirajsinh.in/)**
+
+⭐ Star this repo if you found it helpful!
 
 </div>
