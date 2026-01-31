@@ -50,8 +50,8 @@
 | Environment | URL |
 |-------------|-----|
 | 🌐 **Production** | [https://dev-api-learn.lovable.app](https://dev-api-learn.lovable.app) |
-| 🧪 **Preview** | [https://id-preview--424a47b4-d62a-4035-b391-00c967842102.lovable.app](https://id-preview--424a47b4-d62a-4035-b391-00c967842102.lovable.app) |
 | 💬 **Telegram Community** | [https://t.me/BAPU_EMPIRE](https://t.me/BAPU_EMPIRE) |
+| 🌍 **Portfolio** | [https://pruthvirajsinh.in](https://pruthvirajsinh.in) |
 
 ---
 
@@ -137,9 +137,9 @@
 - **React Hook Form** - Form handling
 - **Zod** - Validation
 
-### Backend (Lovable Cloud)
+### Backend
 - **Supabase** - Database, Auth, Storage
-- **Edge Functions** - Serverless functions
+- **Edge Functions** - Serverless functions (Deno)
 - **PostgreSQL** - Database
 - **Row Level Security** - Data protection
 - **Realtime** - Live updates
@@ -147,7 +147,7 @@
 ### AI Integration
 - **Pruthvi Engine** - Primary AI (Gemini-powered)
 - **ElevenLabs** - Text-to-speech, Music, SFX
-- **Google Gemini** - Fallback AI
+- **Google Gemini** - AI capabilities
 
 ### External Services
 - **Brevo** - Email marketing
@@ -233,11 +233,13 @@ bun dev
 
 ### Environment Variables
 
-The project uses Lovable Cloud (Supabase) which automatically configures:
+Create a `.env` file with the following variables:
 
-- `VITE_SUPABASE_URL` - Backend URL
-- `VITE_SUPABASE_PUBLISHABLE_KEY` - Public API key
-- `VITE_SUPABASE_PROJECT_ID` - Project identifier
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+VITE_SUPABASE_PROJECT_ID=your_project_id
+```
 
 ---
 
@@ -343,12 +345,12 @@ Admin features require special roles:
 
 This project is proprietary software. All rights reserved.
 
+© 2024 Pruthvirajsinh Makwana. All Rights Reserved.
+
 ---
 
 <div align="center">
 
 **Made with ❤️ by [Pruthvirajsinh Makwana](https://pruthvirajsinh.in/)**
-
-![Visitors](https://img.shields.io/badge/dynamic/json?color=8B5CF6&label=Visitors&query=count&url=https://api.countapi.xyz/hit/pruthvis-lab/readme)
 
 </div>
