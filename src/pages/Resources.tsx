@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { 
   Play, Gamepad2, Download, Share2, GraduationCap, Wrench, Shield,
   Search, ExternalLink, Star, ChevronRight, Sparkles, BookOpen, 
-  Globe, Zap, Heart, Info, Bookmark, BookmarkCheck
+  Globe, Zap, Heart, Info, Bookmark, BookmarkCheck, Music
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSavedItems } from "@/hooks/useSavedItems";
@@ -33,6 +33,9 @@ const iconMap: Record<string, React.ElementType> = {
   GraduationCap,
   Wrench,
   Shield,
+  Sparkles,
+  Music,
+  BookOpen,
 };
 
 function ResourceCard({ 

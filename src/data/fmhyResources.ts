@@ -8,7 +8,10 @@ export type ResourceCategory =
   | "educational"
   | "gaming-tools"
   | "software"
-  | "privacy";
+  | "privacy"
+  | "ai-tools"
+  | "audio-music"
+  | "reading";
 
 export type ResourceSubcategory = string;
 
@@ -418,6 +421,248 @@ export const resourceCategories: CategoryData[] = [
           { id: "bitwarden", name: "Bitwarden", url: "https://bitwarden.com/", description: "Password Manager", tags: ["passwords", "security"], isFeatured: true },
           { id: "simplelogin", name: "SimpleLogin", url: "https://simplelogin.io/", description: "Email Aliasing", tags: ["email", "privacy"] },
           { id: "privacyguides", name: "Privacy Guides", url: "https://www.privacyguides.org/", description: "Privacy Resources", tags: ["guides", "resources"] },
+        ]
+      }
+    ]
+  },
+  {
+    id: "ai-tools",
+    name: "AI Tools",
+    description: "AI chatbots, image generators, and machine learning tools",
+    icon: "Sparkles",
+    color: "from-pink-500 to-rose-500",
+    subcategories: [
+      {
+        name: "AI Chatbots",
+        resources: [
+          { id: "chatgpt", name: "ChatGPT", url: "https://chat.openai.com/", description: "OpenAI's AI Assistant", tags: ["chatbot", "gpt", "ai"], isFeatured: true },
+          { id: "claude", name: "Claude", url: "https://claude.ai/", description: "Anthropic's AI Assistant", tags: ["chatbot", "ai"], isFeatured: true },
+          { id: "perplexity", name: "Perplexity", url: "https://www.perplexity.ai/", description: "AI Search Engine", tags: ["search", "ai"], isFeatured: true },
+          { id: "gemini", name: "Google Gemini", url: "https://gemini.google.com/", description: "Google's AI Assistant", tags: ["chatbot", "google", "ai"] },
+          { id: "copilot", name: "Microsoft Copilot", url: "https://copilot.microsoft.com/", description: "Microsoft's AI Assistant", tags: ["chatbot", "microsoft", "ai"] },
+          { id: "poe", name: "Poe", url: "https://poe.com/", description: "Multi-Model AI Platform", tags: ["chatbot", "multi-model", "ai"] },
+          { id: "phind", name: "Phind", url: "https://www.phind.com/", description: "AI for Developers", tags: ["coding", "developer", "ai"] },
+          { id: "huggingchat", name: "HuggingChat", url: "https://huggingface.co/chat/", description: "Open Source AI Chat", tags: ["chatbot", "opensource", "ai"] },
+        ]
+      },
+      {
+        name: "AI Image Generation",
+        resources: [
+          { id: "midjourney", name: "Midjourney", url: "https://www.midjourney.com/", description: "AI Art Generator", tags: ["image", "art", "ai"], isFeatured: true },
+          { id: "dalle", name: "DALL-E", url: "https://openai.com/dall-e-3", description: "OpenAI Image Generator", tags: ["image", "openai", "ai"] },
+          { id: "stable-diffusion", name: "Stable Diffusion", url: "https://stability.ai/", description: "Open Source Image AI", tags: ["image", "opensource", "ai"], isFeatured: true },
+          { id: "leonardo", name: "Leonardo.AI", url: "https://leonardo.ai/", description: "AI Art Platform", tags: ["image", "art", "ai"] },
+          { id: "playground", name: "Playground AI", url: "https://playground.com/", description: "Free AI Image Generator", tags: ["image", "free", "ai"] },
+          { id: "ideogram", name: "Ideogram", url: "https://ideogram.ai/", description: "AI with Better Text Rendering", tags: ["image", "text", "ai"] },
+          { id: "flux", name: "Flux", url: "https://flux1.ai/", description: "Fast AI Image Generator", tags: ["image", "fast", "ai"] },
+          { id: "bing-image-creator", name: "Bing Image Creator", url: "https://www.bing.com/images/create", description: "Free DALL-E 3 Access", tags: ["image", "free", "ai"] },
+        ]
+      },
+      {
+        name: "AI Video Generation",
+        resources: [
+          { id: "runway", name: "Runway", url: "https://runwayml.com/", description: "AI Video Generation & Editing", tags: ["video", "editing", "ai"], isFeatured: true },
+          { id: "pika", name: "Pika", url: "https://pika.art/", description: "AI Video Generator", tags: ["video", "ai"] },
+          { id: "luma", name: "Luma Dream Machine", url: "https://lumalabs.ai/dream-machine", description: "AI Video from Text/Image", tags: ["video", "ai"] },
+          { id: "hailuoai", name: "Hailuo AI", url: "https://hailuoai.video/", description: "AI Video Generation", tags: ["video", "ai"] },
+          { id: "kling", name: "Kling AI", url: "https://klingai.com/", description: "AI Video & Image Generation", tags: ["video", "image", "ai"] },
+        ]
+      },
+      {
+        name: "AI Audio & Voice",
+        resources: [
+          { id: "elevenlabs", name: "ElevenLabs", url: "https://elevenlabs.io/", description: "AI Voice Generation & Cloning", tags: ["voice", "tts", "ai"], isFeatured: true },
+          { id: "murf", name: "Murf.AI", url: "https://murf.ai/", description: "AI Voice Over Generator", tags: ["voice", "tts", "ai"] },
+          { id: "resemble", name: "Resemble AI", url: "https://www.resemble.ai/", description: "AI Voice Cloning", tags: ["voice", "cloning", "ai"] },
+          { id: "play-ht", name: "Play.ht", url: "https://play.ht/", description: "AI Voice Generator", tags: ["voice", "tts", "ai"] },
+          { id: "suno", name: "Suno", url: "https://suno.ai/", description: "AI Music Generation", tags: ["music", "ai"], isFeatured: true },
+          { id: "udio", name: "Udio", url: "https://www.udio.com/", description: "AI Music Creation", tags: ["music", "ai"] },
+        ]
+      },
+      {
+        name: "AI Writing & Productivity",
+        resources: [
+          { id: "notion-ai", name: "Notion AI", url: "https://www.notion.so/product/ai", description: "AI Writing in Notion", tags: ["writing", "productivity", "ai"], isFeatured: true },
+          { id: "grammarly", name: "Grammarly", url: "https://www.grammarly.com/", description: "AI Writing Assistant", tags: ["writing", "grammar", "ai"] },
+          { id: "quillbot", name: "QuillBot", url: "https://quillbot.com/", description: "AI Paraphrasing Tool", tags: ["writing", "paraphrase", "ai"] },
+          { id: "copy-ai", name: "Copy.ai", url: "https://www.copy.ai/", description: "AI Marketing Copy", tags: ["writing", "marketing", "ai"] },
+          { id: "jasper", name: "Jasper", url: "https://www.jasper.ai/", description: "AI Content Creation", tags: ["writing", "content", "ai"] },
+          { id: "sudowrite", name: "Sudowrite", url: "https://www.sudowrite.com/", description: "AI for Creative Writing", tags: ["writing", "fiction", "ai"] },
+        ]
+      },
+      {
+        name: "AI Coding",
+        resources: [
+          { id: "github-copilot", name: "GitHub Copilot", url: "https://github.com/features/copilot", description: "AI Pair Programmer", tags: ["coding", "github", "ai"], isFeatured: true },
+          { id: "cursor", name: "Cursor", url: "https://cursor.sh/", description: "AI Code Editor", tags: ["coding", "editor", "ai"], isFeatured: true },
+          { id: "codeium", name: "Codeium", url: "https://codeium.com/", description: "Free AI Code Completion", tags: ["coding", "free", "ai"] },
+          { id: "tabnine", name: "Tabnine", url: "https://www.tabnine.com/", description: "AI Code Completions", tags: ["coding", "ai"] },
+          { id: "replit-ai", name: "Replit AI", url: "https://replit.com/ai", description: "AI-Powered Development", tags: ["coding", "ide", "ai"] },
+          { id: "v0", name: "v0 by Vercel", url: "https://v0.dev/", description: "AI UI Component Generator", tags: ["coding", "ui", "ai"] },
+        ]
+      },
+      {
+        name: "Local AI & Self-Hosted",
+        resources: [
+          { id: "ollama", name: "Ollama", url: "https://ollama.ai/", description: "Run LLMs Locally", tags: ["local", "llm", "ai"], isFeatured: true },
+          { id: "lmstudio", name: "LM Studio", url: "https://lmstudio.ai/", description: "Local LLM Desktop App", tags: ["local", "desktop", "ai"] },
+          { id: "jan", name: "Jan", url: "https://jan.ai/", description: "Offline AI Assistant", tags: ["local", "offline", "ai"] },
+          { id: "gpt4all", name: "GPT4All", url: "https://gpt4all.io/", description: "Free Local AI", tags: ["local", "free", "ai"] },
+          { id: "localai", name: "LocalAI", url: "https://localai.io/", description: "Self-Hosted AI API", tags: ["local", "api", "ai"] },
+        ]
+      }
+    ]
+  },
+  {
+    id: "audio-music",
+    name: "Audio & Music",
+    description: "Music streaming, downloads, audio tools, and podcasts",
+    icon: "Music",
+    color: "from-cyan-500 to-blue-500",
+    subcategories: [
+      {
+        name: "Music Streaming",
+        resources: [
+          { id: "spotify", name: "Spotify", url: "https://open.spotify.com/", description: "Music Streaming Platform", tags: ["streaming", "music"], isFeatured: true },
+          { id: "soundcloud", name: "SoundCloud", url: "https://soundcloud.com/", description: "Music & Audio Platform", tags: ["streaming", "music", "indie"] },
+          { id: "bandcamp", name: "Bandcamp", url: "https://bandcamp.com/", description: "Independent Music Platform", tags: ["indie", "music", "buy"] },
+          { id: "deezer", name: "Deezer", url: "https://www.deezer.com/", description: "Music Streaming", tags: ["streaming", "music"] },
+          { id: "tidal", name: "Tidal", url: "https://tidal.com/", description: "Hi-Fi Music Streaming", tags: ["streaming", "hifi", "music"] },
+        ]
+      },
+      {
+        name: "Music Downloads",
+        resources: [
+          { id: "slavart", name: "Slavart", url: "https://slavart.gamesdrive.net/", description: "FLAC Music Downloads", tags: ["download", "flac", "music"], isFeatured: true },
+          { id: "freemp3download", name: "Free-MP3-Download", url: "https://free-mp3-download.net/", description: "MP3 & FLAC Downloads", tags: ["download", "mp3", "music"] },
+          { id: "soulseekmusic", name: "Soulseek", url: "https://slsknet.org/", description: "P2P Music Sharing", tags: ["p2p", "music", "download"], isFeatured: true },
+          { id: "deemix", name: "Deemix", url: "https://deemix.app/", description: "Deezer Downloader", tags: ["download", "music"] },
+          { id: "doubledown", name: "DoubleDouble", url: "https://doubledouble.top/", description: "Music Downloads", tags: ["download", "music"] },
+        ]
+      },
+      {
+        name: "Audio Production",
+        resources: [
+          { id: "audacity", name: "Audacity", url: "https://www.audacityteam.org/", description: "Free Audio Editor", tags: ["editor", "free", "audio"], isFeatured: true },
+          { id: "lmms", name: "LMMS", url: "https://lmms.io/", description: "Free DAW", tags: ["daw", "free", "production"] },
+          { id: "ardour", name: "Ardour", url: "https://ardour.org/", description: "Open Source DAW", tags: ["daw", "opensource", "production"] },
+          { id: "reaper", name: "Reaper", url: "https://www.reaper.fm/", description: "Affordable DAW", tags: ["daw", "affordable", "production"], isFeatured: true },
+          { id: "ocenaudio", name: "Ocenaudio", url: "https://www.ocenaudio.com/", description: "Simple Audio Editor", tags: ["editor", "simple", "audio"] },
+          { id: "bandlab", name: "BandLab", url: "https://www.bandlab.com/", description: "Free Online DAW", tags: ["daw", "free", "online"] },
+        ]
+      },
+      {
+        name: "VST Plugins & Samples",
+        resources: [
+          { id: "pluginboutique", name: "Plugin Boutique", url: "https://www.pluginboutique.com/", description: "VST Plugin Store", tags: ["vst", "plugins", "audio"], isFeatured: true },
+          { id: "splice", name: "Splice", url: "https://splice.com/", description: "Samples & Plugins", tags: ["samples", "plugins", "audio"] },
+          { id: "looperman", name: "Looperman", url: "https://www.looperman.com/", description: "Free Loops & Samples", tags: ["samples", "free", "loops"] },
+          { id: "cymatics", name: "Cymatics", url: "https://cymatics.fm/", description: "Free Sample Packs", tags: ["samples", "free", "audio"] },
+          { id: "bedroom-producers", name: "Bedroom Producers", url: "https://bedroomproducersblog.com/", description: "Free VST & Samples", tags: ["vst", "free", "samples"] },
+          { id: "landr", name: "LANDR", url: "https://www.landr.com/", description: "AI Mastering & Samples", tags: ["mastering", "ai", "samples"] },
+        ]
+      },
+      {
+        name: "Podcasts",
+        resources: [
+          { id: "pocketcasts", name: "Pocket Casts", url: "https://pocketcasts.com/", description: "Podcast App", tags: ["podcast", "app"], isFeatured: true },
+          { id: "overcast", name: "Overcast", url: "https://overcast.fm/", description: "iOS Podcast App", tags: ["podcast", "ios"] },
+          { id: "castbox", name: "Castbox", url: "https://castbox.fm/", description: "Free Podcast App", tags: ["podcast", "free"] },
+          { id: "podbean", name: "Podbean", url: "https://www.podbean.com/", description: "Podcast Hosting & Listening", tags: ["podcast", "hosting"] },
+          { id: "listennotes", name: "Listen Notes", url: "https://www.listennotes.com/", description: "Podcast Search Engine", tags: ["podcast", "search"] },
+        ]
+      },
+      {
+        name: "Radio & Live Audio",
+        resources: [
+          { id: "radiogardenr", name: "Radio Garden", url: "https://radio.garden/", description: "Global Radio Stations", tags: ["radio", "global", "live"], isFeatured: true },
+          { id: "tunein", name: "TuneIn", url: "https://tunein.com/", description: "Radio & Podcasts", tags: ["radio", "podcast", "live"] },
+          { id: "iheart", name: "iHeartRadio", url: "https://www.iheart.com/", description: "Radio Streaming", tags: ["radio", "streaming"] },
+          { id: "somafm", name: "SomaFM", url: "https://somafm.com/", description: "Commercial-Free Radio", tags: ["radio", "commercial-free"] },
+        ]
+      }
+    ]
+  },
+  {
+    id: "reading",
+    name: "Reading",
+    description: "Books, comics, manga, magazines, and news",
+    icon: "BookOpen",
+    color: "from-amber-500 to-yellow-500",
+    subcategories: [
+      {
+        name: "E-Books",
+        resources: [
+          { id: "annas-archive", name: "Anna's Archive", url: "https://annas-archive.org/", description: "Largest Open Library", tags: ["books", "library", "ebooks"], isFeatured: true },
+          { id: "zlibrary", name: "Z-Library", url: "https://z-lib.id/", description: "E-Book Library", tags: ["books", "library", "ebooks"], isFeatured: true },
+          { id: "libgen", name: "Library Genesis", url: "https://libgen.is/", description: "Books & Scientific Articles", tags: ["books", "academic", "ebooks"] },
+          { id: "pdfdrive", name: "PDF Drive", url: "https://www.pdfdrive.com/", description: "PDF Book Search", tags: ["pdf", "books", "ebooks"] },
+          { id: "standardebooks", name: "Standard Ebooks", url: "https://standardebooks.org/", description: "High-Quality Public Domain", tags: ["books", "public-domain", "ebooks"] },
+          { id: "gutenberg", name: "Project Gutenberg", url: "https://www.gutenberg.org/", description: "Free Classic Books", tags: ["books", "classic", "ebooks"] },
+          { id: "openlibrary", name: "Open Library", url: "https://openlibrary.org/", description: "Digital Library", tags: ["books", "library", "ebooks"] },
+          { id: "manybooks", name: "ManyBooks", url: "https://manybooks.net/", description: "Free Ebooks", tags: ["books", "free", "ebooks"] },
+        ]
+      },
+      {
+        name: "Manga",
+        resources: [
+          { id: "mangadex", name: "MangaDex", url: "https://mangadex.org/", description: "Manga Reader", tags: ["manga", "reader"], isFeatured: true },
+          { id: "mangakakalot", name: "Mangakakalot", url: "https://mangakakalot.com/", description: "Manga Online", tags: ["manga", "reader"] },
+          { id: "mangafire", name: "MangaFire", url: "https://mangafire.to/", description: "Manga Reader", tags: ["manga", "reader"] },
+          { id: "mangasee", name: "MangaSee", url: "https://mangasee123.com/", description: "Manga Reader", tags: ["manga", "reader"], isFeatured: true },
+          { id: "comick", name: "ComicK", url: "https://comick.io/", description: "Manga & Comics", tags: ["manga", "comics", "reader"] },
+          { id: "tachiyomi", name: "Tachiyomi", url: "https://tachiyomi.org/", description: "Manga Reader App", tags: ["manga", "app", "android"] },
+        ]
+      },
+      {
+        name: "Comics",
+        resources: [
+          { id: "readcomiconline", name: "ReadComicOnline", url: "https://readcomiconline.li/", description: "Comics Online", tags: ["comics", "reader"], isFeatured: true },
+          { id: "getcomics", name: "GetComics", url: "https://getcomics.org/", description: "Comic Downloads", tags: ["comics", "download"] },
+          { id: "comixology", name: "Comixology", url: "https://www.comixology.com/", description: "Digital Comics", tags: ["comics", "digital", "buy"] },
+          { id: "webtoon", name: "Webtoon", url: "https://www.webtoons.com/", description: "Web Comics", tags: ["webtoon", "comics", "free"] },
+          { id: "tapas", name: "Tapas", url: "https://tapas.io/", description: "Web Comics & Novels", tags: ["webtoon", "novels", "comics"] },
+        ]
+      },
+      {
+        name: "Audiobooks",
+        resources: [
+          { id: "audiobookbay", name: "AudioBook Bay", url: "https://audiobookbay.is/", description: "Audiobook Torrents", tags: ["audiobooks", "torrent"], isFeatured: true },
+          { id: "tokybook", name: "Tokybook", url: "https://tokybook.com/", description: "Free Audiobooks", tags: ["audiobooks", "free"] },
+          { id: "librivox", name: "LibriVox", url: "https://librivox.org/", description: "Public Domain Audiobooks", tags: ["audiobooks", "free", "public-domain"] },
+          { id: "loyalbooks", name: "Loyal Books", url: "https://www.loyalbooks.com/", description: "Free Audiobooks", tags: ["audiobooks", "free"] },
+          { id: "storynory", name: "Storynory", url: "https://www.storynory.com/", description: "Kids Audio Stories", tags: ["audiobooks", "kids", "stories"] },
+        ]
+      },
+      {
+        name: "Magazines & News",
+        resources: [
+          { id: "issuu", name: "Issuu", url: "https://issuu.com/", description: "Digital Publishing", tags: ["magazines", "digital"], isFeatured: true },
+          { id: "scribd", name: "Scribd", url: "https://www.scribd.com/", description: "Books & Magazines", tags: ["magazines", "books", "subscription"] },
+          { id: "pdfmagazines", name: "PDF Magazines", url: "https://pdfmagazines.club/", description: "Magazine Downloads", tags: ["magazines", "pdf", "download"] },
+          { id: "magzdb", name: "MagzDB", url: "https://magzdb.org/", description: "Magazine Archive", tags: ["magazines", "archive"] },
+          { id: "ground-news", name: "Ground News", url: "https://ground.news/", description: "News Comparison", tags: ["news", "comparison"], isFeatured: true },
+          { id: "reuters", name: "Reuters", url: "https://www.reuters.com/", description: "World News", tags: ["news", "world"] },
+        ]
+      },
+      {
+        name: "Light Novels & Fiction",
+        resources: [
+          { id: "novelupdates", name: "NovelUpdates", url: "https://www.novelupdates.com/", description: "Light Novel Tracker", tags: ["lightnovel", "tracker"], isFeatured: true },
+          { id: "royalroad", name: "Royal Road", url: "https://www.royalroad.com/", description: "Web Fiction Platform", tags: ["fiction", "webnovel", "free"] },
+          { id: "wuxiaworld", name: "WuxiaWorld", url: "https://www.wuxiaworld.com/", description: "Translated Novels", tags: ["lightnovel", "translated"] },
+          { id: "ao3", name: "Archive of Our Own", url: "https://archiveofourown.org/", description: "Fanfiction Archive", tags: ["fanfiction", "free"] },
+          { id: "scribblehub", name: "ScribbleHub", url: "https://www.scribblehub.com/", description: "Original Web Novels", tags: ["webnovel", "original", "free"] },
+        ]
+      },
+      {
+        name: "Academic & Research",
+        resources: [
+          { id: "scihub", name: "Sci-Hub", url: "https://sci-hub.se/", description: "Scientific Papers", tags: ["academic", "papers", "research"], isFeatured: true },
+          { id: "scholar", name: "Google Scholar", url: "https://scholar.google.com/", description: "Academic Search", tags: ["academic", "search", "research"] },
+          { id: "arxiv", name: "arXiv", url: "https://arxiv.org/", description: "Preprint Archive", tags: ["academic", "preprint", "research"] },
+          { id: "semanticscholar", name: "Semantic Scholar", url: "https://www.semanticscholar.org/", description: "AI Research Search", tags: ["academic", "ai", "search"] },
+          { id: "researchgate", name: "ResearchGate", url: "https://www.researchgate.net/", description: "Research Network", tags: ["academic", "network", "papers"] },
         ]
       }
     ]
