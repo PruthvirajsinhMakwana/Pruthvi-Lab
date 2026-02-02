@@ -70,12 +70,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Log auth events and send Telegram notifications (deferred to avoid deadlock)
+        // Log auth events and send notifications (deferred to avoid deadlock)
         if (session?.user) {
-          setTimeout(() => {
+          setTimeout(async () => {
             if (event === 'SIGNED_IN') {
-              logActivity({ userId: session.user.id, actionType: 'login' });
-              notifyTelegram('login', session.user);
+              const user = session.user;
+              const provider = user.app_metadata?.provider || 'email';
+              const isOAuthUser = provider !== 'email';
+              
+              // Check if this is a new user (created within the last 60 seconds)
+              const createdAt = new Date(user.created_at).getTime();
+              const now = Date.now();
+              const isNewUser = (now - createdAt) < 60000; // 60 seconds
+              
+              if (isNewUser && isOAuthUser) {
+                // New OAuth user - send signup notifications and welcome email
+                console.log(`New OAuth user detected: ${user.email} via ${provider}`);
+                logActivity({ userId: user.id, actionType: 'signup' });
+                notifyTelegram('signup', user);
+                sendWelcomeEmail(
+                  user.email || '', 
+                  user.user_metadata?.full_name || user.user_metadata?.name,
+                  'signup'
+                );
+              } else {
+                // Returning user - just log the login
+                logActivity({ userId: user.id, actionType: 'login' });
+                notifyTelegram('login', user);
+              }
             } else if (event === 'SIGNED_OUT') {
               // User is signing out
             }
