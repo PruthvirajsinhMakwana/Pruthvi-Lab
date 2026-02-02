@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/form";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 
 const signInSchema = z.object({
@@ -89,9 +88,7 @@ export function AuthForm() {
       
       // Provide more helpful error messages
       if (error.message.includes("Invalid login credentials")) {
-        errorMessage = "Invalid email or password. If you just signed up, please verify your email first.";
-      } else if (error.message.includes("Email not confirmed")) {
-        errorMessage = "Please verify your email before signing in. Check your inbox for the verification link.";
+        errorMessage = "Invalid email or password. Please check your credentials and try again.";
       }
       
       toast({
@@ -127,21 +124,14 @@ export function AuthForm() {
       return;
     }
 
-    // Send welcome email (don't wait for it)
-    supabase.functions.invoke("send-welcome-email", {
-      body: { 
-        email: data.email, 
-        name: data.fullName,
-        type: "signup" 
-      },
-    }).catch(err => console.error("Failed to send welcome email:", err));
-
+    // Welcome email is now sent from AuthContext after successful signup
     // Auto-login after signup (since email confirmation is disabled)
     const { error: signInError } = await signIn(data.email, data.password);
     
     if (signInError) {
+      // If auto-login fails, still show success and let them sign in manually
       toast({
-        title: "Account created!",
+        title: "Account created! 🎉",
         description: "Please sign in with your new credentials.",
       });
       setMode("signin");
@@ -149,7 +139,7 @@ export function AuthForm() {
     } else {
       toast({
         title: "Welcome to Pruthvi's Lab! 🎉",
-        description: "Your account has been created. Check your email for a welcome message!",
+        description: "Your account has been created successfully!",
       });
       navigate("/");
     }

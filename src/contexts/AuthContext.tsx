@@ -39,13 +39,19 @@ const notifyTelegram = async (type: "login" | "signup", user: User) => {
 // Helper function to send welcome email
 const sendWelcomeEmail = async (email: string, name?: string, type: "signup" | "login" = "signup") => {
   try {
-    await supabase.functions.invoke("send-welcome-email", {
+    console.log(`Sending ${type} email to: ${email}`);
+    const { data, error } = await supabase.functions.invoke("send-welcome-email", {
       body: {
         email,
-        name,
+        name: name || email.split("@")[0],
         type,
       },
     });
+    if (error) {
+      console.error("Welcome email error:", error);
+    } else {
+      console.log("Welcome email sent successfully:", data);
+    }
   } catch (error) {
     console.error("Failed to send welcome email:", error);
   }
